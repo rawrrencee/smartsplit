@@ -1,14 +1,13 @@
 <template>
     <svg
+        class="h-24 w-24 flex-no-shrink fill-current"
         version="1.0"
         xmlns="http://www.w3.org/2000/svg"
-        width="1024.000000pt"
-        height="1024.000000pt"
-        viewBox="0 0 1024.000000 1024.000000"
+        viewBox="0 0 1024 1024"
         preserveAspectRatio="xMidYMid meet"
     >
         <g
-            transform="translate(0.000000,1024.000000) scale(0.100000,-0.100000)"
+            transform="translate(0,1024) scale(0.1,-0.1)"
             fill="#000000"
             stroke="none"
         >
