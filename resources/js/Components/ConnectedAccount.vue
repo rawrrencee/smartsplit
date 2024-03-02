@@ -1,15 +1,15 @@
 <script setup>
-import {defineProps} from 'vue';
-import ProviderIcon from '@/Components/SocialstreamIcons/ProviderIcon.vue';
+import { defineProps } from "vue";
+import ProviderIcon from "@/Components/SocialstreamIcons/ProviderIcon.vue";
 
 const props = defineProps({
     provider: {
-        type: Object
+        type: Object,
     },
     createdAt: {
         type: String,
         default: null,
-    }
+    },
 });
 </script>
 
@@ -17,14 +17,17 @@ const props = defineProps({
     <div>
         <div class="px-3 flex items-center justify-between">
             <div class="flex items-center">
-                <ProviderIcon :provider="provider" classes="h-6 w-6 me-2"/>
+                <ProviderIcon :provider="provider" classes="h-6 w-6 me-2" />
 
                 <div class="ml-2">
                     <div class="text-sm font-semibold text-gray-600">
                         {{ provider.name }}
                     </div>
 
-                    <div v-if="createdAt !== null" class="text-xs text-gray-500">
+                    <div
+                        v-if="createdAt !== null"
+                        class="text-xs text-gray-500"
+                    >
                         Connected {{ createdAt }}
                     </div>
 
