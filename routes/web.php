@@ -32,4 +32,20 @@ Route::middleware([
     Route::get('/home', function () {
         return Inertia::render('Home');
     })->name('home');
+
+    Route::get('/groups', function () {
+        return Inertia::render('Groups');
+    })->name('groups');
+
+    Route::get('/settle-up', function () {
+        return Inertia::render('SettleUp');
+    })->name('settle-up');
+
+    Route::get('/add-new-expense', function () {
+        return Inertia::render('AddNewExpense');
+    })->name('add-new-expense');
+
+    Route::get('/expense-details', function () {
+        return Inertia::render('ExpenseDetails');
+    })->name('expense-details');
 });

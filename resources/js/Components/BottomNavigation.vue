@@ -13,7 +13,7 @@ const routes = [
     { path: "home", icon: HomeIcon, name: "Home" },
     { path: "groups", icon: UserGroupIcon, name: "Groups" },
     { path: "settle-up", icon: BanknotesIcon, name: "Settle Up" },
-    { path: "add-new", icon: PlusCircleIcon, name: "Add New" },
+    { path: "add-new-expense", icon: PlusCircleIcon, name: "Add New" },
 ];
 </script>
 

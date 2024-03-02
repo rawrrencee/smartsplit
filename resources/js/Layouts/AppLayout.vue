@@ -4,7 +4,6 @@ import Banner from "@/Components/Banner.vue";
 import BottomNavigation from "@/Components/BottomNavigation.vue";
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
-import NavLink from "@/Components/NavLink.vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import { ref } from "vue";
@@ -46,21 +45,16 @@ const logout = () => {
                         <div class="flex">
                             <!-- Logo -->
                             <div class="shrink-0 flex items-center">
-                                <Link :href="route('home')">
-                                    <ApplicationMark class="block h-9 w-9" />
-                                </Link>
-                            </div>
-
-                            <!-- Navigation Links -->
-                            <div
-                                class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
-                            >
-                                <NavLink
+                                <Link
                                     :href="route('home')"
-                                    :active="route().current('home')"
+                                    as="div"
+                                    class="flex flex-row gap-4 place-items-center"
                                 >
-                                    Home
-                                </NavLink>
+                                    <ApplicationMark class="block h-9 w-9" />
+                                    <span class="font-semibold text-xl"
+                                        >smartsplit</span
+                                    >
+                                </Link>
                             </div>
                         </div>
 
