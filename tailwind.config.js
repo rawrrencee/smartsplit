@@ -26,7 +26,7 @@ export default {
         styled: true,
         themes: [
             {
-                compos: {
+                splitsmartLight: {
                     primary: "#1C4E80",
                     secondary: "#A9B4C2",
                     accent: "#EA6947",
@@ -38,6 +38,7 @@ export default {
                     error: "#A33B20",
                 },
             },
+            "dark",
         ],
         base: true,
         utils: true,

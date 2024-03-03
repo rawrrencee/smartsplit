@@ -4,33 +4,61 @@ import {
     HomeIcon,
     PlusCircleIcon,
     UserGroupIcon,
+} from "@heroicons/vue/20/solid";
+import {
+    BanknotesIcon as BanknotesIconOutline,
+    HomeIcon as HomeIconOutline,
+    PlusCircleIcon as PlusCircleIconOutline,
+    UserGroupIcon as UserGroupIconOutline,
 } from "@heroicons/vue/24/outline";
 import { Link } from "@inertiajs/vue3";
-import { ref } from "vue";
 
-const currentRoute = ref(route().current());
-const routes = [
-    { path: "home", icon: HomeIcon, name: "Home" },
-    { path: "groups", icon: UserGroupIcon, name: "Groups" },
-    { path: "settle-up", icon: BanknotesIcon, name: "Settle Up" },
-    { path: "add-new-expense", icon: PlusCircleIcon, name: "Add New" },
+const navigationItems = [
+    {
+        path: "home",
+        icon: HomeIcon,
+        iconOutline: HomeIconOutline,
+        name: "Home",
+    },
+    {
+        path: "groups",
+        icon: UserGroupIcon,
+        iconOutline: UserGroupIconOutline,
+        name: "Groups",
+    },
+    {
+        path: "settle-up",
+        icon: BanknotesIcon,
+        iconOutline: BanknotesIconOutline,
+        name: "Settle Up",
+    },
+    {
+        path: "add-new-expense",
+        icon: PlusCircleIcon,
+        iconOutline: PlusCircleIconOutline,
+        name: "Add New",
+    },
 ];
 </script>
 
 <template>
     <div class="btm-nav">
-        <template v-for="route in routes">
+        <template v-for="item in navigationItems">
             <Link
                 as="template"
-                :href="route.path"
-                :class="currentRoute === route.path ? 'active' : ''"
+                :href="route(item.path)"
+                :class="route().current(item.path) ? 'active' : ''"
             >
                 <component
-                    :is="route.icon"
+                    :is="
+                        route().current(item.path)
+                            ? item.icon
+                            : item.iconOutline
+                    "
                     class="h-6 w-6"
                     aria-hidden="true"
                 />
-                <span class="btm-nav-label text-xs">{{ route.name }}</span>
+                <span class="btm-nav-label text-xs">{{ item.name }}</span>
             </Link>
         </template>
     </div>

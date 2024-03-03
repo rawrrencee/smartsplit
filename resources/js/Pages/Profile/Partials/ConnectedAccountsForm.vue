@@ -1,6 +1,4 @@
 <script setup>
-import { ref } from "vue";
-import { useForm, usePage } from "@inertiajs/vue3";
 import ActionLink from "@/Components/ActionLink.vue";
 import ActionSection from "@/Components/ActionSection.vue";
 import ConnectedAccount from "@/Components/ConnectedAccount.vue";
@@ -10,6 +8,8 @@ import InputError from "@/Components/InputError.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
+import { useForm, usePage } from "@inertiajs/vue3";
+import { ref } from "vue";
 
 const accountId = ref(null);
 const confirmingRemoveAccount = ref(false);
@@ -41,7 +41,6 @@ const confirmRemoveAccount = (id) => {
 };
 
 const removeAccount = () => {
-    console.log(accountId);
     form.delete(route("connected-accounts.destroy", { id: accountId.value }), {
         preserveScroll: true,
         onSuccess: () => closeModal(),

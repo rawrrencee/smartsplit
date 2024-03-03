@@ -1,3 +1,9 @@
+<script setup>
+defineProps({
+    isLightMode: Boolean,
+});
+</script>
+
 <template>
     <svg
         class="h-24 w-24 flex-no-shrink fill-current"
@@ -6,11 +12,7 @@
         viewBox="0 0 1024 1024"
         preserveAspectRatio="xMidYMid meet"
     >
-        <g
-            transform="translate(0,1024) scale(0.1,-0.1)"
-            fill="#000000"
-            stroke="none"
-        >
+        <g transform="translate(0,1024) scale(0.1,-0.1)" stroke="none">
             <path
                 d="M5280 9243 c-2230 -228 -3857 -1837 -4061 -4018 -237 -2527 1834
 -4788 4386 -4790 2126 -1 3946 1510 4339 3605 469 2498 -1232 4859 -3729 5175
