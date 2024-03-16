@@ -76,10 +76,8 @@ watchEffect(async () => {
                             type="button"
                             class="-me-1 flex p-2 rounded-md focus:outline-none sm:-me-2 transition"
                             :class="{
-                                'hover:bg-indigo-600 focus:bg-indigo-600':
-                                    style == 'success',
-                                'hover:bg-red-600 focus:bg-red-600':
-                                    style == 'danger',
+                                'hover:bg-indigo-600 focus:bg-indigo-600': style == 'success',
+                                'hover:bg-red-600 focus:bg-red-600': style == 'danger',
                             }"
                             aria-label="Dismiss"
                             @click.prevent="show = false"
@@ -92,11 +90,7 @@ watchEffect(async () => {
                                 stroke-width="1.5"
                                 stroke="currentColor"
                             >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>

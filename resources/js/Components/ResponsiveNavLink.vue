@@ -21,11 +21,7 @@ const classes = computed(() => {
 
 <template>
     <div>
-        <button
-            v-if="as == 'button'"
-            :class="classes"
-            class="w-full text-start"
-        >
+        <button v-if="as == 'button'" :class="classes" class="w-full text-start">
             <slot />
         </button>
 

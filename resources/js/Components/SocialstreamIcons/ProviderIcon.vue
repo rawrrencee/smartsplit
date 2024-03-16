@@ -25,18 +25,8 @@ defineProps({
         <GithubIcon v-if="provider.id === 'github'" :class="classes" />
         <GitLabIcon v-if="provider.id === 'gitlab'" :class="classes" />
         <GoogleIcon v-if="provider.id === 'google'" :class="classes" />
-        <LinkedInIcon
-            v-if="
-                provider.id === 'linkedin' || provider.id === 'linkedin-openid'
-            "
-            :class="classes"
-        />
+        <LinkedInIcon v-if="provider.id === 'linkedin' || provider.id === 'linkedin-openid'" :class="classes" />
         <SlackIcon v-if="provider.id === 'slack'" :class="classes" />
-        <TwitterIcon
-            v-if="
-                provider.id === 'twitter' || provider.id === 'twitter-oauth-2'
-            "
-            :class="classes"
-        />
+        <TwitterIcon v-if="provider.id === 'twitter' || provider.id === 'twitter-oauth-2'" :class="classes" />
     </div>
 </template>

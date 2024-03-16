@@ -8,9 +8,7 @@ import { computed } from "vue";
 defineProps({
     title: String,
 });
-const theme = computed(
-    () => localStorage.getItem("theme") ?? "splitsmartLight",
-);
+const theme = computed(() => localStorage.getItem("theme") ?? "splitsmartLight");
 const isLightMode = computed(() => theme.value === "splitsmartLight");
 </script>
 
@@ -20,12 +18,7 @@ const isLightMode = computed(() => theme.value === "splitsmartLight");
 
         <Banner />
 
-        <div
-            :class="[
-                isLightMode ? 'bg-gray-100' : 'bg-base-200',
-                'min-h-screen',
-            ]"
-        >
+        <div :class="[isLightMode ? 'bg-gray-100' : 'bg-base-200', 'min-h-screen']">
             <NavigationBar v-if="route().current('home')" :isLightMode />
 
             <!-- Page Heading -->

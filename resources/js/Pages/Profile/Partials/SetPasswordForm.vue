@@ -35,9 +35,7 @@ const setPassword = () => {
     <FormSection @submitted="setPassword">
         <template #title> Set Password </template>
 
-        <template #description>
-            Ensure your account is using a long, random password to stay secure.
-        </template>
+        <template #description> Ensure your account is using a long, random password to stay secure. </template>
 
         <template #form>
             <div class="col-span-6 sm:col-span-4">
@@ -54,10 +52,7 @@ const setPassword = () => {
             </div>
 
             <div class="col-span-6 sm:col-span-4">
-                <InputLabel
-                    for="password_confirmation"
-                    value="Confirm Password"
-                />
+                <InputLabel for="password_confirmation" value="Confirm Password" />
                 <TextInput
                     id="password_confirmation"
                     v-model="form.password_confirmation"
@@ -65,24 +60,14 @@ const setPassword = () => {
                     class="mt-1 block w-full"
                     type="password"
                 />
-                <InputError
-                    :message="form.errors.password_confirmation"
-                    class="mt-2"
-                />
+                <InputError :message="form.errors.password_confirmation" class="mt-2" />
             </div>
         </template>
 
         <template #actions>
-            <ActionMessage :on="form.recentlySuccessful" class="mr-3">
-                Saved.
-            </ActionMessage>
+            <ActionMessage :on="form.recentlySuccessful" class="mr-3"> Saved. </ActionMessage>
 
-            <Button
-                :class="{ 'opacity-25': form.processing }"
-                :disabled="form.processing"
-            >
-                Save
-            </Button>
+            <Button :class="{ 'opacity-25': form.processing }" :disabled="form.processing"> Save </Button>
         </template>
     </FormSection>
 </template>

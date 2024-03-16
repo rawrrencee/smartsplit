@@ -45,14 +45,7 @@ const submit = () => {
         <form @submit.prevent="submit">
             <div>
                 <InputLabel for="email" value="Email" />
-                <TextInput
-                    id="email"
-                    v-model="form.email"
-                    autofocus
-                    class="mt-1 block w-full"
-                    required
-                    type="email"
-                />
+                <TextInput id="email" v-model="form.email" autofocus class="mt-1 block w-full" required type="email" />
                 <InputError :message="form.errors.email" class="mt-2" />
             </div>
 
@@ -85,21 +78,14 @@ const submit = () => {
                     Forgot your password?
                 </Link>
 
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                    class="ml-4"
-                >
+                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="ml-4">
                     Log in
                 </PrimaryButton>
             </div>
         </form>
 
         <Socialstream
-            v-if="
-                $page.props.socialstream.show &&
-                $page.props.socialstream.providers.length
-            "
+            v-if="$page.props.socialstream.show && $page.props.socialstream.providers.length"
             :error="$page.props.errors.socialstream"
             :prompt="$page.props.socialstream.prompt"
             :labels="$page.props.socialstream.labels"

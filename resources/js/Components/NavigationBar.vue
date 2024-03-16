@@ -35,38 +35,22 @@ const toggleTheme = () => {
                 <div class="flex">
                     <!-- Logo -->
                     <div class="shrink-0 flex items-center">
-                        <Link
-                            :href="route('home')"
-                            as="div"
-                            class="flex flex-row gap-4 place-items-center"
-                        >
+                        <Link :href="route('home')" as="div" class="flex flex-row gap-4 place-items-center">
                             <ApplicationMark class="block h-9 w-9" />
-                            <span class="font-semibold text-xl"
-                                >smartsplit</span
-                            >
+                            <span class="font-semibold text-xl">smartsplit</span>
                         </Link>
                     </div>
                 </div>
 
                 <div class="flex flex-row">
                     <div class="flex items-center mr-4">
-                        <label
-                            class="swap swap-rotate"
-                            :class="[isLightMode && 'text-gray-400']"
-                        >
+                        <label class="swap swap-rotate" :class="[isLightMode && 'text-gray-400']">
                             <!-- this hidden checkbox controls the state -->
-                            <input
-                                type="checkbox"
-                                class="border-0 hidden theme-controller"
-                                @click="toggleTheme"
-                            />
+                            <input type="checkbox" class="border-0 hidden theme-controller" @click="toggleTheme" />
 
                             <!-- sun icon -->
                             <svg
-                                :class="[
-                                    isLightMode ? 'swap-off' : 'swap-on',
-                                    'fill-current w-6 h-6',
-                                ]"
+                                :class="[isLightMode ? 'swap-off' : 'swap-on', 'fill-current w-6 h-6']"
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
                             >
@@ -77,10 +61,7 @@ const toggleTheme = () => {
 
                             <!-- moon icon -->
                             <svg
-                                :class="[
-                                    isLightMode ? 'swap-on' : 'swap-off',
-                                    'fill-current w-6 h-6',
-                                ]"
+                                :class="[isLightMode ? 'swap-on' : 'swap-off', 'fill-current w-6 h-6']"
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
                             >
@@ -97,18 +78,12 @@ const toggleTheme = () => {
                             <Dropdown align="right" width="48">
                                 <template #trigger>
                                     <button
-                                        v-if="
-                                            $page.props.jetstream
-                                                .managesProfilePhotos
-                                        "
+                                        v-if="$page.props.jetstream.managesProfilePhotos"
                                         class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition"
                                     >
                                         <img
                                             class="h-8 w-8 rounded-full object-cover"
-                                            :src="
-                                                $page.props.auth.user
-                                                    .profile_photo_url
-                                            "
+                                            :src="$page.props.auth.user.profile_photo_url"
                                             :alt="$page.props.auth.user.name"
                                         />
                                     </button>
@@ -140,20 +115,12 @@ const toggleTheme = () => {
 
                                 <template #content>
                                     <!-- Account Management -->
-                                    <div
-                                        class="block px-4 py-2 text-xs text-gray-400"
-                                    >
-                                        Manage Account
-                                    </div>
+                                    <div class="block px-4 py-2 text-xs text-gray-400">Manage Account</div>
 
-                                    <DropdownLink :href="route('profile.show')">
-                                        Profile
-                                    </DropdownLink>
+                                    <DropdownLink :href="route('profile.show')"> Profile </DropdownLink>
 
                                     <DropdownLink
-                                        v-if="
-                                            $page.props.jetstream.hasApiFeatures
-                                        "
+                                        v-if="$page.props.jetstream.hasApiFeatures"
                                         :href="route('api-tokens.index')"
                                     >
                                         API Tokens
@@ -163,9 +130,7 @@ const toggleTheme = () => {
 
                                     <!-- Authentication -->
                                     <form @submit.prevent="logout">
-                                        <DropdownLink as="button">
-                                            Log Out
-                                        </DropdownLink>
+                                        <DropdownLink as="button"> Log Out </DropdownLink>
                                     </form>
                                 </template>
                             </Dropdown>
@@ -176,22 +141,13 @@ const toggleTheme = () => {
                     <div class="-me-2 flex items-center sm:hidden">
                         <button
                             class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out"
-                            @click="
-                                showingNavigationDropdown =
-                                    !showingNavigationDropdown
-                            "
+                            @click="showingNavigationDropdown = !showingNavigationDropdown"
                         >
-                            <svg
-                                class="h-6 w-6"
-                                stroke="currentColor"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
+                            <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                 <path
                                     :class="{
                                         hidden: showingNavigationDropdown,
-                                        'inline-flex':
-                                            !showingNavigationDropdown,
+                                        'inline-flex': !showingNavigationDropdown,
                                     }"
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
@@ -201,8 +157,7 @@ const toggleTheme = () => {
                                 <path
                                     :class="{
                                         hidden: !showingNavigationDropdown,
-                                        'inline-flex':
-                                            showingNavigationDropdown,
+                                        'inline-flex': showingNavigationDropdown,
                                     }"
                                     stroke-linecap="round"
                                     stroke-linejoin="round"

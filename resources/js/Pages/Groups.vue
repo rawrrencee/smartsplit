@@ -3,19 +3,11 @@ import GroupList from "@/Components/GroupList.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { MagnifyingGlassIcon } from "@heroicons/vue/24/outline";
 import { Link } from "@inertiajs/vue3";
-import {
-    DrawerContent,
-    DrawerOverlay,
-    DrawerPortal,
-    DrawerRoot,
-    DrawerTrigger,
-} from "vaul-vue";
+import { DrawerContent, DrawerOverlay, DrawerPortal, DrawerRoot, DrawerTrigger } from "vaul-vue";
 import { computed } from "vue";
 
 const isAddNewGroupModalOpen = defineModel({ default: false });
-const isLightMode = computed(
-    () => localStorage.getItem("theme") === "splitsmartLight",
-);
+const isLightMode = computed(() => localStorage.getItem("theme") === "splitsmartLight");
 </script>
 
 <template>
@@ -53,26 +45,15 @@ const isLightMode = computed(
                     class="bg-gray-100 flex flex-col rounded-t-[10px] h-full mt-24 max-h-[96%] fixed bottom-0 left-0 right-0"
                 >
                     <div class="p-4 bg-white rounded-t-[10px] flex-1">
-                        <div
-                            class="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-gray-300 mb-8"
-                        />
+                        <div class="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-gray-300 mb-8" />
                         <div class="max-w-md mx-auto">
-                            <h2 id="radix-:R3emdaH1:" class="font-medium mb-4">
-                                Drawer for Vue.
-                            </h2>
+                            <h2 id="radix-:R3emdaH1:" class="font-medium mb-4">Drawer for Vue.</h2>
                             <p class="text-gray-600 mb-2">
-                                This component can be used as a Dialog
-                                replacement on mobile and tablet devices.
+                                This component can be used as a Dialog replacement on mobile and tablet devices.
                             </p>
                             <p class="text-gray-600 mb-2">
-                                It comes unstyled, has gesture-driven
-                                animations, and is made by
-                                <a
-                                    href="https://emilkowal.ski/"
-                                    class="underline"
-                                    target="_blank"
-                                    >Emil Kowalski</a
-                                >.
+                                It comes unstyled, has gesture-driven animations, and is made by
+                                <a href="https://emilkowal.ski/" class="underline" target="_blank">Emil Kowalski</a>.
                             </p>
                             <p class="text-gray-600 mb-8">
                                 It uses

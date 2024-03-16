@@ -1,10 +1,5 @@
 <script setup>
-import {
-    BanknotesIcon,
-    HomeIcon,
-    PlusCircleIcon,
-    UserGroupIcon,
-} from "@heroicons/vue/20/solid";
+import { BanknotesIcon, HomeIcon, PlusCircleIcon, UserGroupIcon } from "@heroicons/vue/20/solid";
 import {
     BanknotesIcon as BanknotesIconOutline,
     HomeIcon as HomeIconOutline,
@@ -44,17 +39,9 @@ const navigationItems = [
 <template>
     <div class="btm-nav">
         <template v-for="item in navigationItems">
-            <Link
-                as="template"
-                :href="route(item.path)"
-                :class="route().current(item.path) ? 'active' : ''"
-            >
+            <Link as="template" :href="route(item.path)" :class="route().current(item.path) ? 'active' : ''">
                 <component
-                    :is="
-                        route().current(item.path)
-                            ? item.icon
-                            : item.iconOutline
-                    "
+                    :is="route().current(item.path) ? item.icon : item.iconOutline"
                     class="h-6 w-6"
                     aria-hidden="true"
                 />

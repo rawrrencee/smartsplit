@@ -56,11 +56,7 @@ const mockGroups = [
 </script>
 
 <template>
-    <ul
-        role="list"
-        class="divide-y"
-        :class="[isLightMode ? 'divide-gray-100' : 'divide-gray-800']"
-    >
+    <ul role="list" class="divide-y" :class="[isLightMode ? 'divide-gray-100' : 'divide-gray-800']">
         <li
             v-for="group in mockGroups"
             :key="group.groupId"
@@ -74,16 +70,12 @@ const mockGroups = [
                     </div>
                 </div>
                 <div class="flex flex-col gap-1">
-                    <span
-                        class="text-md font-medium"
-                        :class="isLightMode ? 'text-gray-600' : 'text-gray-400'"
-                        >{{ group.groupName }}</span
-                    >
+                    <span class="text-md font-medium" :class="isLightMode ? 'text-gray-600' : 'text-gray-400'">{{
+                        group.groupName
+                    }}</span>
                     <div
                         class="flex flex-row gap-1 text-xs font-medium"
-                        :class="[
-                            isLightMode ? 'text-gray-700' : 'text-gray-500',
-                        ]"
+                        :class="[isLightMode ? 'text-gray-700' : 'text-gray-500']"
                     >
                         <UserIcon class="h-4 w-4" />
                         <span>{{ group.userCount }}</span>
@@ -92,29 +84,18 @@ const mockGroups = [
             </div>
             <div class="text-xs text-right">
                 <span v-if="group.loggedInUserBalance === 0">settled up</span>
-                <div
-                    class="flex flex-col text-success"
-                    v-else-if="group.loggedInUserBalance > 0"
-                >
+                <div class="flex flex-col text-success" v-else-if="group.loggedInUserBalance > 0">
                     <span>you are owed</span>
                     <div>
                         <span v-html="group.loggedInUserBalanceCurrency"></span>
-                        <span>{{
-                            parseFloat(
-                                Math.abs(group.loggedInUserBalance),
-                            ).toFixed(2)
-                        }}</span>
+                        <span>{{ parseFloat(Math.abs(group.loggedInUserBalance)).toFixed(2) }}</span>
                     </div>
                 </div>
                 <div class="flex flex-col text-error" v-else>
                     <span>you owe</span>
                     <div>
                         <span v-html="group.loggedInUserBalanceCurrency"></span>
-                        <span>{{
-                            parseFloat(
-                                Math.abs(group.loggedInUserBalance),
-                            ).toFixed(2)
-                        }}</span>
+                        <span>{{ parseFloat(Math.abs(group.loggedInUserBalance)).toFixed(2) }}</span>
                     </div>
                 </div>
             </div>

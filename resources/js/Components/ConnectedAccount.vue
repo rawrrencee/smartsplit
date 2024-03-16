@@ -23,16 +23,9 @@ const props = defineProps({
                         {{ provider.name }}
                     </div>
 
-                    <div
-                        v-if="createdAt !== null"
-                        class="text-xs text-gray-500"
-                    >
-                        Connected {{ createdAt }}
-                    </div>
+                    <div v-if="createdAt !== null" class="text-xs text-gray-500">Connected {{ createdAt }}</div>
 
-                    <div v-else class="text-xs text-gray-500">
-                        Not connected.
-                    </div>
+                    <div v-else class="text-xs text-gray-500">Not connected.</div>
                 </div>
             </div>
 

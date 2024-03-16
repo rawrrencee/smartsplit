@@ -3,9 +3,7 @@ import Welcome from "@/Components/Welcome.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { computed } from "vue";
 
-const isLightMode = computed(
-    () => localStorage.getItem("theme") === "splitsmartLight",
-);
+const isLightMode = computed(() => localStorage.getItem("theme") === "splitsmartLight");
 </script>
 
 <template>

@@ -74,10 +74,7 @@ const submit = () => {
             </div>
 
             <div class="mt-4">
-                <InputLabel
-                    for="password_confirmation"
-                    value="Confirm Password"
-                />
+                <InputLabel for="password_confirmation" value="Confirm Password" />
                 <TextInput
                     id="password_confirmation"
                     v-model="form.password_confirmation"
@@ -86,24 +83,13 @@ const submit = () => {
                     required
                     type="password"
                 />
-                <InputError
-                    :message="form.errors.password_confirmation"
-                    class="mt-2"
-                />
+                <InputError :message="form.errors.password_confirmation" class="mt-2" />
             </div>
 
-            <div
-                v-if="$page.props.jetstream.hasTermsAndPrivacyPolicyFeature"
-                class="mt-4"
-            >
+            <div v-if="$page.props.jetstream.hasTermsAndPrivacyPolicyFeature" class="mt-4">
                 <InputLabel for="terms">
                     <div class="flex items-center">
-                        <Checkbox
-                            id="terms"
-                            v-model:checked="form.terms"
-                            name="terms"
-                            required
-                        />
+                        <Checkbox id="terms" v-model:checked="form.terms" name="terms" required />
 
                         <div class="ml-2">
                             I agree to the
@@ -134,21 +120,14 @@ const submit = () => {
                     Already registered?
                 </Link>
 
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                    class="ml-4"
-                >
+                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="ml-4">
                     Register
                 </PrimaryButton>
             </div>
         </form>
 
         <Socialstream
-            v-if="
-                $page.props.socialstream.show &&
-                $page.props.socialstream.providers.length
-            "
+            v-if="$page.props.socialstream.show && $page.props.socialstream.providers.length"
             :error="$page.props.errors.socialstream"
             :prompt="$page.props.socialstream.prompt"
             :labels="$page.props.socialstream.labels"
