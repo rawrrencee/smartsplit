@@ -18,17 +18,17 @@ const logout = () => {
 
 const toggleTheme = () => {
     const theme = localStorage.getItem("theme");
-    if (theme && theme === "business") {
+    if (theme && theme === "dark") {
         localStorage.setItem("theme", "splitsmartLight");
     } else {
-        localStorage.setItem("theme", "business");
+        localStorage.setItem("theme", "dark");
     }
     location.reload();
 };
 </script>
 
 <template>
-    <nav :class="[isLightMode ? 'bg-white' : 'bg-base-100']">
+    <nav class="bg-white dark:bg-gray-800">
         <!-- Primary Navigation Menu -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
@@ -37,14 +37,14 @@ const toggleTheme = () => {
                     <div class="shrink-0 flex items-center">
                         <Link :href="route('home')" as="div" class="flex flex-row gap-4 place-items-center">
                             <ApplicationMark class="block h-9 w-9" />
-                            <span class="font-semibold text-xl">smartsplit</span>
+                            <span class="font-semibold text-xl dark:text-gray-300">smartsplit</span>
                         </Link>
                     </div>
                 </div>
 
                 <div class="flex flex-row">
                     <div class="flex items-center mr-4">
-                        <label class="swap swap-rotate" :class="[isLightMode && 'text-gray-400']">
+                        <label class="swap swap-rotate text-gray-400 dark:text-gray-300">
                             <!-- this hidden checkbox controls the state -->
                             <input type="checkbox" class="border-0 hidden theme-controller" @click="toggleTheme" />
 
@@ -140,7 +140,7 @@ const toggleTheme = () => {
                     <!-- Hamburger -->
                     <div class="-me-2 flex items-center sm:hidden">
                         <button
-                            class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out"
+                            class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out dark:focus:bg-gray-900 dark:text-gray-300 dark:hover:text-gray-400 dark:hover:bg-gray-900"
                             @click="showingNavigationDropdown = !showingNavigationDropdown"
                         >
                             <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
@@ -171,7 +171,7 @@ const toggleTheme = () => {
             </div>
         </div>
         <template v-if="showingNavigationDropdown" class="sm:hidden">
-            <ResponsiveHamburgerMenu :is-light-mode="isLightMode" />
+            <ResponsiveHamburgerMenu />
         </template>
     </nav>
 </template>

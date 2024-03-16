@@ -20,6 +20,8 @@ export default {
         },
     },
 
+    darkMode: "selector",
+
     plugins: [forms, typography, require("daisyui")],
 
     daisyui: {
@@ -38,7 +40,6 @@ export default {
                     error: "#A33B20",
                 },
             },
-            "business",
         ],
         base: true,
         utils: true,
@@ -46,6 +47,6 @@ export default {
         rtl: false,
         prefix: "",
         themeRoot: ":root",
-        darkTheme: "business",
+        darkTheme: "splitsmartLight",
     },
 };

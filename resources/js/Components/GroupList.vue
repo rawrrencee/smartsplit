@@ -1,8 +1,8 @@
 <script setup lang="js">
 import { UserIcon } from "@heroicons/vue/24/outline";
+import { router } from "@inertiajs/vue3";
 
 defineProps({
-    isLightMode: Boolean,
     groups: Array,
 });
 
@@ -53,15 +53,19 @@ const mockGroups = [
             "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     },
 ];
+
+const openGroup = (groupId) => {
+    router.visit(route("view-group", groupId));
+};
 </script>
 
 <template>
-    <ul role="list" class="divide-y" :class="[isLightMode ? 'divide-gray-100' : 'divide-gray-800']">
+    <ul role="list" class="divide-y divide-gray-100 dark:divide-gray-800">
         <li
             v-for="group in mockGroups"
             :key="group.groupId"
-            class="flex gap-2 justify-between items-center py-5 px-6 hover:cursor-pointer"
-            :class="[isLightMode ? 'hover:bg-gray-100' : 'hover:bg-base-200']"
+            class="flex gap-2 justify-between items-center py-5 px-6 bg-white dark:bg-gray-900 hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+            @click="openGroup(group.groupId)"
         >
             <div class="flex flex-row gap-4">
                 <div class="avatar">
@@ -70,13 +74,8 @@ const mockGroups = [
                     </div>
                 </div>
                 <div class="flex flex-col gap-1">
-                    <span class="text-md font-medium" :class="isLightMode ? 'text-gray-600' : 'text-gray-400'">{{
-                        group.groupName
-                    }}</span>
-                    <div
-                        class="flex flex-row gap-1 text-xs font-medium"
-                        :class="[isLightMode ? 'text-gray-700' : 'text-gray-500']"
-                    >
+                    <span class="text-md font-medium text-gray-600 dark:text-gray-200">{{ group.groupName }}</span>
+                    <div class="flex flex-row gap-1 text-xs font-medium text-gray-700 dark:text-gray-400">
                         <UserIcon class="h-4 w-4" />
                         <span>{{ group.userCount }}</span>
                     </div>

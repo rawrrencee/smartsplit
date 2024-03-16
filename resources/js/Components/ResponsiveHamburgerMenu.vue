@@ -3,10 +3,6 @@ import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import { ArrowRightEndOnRectangleIcon, UserIcon } from "@heroicons/vue/24/outline";
 import { router } from "@inertiajs/vue3";
 
-defineProps({
-    isLightMode: Boolean,
-});
-
 const logout = () => {
     router.post(route("logout"));
 };
@@ -14,7 +10,7 @@ const logout = () => {
 
 <template>
     <!-- Responsive Settings Options -->
-    <div class="pt-4 pb-1 bg-base-100 border-t" :class="isLightMode ? 'border-gray-200' : 'border-gray-600'">
+    <div class="pt-4 pb-1 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-600">
         <div class="flex items-center px-4">
             <div v-if="$page.props.jetstream.managesProfilePhotos" class="shrink-0 me-3">
                 <img
@@ -25,7 +21,7 @@ const logout = () => {
             </div>
 
             <div>
-                <div class="font-medium text-base" :class="[isLightMode ? 'text-gray-800' : 'text-gray-300']">
+                <div class="font-medium text-base text-gray-800 dark:text-gray-300">
                     {{ $page.props.auth.user.name }}
                 </div>
                 <div class="font-medium text-sm text-gray-400">
@@ -35,7 +31,7 @@ const logout = () => {
         </div>
 
         <div class="mt-3 space-y-1 text-gray-500">
-            <ResponsiveNavLink :href="route('profile.show')" :active="route().current('profile.show')" :isLightMode>
+            <ResponsiveNavLink :href="route('profile.show')" :active="route().current('profile.show')">
                 <div class="flex flex-row place-items-center gap-2">
                     <UserIcon class="h-4 w-4" />
                     <span>Profile</span>
@@ -44,7 +40,7 @@ const logout = () => {
 
             <!-- Authentication -->
             <form method="POST" @submit.prevent="logout">
-                <ResponsiveNavLink as="button" :isLightMode>
+                <ResponsiveNavLink as="button">
                     <div class="flex flex-row place-items-center gap-2">
                         <ArrowRightEndOnRectangleIcon class="h-4 w-4" />
                         <span>Sign out</span>

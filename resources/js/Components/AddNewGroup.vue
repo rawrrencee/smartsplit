@@ -41,15 +41,11 @@ const updatePhotoPreview = (event) => {
                             leave-to="translate-x-full"
                         >
                             <div
-                                class="pointer-events-auto w-screen max-w-2xl overflow-y-auto"
-                                :class="[isLightMode ? 'bg-white' : 'bg-base-100']"
+                                class="pointer-events-auto w-screen max-w-2xl overflow-y-auto bg-white dark:bg-gray-800"
                             >
                                 <form class="flex h-full flex-col">
                                     <div class="flex-1">
-                                        <div
-                                            class="px-4 py-6 sm:px-6"
-                                            :class="[isLightMode ? 'bg-gray-200' : 'bg-base-200']"
-                                        >
+                                        <div class="px-4 py-6 sm:px-6 bg-gray-200 dark:bg-base-900">
                                             <div class="flex items-start justify-between space-x-3">
                                                 <div class="space-y-1">
                                                     <DialogTitle

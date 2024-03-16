@@ -37,6 +37,10 @@ Route::middleware([
         return Inertia::render('Groups');
     })->name('groups');
 
+    Route::get('/view-group', function () {
+        return Inertia::render('ViewGroup');
+    })->name('view-group');
+
     Route::get('/create-edit-group', function () {
         return Inertia::render('CreateOrEditGroup');
     })->name('create-edit-group');

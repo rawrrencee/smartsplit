@@ -8,17 +8,16 @@ import { computed } from "vue";
 defineProps({
     title: String,
 });
-const theme = computed(() => localStorage.getItem("theme") ?? "splitsmartLight");
-const isLightMode = computed(() => theme.value === "splitsmartLight");
+const isLightMode = computed(() => (localStorage.getItem("theme") ?? "splitsmartLight") === "splitsmartLight");
 </script>
 
 <template>
-    <div :data-theme="theme">
+    <div data-theme="splitsmartLight" :class="!isLightMode && 'dark'">
         <Head :title="title" />
 
         <Banner />
 
-        <div :class="[isLightMode ? 'bg-gray-100' : 'bg-base-200', 'min-h-screen']">
+        <div class="bg-gray-100 min-h-screen dark:bg-gray-800">
             <NavigationBar v-if="route().current('home')" :isLightMode />
 
             <!-- Page Heading -->
@@ -32,8 +31,7 @@ const isLightMode = computed(() => theme.value === "splitsmartLight");
             <main class="pb-20">
                 <slot />
             </main>
-
-            <BottomNavigation />
         </div>
+        <BottomNavigation />
     </div>
 </template>
