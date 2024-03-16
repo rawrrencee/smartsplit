@@ -37,6 +37,10 @@ Route::middleware([
         return Inertia::render('Groups');
     })->name('groups');
 
+    Route::get('/create-edit-group', function () {
+        return Inertia::render('CreateOrEditGroup');
+    })->name('create-edit-group');
+
     Route::get('/settle-up', function () {
         return Inertia::render('SettleUp');
     })->name('settle-up');
