@@ -2,7 +2,7 @@
 import ApplicationMark from "@/Components/ApplicationMark.vue";
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
-import { Link } from "@inertiajs/vue3";
+import { Link, router } from "@inertiajs/vue3";
 import { ref } from "vue";
 import ResponsiveHamburgerMenu from "./ResponsiveHamburgerMenu.vue";
 
@@ -17,11 +17,11 @@ const logout = () => {
 };
 
 const toggleTheme = () => {
-    const theme = sessionStorage.getItem("theme");
-    if (theme && theme === "dark") {
-        sessionStorage.setItem("theme", "splitsmartLight");
+    const theme = localStorage.getItem("theme");
+    if (theme && theme === "business") {
+        localStorage.setItem("theme", "splitsmartLight");
     } else {
-        sessionStorage.setItem("theme", "dark");
+        localStorage.setItem("theme", "business");
     }
     location.reload();
 };

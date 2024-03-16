@@ -4,10 +4,15 @@ import {
     ArrowRightEndOnRectangleIcon,
     UserIcon,
 } from "@heroicons/vue/24/outline";
+import { router } from "@inertiajs/vue3";
 
 defineProps({
     isLightMode: Boolean,
 });
+
+const logout = () => {
+    router.post(route("logout"));
+};
 </script>
 
 <template>

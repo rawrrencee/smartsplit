@@ -9,7 +9,7 @@ defineProps({
     title: String,
 });
 const theme = computed(
-    () => sessionStorage.getItem("theme") ?? "splitsmartLight",
+    () => localStorage.getItem("theme") ?? "splitsmartLight",
 );
 const isLightMode = computed(() => theme.value === "splitsmartLight");
 </script>

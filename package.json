@@ -23,6 +23,7 @@
     },
     "dependencies": {
         "@headlessui/vue": "^1.7.19",
-        "@heroicons/vue": "^2.1.1"
+        "@heroicons/vue": "^2.1.1",
+        "vaul-vue": "^0.1.0"
     }
 }

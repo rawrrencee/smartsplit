@@ -4,7 +4,7 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import { computed } from "vue";
 
 const isLightMode = computed(
-    () => sessionStorage.getItem("theme") === "splitsmartLight",
+    () => localStorage.getItem("theme") === "splitsmartLight",
 );
 </script>
 

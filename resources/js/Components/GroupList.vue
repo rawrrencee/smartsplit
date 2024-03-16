@@ -59,7 +59,7 @@ const mockGroups = [
     <ul
         role="list"
         class="divide-y"
-        :class="[isLightMode ? 'divide-gray-100' : 'divide-gray-600']"
+        :class="[isLightMode ? 'divide-gray-100' : 'divide-gray-800']"
     >
         <li
             v-for="group in mockGroups"

@@ -27,18 +27,18 @@ export default {
         themes: [
             {
                 splitsmartLight: {
+                    ...require("daisyui/src/theming/themes")["light"],
                     primary: "#1C4E80",
                     secondary: "#A9B4C2",
                     accent: "#EA6947",
                     neutral: "#23282E",
-                    "base-100": "#FFFFFF",
                     info: "#0091D5",
                     success: "#6BB187",
                     warning: "#DBAE59",
                     error: "#A33B20",
                 },
             },
-            "dark",
+            "business",
         ],
         base: true,
         utils: true,
@@ -46,6 +46,6 @@ export default {
         rtl: false,
         prefix: "",
         themeRoot: ":root",
-        darkTheme: "dark",
+        darkTheme: "business",
     },
 };
