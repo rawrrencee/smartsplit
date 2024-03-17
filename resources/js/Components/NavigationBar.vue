@@ -30,27 +30,27 @@ const toggleTheme = () => {
 <template>
     <nav class="bg-white dark:bg-gray-800">
         <!-- Primary Navigation Menu -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="flex h-16 justify-between">
                 <div class="flex">
                     <!-- Logo -->
-                    <div class="shrink-0 flex items-center">
-                        <Link :href="route('home')" as="div" class="flex flex-row gap-4 place-items-center">
+                    <div class="flex shrink-0 items-center">
+                        <Link :href="route('home')" as="div" class="flex flex-row place-items-center gap-4">
                             <ApplicationMark class="block h-9 w-9" />
-                            <span class="font-semibold text-xl dark:text-gray-300">smartsplit</span>
+                            <span class="text-xl font-semibold dark:text-gray-300">smartsplit</span>
                         </Link>
                     </div>
                 </div>
 
                 <div class="flex flex-row">
-                    <div class="flex items-center mr-4">
+                    <div class="mr-4 flex items-center">
                         <label class="swap swap-rotate text-gray-400 dark:text-gray-300">
                             <!-- this hidden checkbox controls the state -->
-                            <input type="checkbox" class="border-0 hidden theme-controller" @click="toggleTheme" />
+                            <input type="checkbox" class="theme-controller hidden border-0" @click="toggleTheme" />
 
                             <!-- sun icon -->
                             <svg
-                                :class="[isLightMode ? 'swap-off' : 'swap-on', 'fill-current w-6 h-6']"
+                                :class="[isLightMode ? 'swap-off' : 'swap-on', 'h-6 w-6 fill-current']"
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
                             >
@@ -61,7 +61,7 @@ const toggleTheme = () => {
 
                             <!-- moon icon -->
                             <svg
-                                :class="[isLightMode ? 'swap-on' : 'swap-off', 'fill-current w-6 h-6']"
+                                :class="[isLightMode ? 'swap-on' : 'swap-off', 'h-6 w-6 fill-current']"
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
                             >
@@ -72,14 +72,14 @@ const toggleTheme = () => {
                         </label>
                     </div>
 
-                    <div class="hidden sm:flex sm:items-center sm:ms-6">
+                    <div class="hidden sm:ms-6 sm:flex sm:items-center">
                         <!-- Settings Dropdown -->
-                        <div class="ms-3 relative">
+                        <div class="relative ms-3">
                             <Dropdown align="right" width="48">
                                 <template #trigger>
                                     <button
                                         v-if="$page.props.jetstream.managesProfilePhotos"
-                                        class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition"
+                                        class="flex rounded-full border-2 border-transparent text-sm transition focus:border-gray-300 focus:outline-none"
                                     >
                                         <img
                                             class="h-8 w-8 rounded-full object-cover"
@@ -91,12 +91,12 @@ const toggleTheme = () => {
                                     <span v-else class="inline-flex rounded-md">
                                         <button
                                             type="button"
-                                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150"
+                                            class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:bg-gray-50 focus:outline-none active:bg-gray-50"
                                         >
                                             {{ $page.props.auth.user.name }}
 
                                             <svg
-                                                class="ms-2 -me-0.5 h-4 w-4"
+                                                class="-me-0.5 ms-2 h-4 w-4"
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
@@ -140,7 +140,7 @@ const toggleTheme = () => {
                     <!-- Hamburger -->
                     <div class="-me-2 flex items-center sm:hidden">
                         <button
-                            class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out dark:focus:bg-gray-900 dark:text-gray-300 dark:hover:text-gray-400 dark:hover:bg-gray-900"
+                            class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-900 dark:hover:text-gray-400 dark:focus:bg-gray-900"
                             @click="showingNavigationDropdown = !showingNavigationDropdown"
                         >
                             <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">

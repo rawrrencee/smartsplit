@@ -12,7 +12,7 @@ const props = defineProps({
     <div>
         <button
             v-if="as == 'button'"
-            class="w-full text-start block ps-3 pe-4 py-2 text-base font-medium hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-400 dark:hover:bg-gray-600"
+            class="block w-full py-2 pe-4 ps-3 text-start text-base font-medium text-gray-600 transition duration-150 ease-in-out hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 focus:border-gray-300 focus:bg-gray-50 focus:text-gray-800 focus:outline-none dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-gray-400"
         >
             <slot />
         </button>
@@ -20,7 +20,7 @@ const props = defineProps({
         <Link
             v-else
             :href="href"
-            class="block w-full ps-3 pe-4 py-2 text-start text-base font-medium hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-400 dark:hover:bg-gray-600"
+            class="block w-full py-2 pe-4 ps-3 text-start text-base font-medium text-gray-600 transition duration-150 ease-in-out hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 focus:border-gray-300 focus:bg-gray-50 focus:text-gray-800 focus:outline-none dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-gray-400"
         >
             <slot />
         </Link>

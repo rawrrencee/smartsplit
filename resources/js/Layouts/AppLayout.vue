@@ -17,12 +17,12 @@ const isLightMode = computed(() => (localStorage.getItem("theme") ?? "splitsmart
 
         <Banner />
 
-        <div class="bg-gray-100 min-h-screen dark:bg-gray-800">
+        <div class="min-h-screen bg-gray-100 dark:bg-gray-800">
             <NavigationBar v-if="route().current('home')" :isLightMode />
 
             <!-- Page Heading -->
             <header v-if="$slots.header" class="bg-white shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                     <slot name="header" />
                 </div>
             </header>

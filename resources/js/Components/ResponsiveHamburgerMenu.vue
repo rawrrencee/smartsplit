@@ -10,9 +10,9 @@ const logout = () => {
 
 <template>
     <!-- Responsive Settings Options -->
-    <div class="pt-4 pb-1 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-600">
+    <div class="border-t border-gray-200 bg-white pb-1 pt-4 dark:border-gray-600 dark:bg-gray-900">
         <div class="flex items-center px-4">
-            <div v-if="$page.props.jetstream.managesProfilePhotos" class="shrink-0 me-3">
+            <div v-if="$page.props.jetstream.managesProfilePhotos" class="me-3 shrink-0">
                 <img
                     class="h-10 w-10 rounded-full object-cover"
                     :src="$page.props.auth.user.profile_photo_url"
@@ -21,10 +21,10 @@ const logout = () => {
             </div>
 
             <div>
-                <div class="font-medium text-base text-gray-800 dark:text-gray-300">
+                <div class="text-base font-medium text-gray-800 dark:text-gray-300">
                     {{ $page.props.auth.user.name }}
                 </div>
-                <div class="font-medium text-sm text-gray-400">
+                <div class="text-sm font-medium text-gray-400">
                     {{ $page.props.auth.user.email }}
                 </div>
             </div>

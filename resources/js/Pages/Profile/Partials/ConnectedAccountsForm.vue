@@ -61,12 +61,12 @@ const closeModal = () => {
         <template #description> Connect your social media accounts to enable Sign In with OAuth. </template>
 
         <template #content>
-            <div class="p-4 bg-red-500/10 text-red-500 border-l-4 border-red-600 rounded font-medium text-sm">
+            <div class="rounded border-l-4 border-red-600 bg-red-500/10 p-4 text-sm font-medium text-red-500">
                 If you feel any of your connected accounts have been compromised, you should disconnect them immediately
                 and change your password.
             </div>
 
-            <div class="space-y-6 mt-6">
+            <div class="mt-6 space-y-6">
                 <div v-for="provider in $page.props.socialstream.providers" :key="provider">
                     <ConnectedAccount :provider="provider" :created-at="getAccountForProvider(provider)?.created_at">
                         <template #action>
@@ -78,7 +78,7 @@ const closeModal = () => {
                                             getAccountForProvider(provider).avatar_path
                                         "
                                         @click="setProfilePhoto(getAccountForProvider(provider).id)"
-                                        class="cursor-pointer ms-6 text-sm text-gray-500 hover:text-gray-700 focus:outline-none"
+                                        class="ms-6 cursor-pointer text-sm text-gray-500 hover:text-gray-700 focus:outline-none"
                                     >
                                         Use Avatar as Profile Photo
                                     </button>

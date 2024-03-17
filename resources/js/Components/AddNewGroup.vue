@@ -45,7 +45,7 @@ const updatePhotoPreview = (event) => {
                             >
                                 <form class="flex h-full flex-col">
                                     <div class="flex-1">
-                                        <div class="px-4 py-6 sm:px-6 bg-gray-200 dark:bg-base-900">
+                                        <div class="dark:bg-base-900 bg-gray-200 px-4 py-6 sm:px-6">
                                             <div class="flex items-start justify-between space-x-3">
                                                 <div class="space-y-1">
                                                     <DialogTitle
@@ -110,7 +110,7 @@ const updatePhotoPreview = (event) => {
                                                     >Group Photo</label
                                                 >
                                                 <div
-                                                    class="mt-2 sm:col-span-2 flex max-w-lg justify-center rounded-lg border border-dashed px-6 py-10"
+                                                    class="mt-2 flex max-w-lg justify-center rounded-lg border border-dashed px-6 py-10 sm:col-span-2"
                                                     :class="[isLightMode ? 'border-gray-900/25' : 'border-gray-100/25']"
                                                 >
                                                     <div class="flex flex-col justify-center gap-2 text-center">

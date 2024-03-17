@@ -64,12 +64,12 @@ const openGroup = (groupId) => {
         <li
             v-for="group in mockGroups"
             :key="group.groupId"
-            class="flex gap-2 justify-between items-center py-5 px-6 bg-white dark:bg-gray-900 hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+            class="flex items-center justify-between gap-2 bg-white px-6 py-5 hover:cursor-pointer hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
             @click="openGroup(group.groupId)"
         >
             <div class="flex flex-row gap-4">
                 <div class="avatar">
-                    <div class="w-10 mask mask-squircle">
+                    <div class="mask mask-squircle w-10">
                         <img :src="group.imageUrl" />
                     </div>
                 </div>
@@ -81,7 +81,7 @@ const openGroup = (groupId) => {
                     </div>
                 </div>
             </div>
-            <div class="text-xs text-right">
+            <div class="text-right text-xs">
                 <span v-if="group.loggedInUserBalance === 0">settled up</span>
                 <div class="flex flex-col text-success" v-else-if="group.loggedInUserBalance > 0">
                     <span>you are owed</span>

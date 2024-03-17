@@ -81,7 +81,7 @@ const updatePhotoPreview = (event) => {
                             >Group Photo</label
                         >
                         <div
-                            class="mt-2 sm:col-span-2 flex max-w-lg justify-center rounded-lg border border-dashed px-6 py-10"
+                            class="mt-2 flex max-w-lg justify-center rounded-lg border border-dashed px-6 py-10 sm:col-span-2"
                             :class="[isLightMode ? 'border-gray-900/25' : 'border-gray-100/25']"
                         >
                             <div class="flex flex-col justify-center gap-2 text-center">

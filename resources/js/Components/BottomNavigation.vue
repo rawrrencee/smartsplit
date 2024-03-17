@@ -42,7 +42,7 @@ const navigationItems = [
             <Link
                 as="template"
                 :href="route(item.path)"
-                :class="route().current(item.path) ? 'active dark:bg-gray-800 dark:border-t-gray-400' : ''"
+                :class="route().current(item.path) ? 'active dark:border-t-gray-400 dark:bg-gray-800' : ''"
             >
                 <component
                     :is="route().current(item.path) ? item.icon : item.iconOutline"

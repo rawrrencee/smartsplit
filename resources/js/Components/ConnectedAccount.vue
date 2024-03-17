@@ -14,7 +14,7 @@ const props = defineProps({
 
 <template>
     <div>
-        <div class="px-3 flex items-center justify-between">
+        <div class="flex items-center justify-between px-3">
             <div class="flex items-center">
                 <ProviderIcon :provider="provider" classes="h-6 w-6 me-2" />
 
