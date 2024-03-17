@@ -16,7 +16,9 @@ import {
 
 <template>
     <AppLayout title="Home">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div
+            class="sticky top-0 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
+        >
             <div class="flex w-full flex-row items-center justify-between py-2">
                 <button type="button" class="btn btn-link px-0 text-gray-600 dark:text-gray-200">
                     <MagnifyingGlassIcon class="h-5 w-5" />
@@ -61,6 +63,8 @@ import {
                     </DrawerPortal>
                 </DrawerRoot>
             </div>
+        </div>
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="overflow-x-auto rounded-xl shadow-md">
                 <GroupList :groups="[]" />
             </div>
