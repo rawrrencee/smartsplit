@@ -2,6 +2,7 @@
 import GroupList from "@/Components/GroupList.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { CameraIcon, MagnifyingGlassIcon } from "@heroicons/vue/24/outline";
+import { router } from "@inertiajs/vue3";
 import {
     DrawerClose,
     DrawerContent,
@@ -12,6 +13,10 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from "vaul-vue";
+
+const openGroup = (groupId) => {
+    router.get(route("view-group"), { id: groupId });
+};
 </script>
 
 <template>
@@ -66,7 +71,7 @@ import {
         </div>
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="overflow-x-auto rounded-xl shadow-md">
-                <GroupList :groups="[]" />
+                <GroupList :groups="[]" @group-clicked="openGroup" />
             </div>
         </div>
     </AppLayout>

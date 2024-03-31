@@ -1,11 +1,12 @@
 <script setup>
+import NavigationBarButton from "@/Components/NavigationBarButton.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { ArrowLeftIcon, CurrencyDollarIcon } from "@heroicons/vue/24/outline";
 import { router } from "@inertiajs/vue3";
 import { formatDate } from "@vueuse/shared";
 
 const back = () => {
-    router.visit(route("groups"));
+    window.history.back();
 };
 
 const mockGroupPaymentSections = [
@@ -147,11 +148,9 @@ const mockGroupPaymentSections = [
 <template>
     <AppLayout>
         <div
-            class="sticky top-0 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
+            class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
         >
-            <button type="button" class="btn btn-link px-0 text-gray-600 dark:text-gray-200" @click="back">
-                <ArrowLeftIcon class="h-5 w-5" />
-            </button>
+            <NavigationBarButton :icon="ArrowLeftIcon" :on-click="back" />
         </div>
         <div class="mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col gap-5">
@@ -210,6 +209,7 @@ const mockGroupPaymentSections = [
                         <button
                             type="button"
                             class="flex flex-row items-center gap-2 py-1 text-left hover:rounded-xl hover:bg-gray-200 dark:hover:bg-gray-900"
+                            @click="router.visit(route('expense-details'))"
                         >
                             <div class="flex flex-col items-center pl-4 sm:pl-6 lg:pl-8">
                                 <span class="text-xs">{{ formatDate(payment.date, "MMM") }}</span>

@@ -1,3 +1,4 @@
+import "v-calendar/style.css";
 import "../css/app.css";
 import "./bootstrap";
 

@@ -2,6 +2,13 @@
 import Banner from "@/Components/Banner.vue";
 import BottomNavigation from "@/Components/BottomNavigation.vue";
 import NavigationBar from "@/Components/NavigationBar.vue";
+import { BanknotesIcon, HomeIcon, PlusCircleIcon, UserGroupIcon } from "@heroicons/vue/20/solid";
+import {
+    BanknotesIcon as BanknotesIconOutline,
+    HomeIcon as HomeIconOutline,
+    PlusCircleIcon as PlusCircleIconOutline,
+    UserGroupIcon as UserGroupIconOutline,
+} from "@heroicons/vue/24/outline";
 import { Head } from "@inertiajs/vue3";
 import { computed } from "vue";
 
@@ -9,6 +16,33 @@ defineProps({
     title: String,
 });
 const isLightMode = computed(() => (localStorage.getItem("theme") ?? "splitsmartLight") === "splitsmartLight");
+
+const navigationItems = [
+    {
+        path: "home",
+        icon: HomeIcon,
+        iconOutline: HomeIconOutline,
+        name: "Home",
+    },
+    {
+        path: "groups",
+        icon: UserGroupIcon,
+        iconOutline: UserGroupIconOutline,
+        name: "Groups",
+    },
+    {
+        path: "settle-up",
+        icon: BanknotesIcon,
+        iconOutline: BanknotesIconOutline,
+        name: "Settle Up",
+    },
+    {
+        path: "add-new-expense",
+        icon: PlusCircleIcon,
+        iconOutline: PlusCircleIconOutline,
+        name: "Add New",
+    },
+];
 </script>
 
 <template>
@@ -32,6 +66,6 @@ const isLightMode = computed(() => (localStorage.getItem("theme") ?? "splitsmart
                 <slot />
             </main>
         </div>
-        <BottomNavigation />
+        <BottomNavigation :navigationItems v-if="navigationItems.some((item) => route().current(item.path))" />
     </div>
 </template>

@@ -1,39 +1,9 @@
 <script setup>
-import { BanknotesIcon, HomeIcon, PlusCircleIcon, UserGroupIcon } from "@heroicons/vue/20/solid";
-import {
-    BanknotesIcon as BanknotesIconOutline,
-    HomeIcon as HomeIconOutline,
-    PlusCircleIcon as PlusCircleIconOutline,
-    UserGroupIcon as UserGroupIconOutline,
-} from "@heroicons/vue/24/outline";
 import { Link } from "@inertiajs/vue3";
 
-const navigationItems = [
-    {
-        path: "home",
-        icon: HomeIcon,
-        iconOutline: HomeIconOutline,
-        name: "Home",
-    },
-    {
-        path: "groups",
-        icon: UserGroupIcon,
-        iconOutline: UserGroupIconOutline,
-        name: "Groups",
-    },
-    {
-        path: "settle-up",
-        icon: BanknotesIcon,
-        iconOutline: BanknotesIconOutline,
-        name: "Settle Up",
-    },
-    {
-        path: "add-new-expense",
-        icon: PlusCircleIcon,
-        iconOutline: PlusCircleIconOutline,
-        name: "Add New",
-    },
-];
+defineProps({
+    navigationItems: Array,
+});
 </script>
 
 <template>

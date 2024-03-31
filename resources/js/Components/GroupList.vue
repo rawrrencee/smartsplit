@@ -1,9 +1,9 @@
 <script setup lang="js">
 import { UserIcon } from "@heroicons/vue/24/outline";
-import { router } from "@inertiajs/vue3";
 
 defineProps({
     groups: Array,
+    hideOwedAmounts: Boolean,
 });
 
 const mockGroups = [
@@ -54,9 +54,7 @@ const mockGroups = [
     },
 ];
 
-const openGroup = (groupId) => {
-    router.visit(route("view-group", groupId));
-};
+defineEmits(["groupClicked"]);
 </script>
 
 <template>
@@ -65,7 +63,7 @@ const openGroup = (groupId) => {
             v-for="group in mockGroups"
             :key="group.groupId"
             class="flex items-center justify-between gap-2 bg-white px-6 py-5 hover:cursor-pointer hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
-            @click="openGroup(group.groupId)"
+            @click="$emit('groupClicked', group.groupId)"
         >
             <div class="flex flex-row gap-4">
                 <div class="avatar">
@@ -81,7 +79,7 @@ const openGroup = (groupId) => {
                     </div>
                 </div>
             </div>
-            <div class="text-right text-xs">
+            <div class="text-right text-xs" v-if="!hideOwedAmounts">
                 <span v-if="group.loggedInUserBalance === 0">settled up</span>
                 <div class="flex flex-col text-success" v-else-if="group.loggedInUserBalance > 0">
                     <span>you are owed</span>
