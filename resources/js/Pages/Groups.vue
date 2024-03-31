@@ -7,6 +7,10 @@ import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 import { router } from "@inertiajs/vue3";
 import { ref } from "vue";
 
+defineProps({
+    groups: Array,
+});
+
 const openGroup = (groupId) => {
     router.get(route("view-group"), { id: groupId });
 };
@@ -38,7 +42,7 @@ const setIsDialogOpen = (value) => {
         </div>
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="overflow-x-auto rounded-xl shadow-md">
-                <GroupList :groups="[]" @group-clicked="openGroup" />
+                <GroupList :groups="groups" @group-clicked="openGroup" />
             </div>
         </div>
     </AppLayout>

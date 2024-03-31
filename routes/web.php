@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GroupController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -33,9 +34,7 @@ Route::middleware([
         return Inertia::render('Home');
     })->name('home');
 
-    Route::get('/groups', function () {
-        return Inertia::render('Groups');
-    })->name('groups');
+    Route::get('/groups', [GroupController::class, 'index'])->name('groups');
 
     Route::get('/view-group', function () {
         return Inertia::render('ViewGroup');

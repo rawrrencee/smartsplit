@@ -8,47 +8,47 @@ defineProps({
 
 const mockGroups = [
     {
-        groupId: 1,
-        groupName: "Roommates Household",
+        id: 1,
+        group_title: "Roommates Household",
         loggedInUserBalance: -200.1,
         loggedInUserBalanceCurrency: "&#83;&#36",
-        userCount: 10,
+        member_count: 10,
         imageUrl:
             "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     },
     {
-        groupId: 2,
-        groupName: "Travel Buddies",
+        id: 2,
+        group_title: "Travel Buddies",
         loggedInUserBalance: 10.2,
         loggedInUserBalanceCurrency: "&#82;&#77",
-        userCount: 2,
+        member_count: 2,
         imageUrl:
             "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     },
     {
-        groupId: 3,
-        groupName: "Dinner Club",
+        id: 3,
+        group_title: "Dinner Club",
         loggedInUserBalance: 16.9,
         loggedInUserBalanceCurrency: "&#163",
-        userCount: 4,
+        member_count: 4,
         imageUrl:
             "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     },
     {
-        groupId: 4,
-        groupName: "Family Vacation",
+        id: 4,
+        group_title: "Family Vacation",
         loggedInUserBalance: 4000.1,
         loggedInUserBalanceCurrency: "&#165",
-        userCount: 1,
+        member_count: 1,
         imageUrl:
             "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     },
     {
-        groupId: 5,
-        groupName: "Project Team",
+        id: 5,
+        group_title: "Project Team",
         loggedInUserBalance: -5000.1,
         loggedInUserBalanceCurrency: "&#83;&#36",
-        userCount: 170,
+        member_count: 170,
         imageUrl:
             "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     },
@@ -60,22 +60,22 @@ defineEmits(["groupClicked"]);
 <template>
     <ul role="list" class="divide-y divide-gray-100 dark:divide-gray-800">
         <li
-            v-for="group in mockGroups"
-            :key="group.groupId"
+            v-for="group in groups.length > 0 ? groups : mockGroups"
+            :key="group.id"
             class="flex items-center justify-between gap-2 bg-white px-6 py-5 hover:cursor-pointer hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
-            @click="$emit('groupClicked', group.groupId)"
+            @click="$emit('groupClicked', group.id)"
         >
             <div class="flex flex-row gap-4">
-                <div class="avatar">
+                <div class="avatar" v-if="group.imageUrl">
                     <div class="mask mask-squircle w-10">
                         <img :src="group.imageUrl" />
                     </div>
                 </div>
                 <div class="flex flex-col gap-1">
-                    <span class="text-md font-medium text-gray-600 dark:text-gray-200">{{ group.groupName }}</span>
+                    <span class="text-md font-medium text-gray-600 dark:text-gray-200">{{ group.group_title }}</span>
                     <div class="flex flex-row gap-1 text-xs font-medium text-gray-700 dark:text-gray-400">
                         <UserIcon class="h-4 w-4" />
-                        <span>{{ group.userCount }}</span>
+                        <span>{{ group.member_count }}</span>
                     </div>
                 </div>
             </div>
