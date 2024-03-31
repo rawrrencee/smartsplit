@@ -1,21 +1,19 @@
 <script setup>
+import CreateOrEditGroup from "@/Components/Group/CreateOrEditGroup.vue";
 import GroupList from "@/Components/GroupList.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { CameraIcon, MagnifyingGlassIcon } from "@heroicons/vue/24/outline";
+import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
+import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 import { router } from "@inertiajs/vue3";
-import {
-    DrawerClose,
-    DrawerContent,
-    DrawerDescription,
-    DrawerOverlay,
-    DrawerPortal,
-    DrawerRoot,
-    DrawerTitle,
-    DrawerTrigger,
-} from "vaul-vue";
+import { ref } from "vue";
 
 const openGroup = (groupId) => {
     router.get(route("view-group"), { id: groupId });
+};
+
+const isDialogOpen = ref(false);
+const setIsDialogOpen = (value) => {
+    isDialogOpen.value = value;
 };
 </script>
 
@@ -29,44 +27,13 @@ const openGroup = (groupId) => {
                     <MagnifyingGlassIcon class="h-5 w-5" />
                 </button>
 
-                <DrawerRoot>
-                    <DrawerTrigger as="button" class="btn btn-link px-0 text-gray-600 no-underline dark:text-gray-200">
-                        Create group
-                    </DrawerTrigger>
-                    <DrawerPortal>
-                        <DrawerOverlay class="fixed inset-0 bg-black/40" />
-                        <DrawerTitle class="hidden">Create Group</DrawerTitle>
-                        <DrawerDescription class="hidden">Create a new group</DrawerDescription>
-                        <DrawerContent
-                            class="border-b-none fixed bottom-0 left-0 right-0 mx-[-1px] flex h-full max-h-[96%] flex-col rounded-t-[10px] border border-gray-200 bg-white"
-                        >
-                            <div class="mx-auto flex h-full w-full max-w-md flex-col justify-between p-4 pt-5">
-                                <div class="mx-auto mb-8 h-1.5 w-12 flex-shrink-0 rounded-full bg-gray-300" />
-                                <div class="mx-auto max-w-md flex-grow pb-6">
-                                    <form class="flex flex-col">
-                                        <div class="flex flex-row place-items-end gap-4">
-                                            <div
-                                                class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl border-4 border-dashed border-gray-300"
-                                            >
-                                                <CameraIcon class="h-8 w-8" />
-                                            </div>
-                                            <label class="form-control w-full max-w-xs">
-                                                <div class="label">
-                                                    <span class="label-text dark:text-gray-200">Group name</span>
-                                                </div>
-                                                <input type="text" class="input input-bordered w-full max-w-xs" />
-                                            </label>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div class="flex flex-shrink-0 flex-row justify-between gap-4">
-                                    <DrawerClose as="button" class="btn btn-secondary flex-grow">Close</DrawerClose>
-                                    <button type="button" class="btn btn-primary flex-grow">Create</button>
-                                </div>
-                            </div>
-                        </DrawerContent>
-                    </DrawerPortal>
-                </DrawerRoot>
+                <button
+                    type="button"
+                    class="btn btn-link pr-0 text-gray-600 no-underline dark:text-gray-200"
+                    @click="setIsDialogOpen(true)"
+                >
+                    Create group
+                </button>
             </div>
         </div>
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -75,4 +42,65 @@ const openGroup = (groupId) => {
             </div>
         </div>
     </AppLayout>
+
+    <TransitionRoot as="template" :show="isDialogOpen">
+        <Dialog as="div" class="relative z-10" @close="setIsDialogOpen(false)">
+            <TransitionChild
+                as="template"
+                enter="ease-in-out duration-500"
+                enter-from="opacity-0"
+                enter-to="opacity-100"
+                leave="ease-in-out duration-500"
+                leave-from="opacity-100"
+                leave-to="opacity-0"
+            >
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            </TransitionChild>
+
+            <div class="fixed inset-0 overflow-hidden">
+                <div class="absolute inset-0 overflow-hidden">
+                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-40">
+                        <TransitionChild
+                            as="template"
+                            enter="transform transition ease-in-out duration-500"
+                            enter-from="translate-y-full"
+                            enter-to="translate-y-0"
+                            leave="transform transition ease-in-out duration-500"
+                            leave-from="translate-y-0"
+                            leave-to="translate-y-full"
+                        >
+                            <DialogPanel class="pointer-events-auto w-screen">
+                                <div
+                                    class="flex h-full flex-col rounded-t-2xl bg-gray-50 shadow-xl dark:bg-gray-900 dark:text-gray-200"
+                                >
+                                    <div class="p-6">
+                                        <div class="flex items-start justify-between">
+                                            <DialogTitle
+                                                class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
+                                                >Groups</DialogTitle
+                                            >
+                                            <div class="ml-3 flex h-7 items-center">
+                                                <button
+                                                    type="button"
+                                                    class="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+                                                    @click="setIsDialogOpen(false)"
+                                                >
+                                                    <span class="absolute -inset-2.5" />
+                                                    <span class="sr-only">Close panel</span>
+                                                    <XMarkIcon class="h-6 w-6" aria-hidden="true" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 overflow-y-auto">
+                                        <CreateOrEditGroup @cancel-clicked="setIsDialogOpen(false)" />
+                                    </div>
+                                </div>
+                            </DialogPanel>
+                        </TransitionChild>
+                    </div>
+                </div>
+            </div>
+        </Dialog>
+    </TransitionRoot>
 </template>

@@ -66,6 +66,6 @@ const navigationItems = [
                 <slot />
             </main>
         </div>
-        <BottomNavigation :navigationItems v-if="navigationItems.some((item) => route().current(item.path))" />
+        <BottomNavigation :navigationItems />
     </div>
 </template>

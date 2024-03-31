@@ -1,13 +1,30 @@
 <script setup>
+import GroupList from "@/Components/GroupList.vue";
 import NavigationBarButton from "@/Components/NavigationBarButton.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { ArrowLeftIcon, CurrencyDollarIcon } from "@heroicons/vue/24/outline";
+import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
+import {
+    ArrowLeftIcon,
+    CurrencyDollarIcon,
+    PaperAirplaneIcon,
+    PencilIcon,
+    PlusIcon,
+    XMarkIcon,
+} from "@heroicons/vue/24/outline";
 import { router } from "@inertiajs/vue3";
 import { formatDate } from "@vueuse/shared";
+import { ref } from "vue";
 
 const back = () => {
     window.history.back();
 };
+
+const isDialogOpen = ref(false);
+const setIsDialogOpen = (value) => {
+    isDialogOpen.value = value;
+};
+
+const isAddMemberInputShown = ref(false);
 
 const mockGroupPaymentSections = [
     {
@@ -151,6 +168,7 @@ const mockGroupPaymentSections = [
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
         >
             <NavigationBarButton :icon="ArrowLeftIcon" :on-click="back" />
+            <NavigationBarButton :icon="PencilIcon" :on-click="() => router.get(route('edit-group'))" />
         </div>
         <div class="mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col gap-5">
@@ -162,7 +180,7 @@ const mockGroupPaymentSections = [
                     </div>
                     <span class="truncate text-2xl font-medium dark:text-gray-100">Korea 2022</span>
                 </div>
-                <div class="flex flex-row items-center gap-2">
+                <button type="button" class="flex flex-row items-center" @click="setIsDialogOpen(true)">
                     <div class="avatar-group -space-x-4 rtl:space-x-reverse">
                         <div class="avatar">
                             <div class="w-8">
@@ -195,8 +213,10 @@ const mockGroupPaymentSections = [
                             </div>
                         </div>
                     </div>
-                    <span class="text-xs text-gray-500 dark:text-gray-400"> 170 members </span>
-                </div>
+                    <div class="rounded-md p-2 text-xs text-gray-500 hover:bg-gray-300 dark:text-gray-400">
+                        <span>170 members</span>
+                    </div>
+                </button>
             </div>
         </div>
         <div class="mx-auto flex max-w-7xl flex-col gap-4 pt-12">
@@ -254,4 +274,112 @@ const mockGroupPaymentSections = [
             </div>
         </div>
     </AppLayout>
+
+    <TransitionRoot as="template" :show="isDialogOpen">
+        <Dialog as="div" class="relative z-10" @close="setIsDialogOpen(false)">
+            <TransitionChild
+                as="template"
+                enter="ease-in-out duration-500"
+                enter-from="opacity-0"
+                enter-to="opacity-100"
+                leave="ease-in-out duration-500"
+                leave-from="opacity-100"
+                leave-to="opacity-0"
+            >
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            </TransitionChild>
+
+            <div class="fixed inset-0 overflow-hidden">
+                <div class="absolute inset-0 overflow-hidden">
+                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-36">
+                        <TransitionChild
+                            as="template"
+                            enter="transform transition ease-in-out duration-500"
+                            enter-from="translate-y-full"
+                            enter-to="translate-y-0"
+                            leave="transform transition ease-in-out duration-500"
+                            leave-from="translate-y-0"
+                            leave-to="translate-y-full"
+                        >
+                            <DialogPanel class="pointer-events-auto w-screen">
+                                <div
+                                    class="flex h-full flex-col rounded-t-2xl bg-gray-50 shadow-xl dark:bg-gray-900 dark:text-gray-200"
+                                >
+                                    <div class="px-6 py-4">
+                                        <div class="flex flex-row items-center justify-between">
+                                            <DialogTitle as="div" class="flex flex-row items-start gap-2"
+                                                ><span
+                                                    class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
+                                                >
+                                                    Group Members
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-link btn-xs m-0 flex flex-row gap-1 no-underline"
+                                                    @click="isAddMemberInputShown = true"
+                                                >
+                                                    <PlusIcon class="h-3 w-3" />
+                                                    <span>Add</span>
+                                                </button>
+                                            </DialogTitle>
+                                            <div class="ml-3 flex h-7 items-center">
+                                                <button
+                                                    type="button"
+                                                    class="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+                                                    @click="setIsDialogOpen(false)"
+                                                >
+                                                    <span class="absolute -inset-2.5" />
+                                                    <span class="sr-only">Close panel</span>
+                                                    <XMarkIcon class="h-6 w-6" aria-hidden="true" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 overflow-y-auto">
+                                        <TransitionRoot as="template" :show="isAddMemberInputShown">
+                                            <TransitionChild
+                                                as="template"
+                                                enter="ease-in-out duration-350"
+                                                enter-from="opacity-0"
+                                                enter-to="opacity-100"
+                                                leave="ease-in-out duration-350"
+                                                leave-from="opacity-100"
+                                                leave-to="opacity-0"
+                                            >
+                                                <div class="flex flex-row items-end gap-1 px-6 pb-4 transition-opacity">
+                                                    <div class="flex flex-1 flex-col gap-1">
+                                                        <span class="text-xs text-gray-500"
+                                                            >Enter an email to invite</span
+                                                        >
+                                                        <input
+                                                            type="text"
+                                                            class="input input-sm input-bordered text-xs"
+                                                            placeholder="...@gmail.com"
+                                                        />
+                                                    </div>
+                                                    <button type="button" class="btn btn-success btn-sm text-gray-50">
+                                                        <PaperAirplaneIcon class="h-4 w-4" />
+                                                        <span>Add</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-square btn-error btn-sm"
+                                                        @click="isAddMemberInputShown = false"
+                                                    >
+                                                        <XMarkIcon class="h-4 w-4 text-gray-50" />
+                                                    </button>
+                                                </div>
+                                            </TransitionChild>
+                                        </TransitionRoot>
+
+                                        <GroupList :hide-owed-amounts="true" />
+                                    </div>
+                                </div>
+                            </DialogPanel>
+                        </TransitionChild>
+                    </div>
+                </div>
+            </div>
+        </Dialog>
+    </TransitionRoot>
 </template>

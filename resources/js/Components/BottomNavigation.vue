@@ -7,7 +7,7 @@ defineProps({
 </script>
 
 <template>
-    <div class="btm-nav dark:bg-gray-900">
+    <div class="btm-nav h-12 dark:bg-gray-900">
         <template v-for="item in navigationItems">
             <Link
                 as="template"
@@ -16,7 +16,7 @@ defineProps({
             >
                 <component
                     :is="route().current(item.path) ? item.icon : item.iconOutline"
-                    class="h-6 w-6 dark:text-gray-200"
+                    class="h-4 w-4 dark:text-gray-200"
                     aria-hidden="true"
                 />
                 <span class="btm-nav-label text-xs dark:text-gray-200">{{ item.name }}</span>
