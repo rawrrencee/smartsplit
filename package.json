@@ -26,7 +26,6 @@
         "@headlessui/vue": "^1.7.19",
         "@heroicons/vue": "^2.1.1",
         "@popperjs/core": "^2.11.8",
-        "v-calendar": "^3.1.2",
-        "vaul-vue": "^0.1.0"
+        "v-calendar": "^3.1.2"
     }
 }
