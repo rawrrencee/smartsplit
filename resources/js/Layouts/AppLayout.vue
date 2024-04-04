@@ -37,7 +37,7 @@ const navigationItems = [
         name: "Settle Up",
     },
     {
-        path: "add-new-expense",
+        path: "expenses.add",
         icon: PlusCircleIcon,
         iconOutline: PlusCircleIconOutline,
         name: "Add New",

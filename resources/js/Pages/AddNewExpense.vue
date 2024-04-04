@@ -1,5 +1,7 @@
 <script setup>
 import GroupList from "@/Components/GroupList.vue";
+import PlaceholderImage from "@/Components/PlaceholderImage.vue";
+import ServerImage from "@/Components/ServerImage.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
 import { CheckCircleIcon } from "@heroicons/vue/20/solid";
@@ -8,6 +10,13 @@ import { DatePicker } from "v-calendar";
 import "v-calendar/style.css";
 import { computed, ref } from "vue";
 
+const props = defineProps({
+    groups: Array,
+    currencies: Array,
+});
+
+console.log(props.groups);
+
 const defaultExpenseGroupKey = "addExpenseDefaultGroupId";
 
 const isDialogOpen = ref(false);
@@ -15,12 +24,19 @@ const setIsDialogOpen = (value) => {
     isDialogOpen.value = value;
 };
 
-const getSelectedGroupFromSessionStorage = () => sessionStorage.getItem(defaultExpenseGroupKey);
-const selectedGroup = ref(getSelectedGroupFromSessionStorage());
+const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(defaultExpenseGroupKey);
+const selectedGroupId = ref(getSelectedGroupIdFromSessionStorage());
 const setSelectedGroup = (groupId) => {
     sessionStorage.setItem(defaultExpenseGroupKey, groupId);
-    selectedGroup.value = getSelectedGroupFromSessionStorage();
+    selectedGroupId.value = getSelectedGroupIdFromSessionStorage();
 };
+const onGroupClicked = (groupId) => {
+    setSelectedGroup(groupId);
+    setIsDialogOpen(false);
+};
+const currentGroup = computed(() => {
+    return props.groups.find((group) => `${group.id}` === selectedGroupId.value);
+});
 
 const selectedDate = ref(new Date());
 const popover = ref({
@@ -71,13 +87,12 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
                         class="btn btn-outline max-w-80 dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
                         @click="isDialogOpen = true"
                     >
-                        <div class="flex w-full flex-row items-center gap-2">
-                            <div class="avatar">
-                                <div class="w-6 rounded-full">
-                                    <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-                                </div>
-                            </div>
-                            <span class="truncate"> {{ selectedGroup ?? "Select a group" }} </span>
+                        <div class="flex w-full flex-row gap-2">
+                            <ServerImage v-if="currentGroup?.img_path" :image-url="currentGroup?.img_path" :size="6" />
+                            <PlaceholderImage :size="6" v-else />
+                            <span class="place-self-center truncate py-2">
+                                {{ currentGroup?.group_title ?? "Select a group" }}
+                            </span>
                         </div>
                     </button>
                 </div>
@@ -337,13 +352,9 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
                                     </div>
                                     <div class="flex-1 overflow-y-auto">
                                         <GroupList
+                                            :groups="groups"
                                             :hide-owed-amounts="true"
-                                            @group-clicked="
-                                                (groupId) => {
-                                                    setSelectedGroup(groupId);
-                                                    setIsDialogOpen(false);
-                                                }
-                                            "
+                                            @group-clicked="onGroupClicked"
                                         />
                                     </div>
                                 </div>

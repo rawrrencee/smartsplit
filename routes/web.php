@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CommonController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GroupController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -42,6 +43,9 @@ Route::middleware([
         Route::post('/add', [GroupController::class, 'store'])->name('groups.add');
     });
 
+    Route::prefix('expenses')->group(function () {
+        Route::get('/add', [ExpenseController::class, 'addExpensePage'])->name('expenses.add');
+    });
 
     Route::get('/view-group', function () {
         return Inertia::render('ViewGroup');
@@ -55,9 +59,7 @@ Route::middleware([
         return Inertia::render('SettleUp');
     })->name('settle-up');
 
-    Route::get('/add-new-expense', function () {
-        return Inertia::render('AddNewExpense');
-    })->name('add-new-expense');
+
 
     Route::get('/expense-details', function () {
         return Inertia::render('ExpenseDetails');

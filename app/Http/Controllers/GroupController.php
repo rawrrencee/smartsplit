@@ -17,9 +17,14 @@ class GroupController extends Controller
         $this->CommonController = $CommonController;
     }
 
+    public function getGroupsByOwnerId($userId)
+    {
+        return Group::whereOwnerId($userId)->get();
+    }
+
     public function index(Request $request)
     {
-        return Inertia::render('Groups', ['groups' => Group::all()]);
+        return Inertia::render('Groups', ['groups' => $this->getGroupsByOwnerId($request->user()->id)]);
     }
 
     public function view(Request $request)
