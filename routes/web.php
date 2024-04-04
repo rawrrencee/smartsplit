@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CommonController;
 use App\Http\Controllers\GroupController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -30,11 +31,17 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
+    Route::get('/photo', [CommonController::class, 'showPhoto'])->name('photo');
+
     Route::get('/home', function () {
         return Inertia::render('Home');
     })->name('home');
 
-    Route::get('/groups', [GroupController::class, 'index'])->name('groups');
+    Route::prefix('groups')->group(function () {
+        Route::get('/', [GroupController::class, 'index'])->name('groups');
+        Route::post('/add', [GroupController::class, 'store'])->name('groups.add');
+    });
+
 
     Route::get('/view-group', function () {
         return Inertia::render('ViewGroup');

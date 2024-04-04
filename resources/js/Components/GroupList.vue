@@ -1,5 +1,6 @@
 <script setup lang="js">
-import { UserIcon } from "@heroicons/vue/24/outline";
+import { getImgSrcFromPath } from "@/Common";
+import { PhotoIcon, UserIcon } from "@heroicons/vue/24/outline";
 
 defineProps({
     groups: Array,
@@ -66,9 +67,14 @@ defineEmits(["groupClicked"]);
             @click="$emit('groupClicked', group.id)"
         >
             <div class="flex flex-row gap-4">
-                <div class="avatar" v-if="group.imageUrl">
+                <div class="avatar" v-if="group.img_path">
                     <div class="mask mask-squircle w-10">
-                        <img :src="group.imageUrl" />
+                        <img :src="getImgSrcFromPath(group.img_path)" />
+                    </div>
+                </div>
+                <div class="avatar" v-else>
+                    <div class="mask mask-squircle flex w-10 place-content-center bg-gray-200">
+                        <PhotoIcon class="h-8 w-full text-gray-50" aria-hidden="true" />
                     </div>
                 </div>
                 <div class="flex flex-col gap-1">
@@ -80,19 +86,29 @@ defineEmits(["groupClicked"]);
                 </div>
             </div>
             <div class="text-right text-xs" v-if="!hideOwedAmounts">
-                <span v-if="group.loggedInUserBalance === 0">settled up</span>
+                <span v-if="group.loggedInUserBalance === 0 || !group.loggedInUserBalance" class="text-success"
+                    >settled up</span
+                >
                 <div class="flex flex-col text-success" v-else-if="group.loggedInUserBalance > 0">
                     <span>you are owed</span>
                     <div>
                         <span v-html="group.loggedInUserBalanceCurrency"></span>
-                        <span>{{ parseFloat(Math.abs(group.loggedInUserBalance)).toFixed(2) }}</span>
+                        <span>{{
+                            group.loggedInUserBalance > 0
+                                ? parseFloat(Math.abs(group.loggedInUserBalance)).toFixed(2)
+                                : "0.00"
+                        }}</span>
                     </div>
                 </div>
                 <div class="flex flex-col text-error" v-else>
                     <span>you owe</span>
                     <div>
                         <span v-html="group.loggedInUserBalanceCurrency"></span>
-                        <span>{{ parseFloat(Math.abs(group.loggedInUserBalance)).toFixed(2) }}</span>
+                        <span>{{
+                            group.loggedInUserBalance > 0
+                                ? parseFloat(Math.abs(group.loggedInUserBalance)).toFixed(2)
+                                : "0.00"
+                        }}</span>
                     </div>
                 </div>
             </div>

@@ -41,12 +41,11 @@ class GroupController extends Controller
     {
         $request->validate([
             'group_title' => 'required|max:255',
-            'img_url' => 'nullable|url',
-            'active' => 'required|boolean',
             'group_photo' => 'nullable|image',
         ]);
 
         $request['owner_id'] = auth()->user()->id;
+        $request['active'] = true;
 
         if (!empty($request['group_photo'])) {
             $path = $request->file('group_photo')->store('group-photos', 'private');

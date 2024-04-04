@@ -4,7 +4,7 @@ import GroupList from "@/Components/GroupList.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/vue/24/outline";
-import { router } from "@inertiajs/vue3";
+import { router, useForm } from "@inertiajs/vue3";
 import { ref } from "vue";
 
 defineProps({
@@ -15,9 +15,32 @@ const openGroup = (groupId) => {
     router.get(route("view-group"), { id: groupId });
 };
 
+const isLoading = ref(false);
+const setIsLoading = (value) => {
+    isLoading.value = value;
+};
 const isDialogOpen = ref(false);
 const setIsDialogOpen = (value) => {
     isDialogOpen.value = value;
+    groupForm.clearErrors();
+    groupForm.reset();
+};
+
+const groupForm = useForm({
+    group_title: "",
+    group_photo: null,
+});
+const createGroup = (formData) => {
+    setIsLoading(true);
+    formData.post(route("groups.add"), {
+        onSuccess: () => {
+            setIsDialogOpen(false);
+            groupForm.reset();
+        },
+        onError: (e) => {
+            setIsLoading(false);
+        },
+    });
 };
 </script>
 
@@ -63,7 +86,7 @@ const setIsDialogOpen = (value) => {
 
             <div class="fixed inset-0 overflow-hidden">
                 <div class="absolute inset-0 overflow-hidden">
-                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-40">
+                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-28">
                         <TransitionChild
                             as="template"
                             enter="transform transition ease-in-out duration-500"
@@ -97,7 +120,12 @@ const setIsDialogOpen = (value) => {
                                         </div>
                                     </div>
                                     <div class="flex-1 overflow-y-auto">
-                                        <CreateOrEditGroup @cancel-clicked="setIsDialogOpen(false)" />
+                                        <CreateOrEditGroup
+                                            :form="groupForm"
+                                            :isLoading
+                                            @cancel-clicked="setIsDialogOpen(false)"
+                                            @create-clicked="createGroup"
+                                        />
                                     </div>
                                 </div>
                             </DialogPanel>

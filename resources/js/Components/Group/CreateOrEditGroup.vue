@@ -2,9 +2,12 @@
 import { PhotoIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 import { ref } from "vue";
 
-defineProps({
+const props = defineProps({
+    form: Object,
     group: Object,
+    isLoading: Boolean,
 });
+const emit = defineEmits(["cancelClicked", "createClicked"]);
 
 const photoPreview = ref(null);
 const photoFile = ref(null);
@@ -17,8 +20,15 @@ const updatePhotoPreview = (event) => {
     };
     reader.readAsDataURL(photoFile.value);
 };
-
-defineEmits(["cancelClicked", "createClicked"]);
+const onCreateClicked = () => {
+    emit(
+        "createClicked",
+        props.form.transform((data) => ({
+            ...data,
+            group_photo: photoFile.value,
+        })),
+    );
+};
 </script>
 
 <template>
@@ -29,8 +39,17 @@ defineEmits(["cancelClicked", "createClicked"]);
                     <div>
                         <label for="group-name" class="block text-sm font-medium leading-6 sm:mt-1.5">Name</label>
                     </div>
-                    <div class="sm:col-span-2">
-                        <input type="text" name="group-name" class="input input-bordered w-full" />
+                    <div class="flex flex-col gap-1 sm:col-span-2">
+                        <input
+                            type="text"
+                            name="group-name"
+                            class="input input-bordered w-full"
+                            :class="form.errors['group_title'] && 'border-error'"
+                            v-model="form.group_title"
+                        />
+                        <span v-if="form.errors['group_title']" class="text-error">
+                            {{ form.errors["group_title"] }}
+                        </span>
                     </div>
                 </div>
 
@@ -98,8 +117,13 @@ defineEmits(["cancelClicked", "createClicked"]);
         </div>
         <div class="flex-shrink-0 px-6 py-5 sm:px-6">
             <div class="flex justify-between space-x-3">
-                <button type="button" class="btn btn-neutral" @click="$emit('cancelClicked')">Cancel</button>
-                <button type="button" class="btn btn-primary" @click="$emit('createClicked')">Create</button>
+                <button :disabled="isLoading" type="button" class="btn btn-neutral" @click="$emit('cancelClicked')">
+                    Cancel
+                </button>
+                <button :disabled="isLoading" type="button" class="btn btn-primary" @click="onCreateClicked">
+                    <span :class="isLoading && 'loading loading-spinner'"></span>
+                    Create
+                </button>
             </div>
         </div>
     </form>

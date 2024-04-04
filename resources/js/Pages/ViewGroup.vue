@@ -1,5 +1,4 @@
 <script setup>
-import GroupList from "@/Components/GroupList.vue";
 import NavigationBarButton from "@/Components/NavigationBarButton.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
@@ -371,8 +370,6 @@ const mockGroupPaymentSections = [
                                                 </div>
                                             </TransitionChild>
                                         </TransitionRoot>
-
-                                        <GroupList :hide-owed-amounts="true" />
                                     </div>
                                 </div>
                             </DialogPanel>
