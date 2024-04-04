@@ -314,7 +314,7 @@ const mockGroupPaymentSections = [
                                                 </span>
                                                 <button
                                                     type="button"
-                                                    class="btn btn-link btn-xs m-0 flex flex-row gap-1 no-underline"
+                                                    class="btn btn-link btn-xs m-0 flex flex-row gap-1 border-2 border-gray-300 no-underline hover:border-gray-800 dark:border-gray-600 dark:text-gray-50 hover:dark:border-gray-50"
                                                     @click="isAddMemberInputShown = true"
                                                 >
                                                     <PlusIcon class="h-3 w-3" />
@@ -347,12 +347,12 @@ const mockGroupPaymentSections = [
                                             >
                                                 <div class="flex flex-row items-end gap-1 px-6 pb-4 transition-opacity">
                                                     <div class="flex flex-1 flex-col gap-1">
-                                                        <span class="text-xs text-gray-500"
+                                                        <span class="text-xs text-gray-500 dark:text-gray-50"
                                                             >Enter an email to invite</span
                                                         >
                                                         <input
                                                             type="text"
-                                                            class="input input-sm input-bordered text-xs"
+                                                            class="input input-sm input-bordered text-xs dark:bg-gray-800"
                                                             placeholder="...@gmail.com"
                                                         />
                                                     </div>
