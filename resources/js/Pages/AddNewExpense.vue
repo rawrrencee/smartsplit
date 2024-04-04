@@ -87,7 +87,7 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
                         class="btn btn-outline max-w-80 dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
                         @click="isDialogOpen = true"
                     >
-                        <div class="flex w-full flex-row gap-2">
+                        <div class="flex w-full flex-row items-center gap-2">
                             <ServerImage v-if="currentGroup?.img_path" :image-url="currentGroup?.img_path" :size="6" />
                             <PlaceholderImage :size="6" v-else />
                             <span class="place-self-center truncate py-2">

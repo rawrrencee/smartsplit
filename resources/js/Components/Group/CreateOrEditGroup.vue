@@ -43,7 +43,7 @@ const onCreateClicked = () => {
                         <input
                             type="text"
                             name="group-name"
-                            class="input input-bordered w-full"
+                            class="input input-bordered w-full dark:bg-gray-800 dark:text-gray-50"
                             :class="form.errors['group_title'] && 'border-error'"
                             v-model="form.group_title"
                         />

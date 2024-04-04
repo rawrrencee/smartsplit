@@ -16,17 +16,17 @@ defineEmits(["groupClicked"]);
         <li
             v-for="group in groups"
             :key="group.id"
-            class="flex items-center justify-between gap-2 bg-white px-6 py-5 hover:cursor-pointer hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
+            class="flex items-center justify-between gap-2 bg-gray-50 px-6 py-5 hover:cursor-pointer hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
             @click="$emit('groupClicked', group.id)"
         >
-            <div class="flex flex-row gap-4">
+            <div class="flex flex-row items-center gap-4">
                 <ServerImage v-if="group.img_path" :image-url="group.img_path" />
                 <PlaceholderImage v-else />
                 <div class="flex flex-col gap-1">
                     <span class="text-md font-medium text-gray-600 dark:text-gray-200">{{ group.group_title }}</span>
-                    <div class="flex flex-row gap-1 text-xs font-medium text-gray-700 dark:text-gray-400">
-                        <UserIcon class="h-4 w-4" />
-                        <span>{{ group.member_count }}</span>
+                    <div class="flex flex-row items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-400">
+                        <UserIcon class="h-3 w-3" />
+                        <span class="text-xs">{{ group.member_count }}</span>
                     </div>
                 </div>
             </div>
