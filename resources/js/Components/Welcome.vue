@@ -3,7 +3,7 @@ import GroupList from "@/Components/GroupList.vue";
 import { router } from "@inertiajs/vue3";
 
 const openGroup = (groupId) => {
-    router.get(route("view-group"), { id: groupId });
+    router.get(route("groups.view"), { id: groupId });
 };
 </script>
 

@@ -41,15 +41,13 @@ Route::middleware([
     Route::prefix('groups')->group(function () {
         Route::get('/', [GroupController::class, 'index'])->name('groups');
         Route::post('/add', [GroupController::class, 'store'])->name('groups.add');
+        Route::post('/add-member', [GroupController::class, 'addMember'])->name('groups.add.member');
+        Route::get('/view-group', [GroupController::class, 'view'])->name('groups.view');
     });
 
     Route::prefix('expenses')->group(function () {
         Route::get('/add', [ExpenseController::class, 'addExpensePage'])->name('expenses.add');
     });
-
-    Route::get('/view-group', function () {
-        return Inertia::render('ViewGroup');
-    })->name('view-group');
 
     Route::get('/edit-group', function () {
         return Inertia::render('EditGroup');

@@ -12,7 +12,7 @@ defineEmits(["groupClicked"]);
 </script>
 
 <template>
-    <ul role="list" class="divide-y divide-gray-100 dark:divide-gray-800" v-if="groups.length > 0">
+    <ul role="list" class="divide-y divide-gray-100 dark:divide-gray-800" v-if="groups?.length > 0">
         <li
             v-for="group in groups"
             :key="group.id"
@@ -26,7 +26,7 @@ defineEmits(["groupClicked"]);
                     <span class="text-md font-medium text-gray-600 dark:text-gray-200">{{ group.group_title }}</span>
                     <div class="flex flex-row items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-400">
                         <UserIcon class="h-3 w-3" />
-                        <span class="text-xs">{{ group.member_count }}</span>
+                        <span class="text-xs">{{ group.member_count ?? 0 }}</span>
                     </div>
                 </div>
             </div>

@@ -10,20 +10,62 @@ import {
     PlusIcon,
     XMarkIcon,
 } from "@heroicons/vue/24/outline";
-import { router } from "@inertiajs/vue3";
+import { router, useForm } from "@inertiajs/vue3";
 import { formatDate } from "@vueuse/shared";
 import { ref } from "vue";
+
+const props = defineProps({
+    group: Object,
+    groupMembers: Array,
+});
+
+console.log(props.group);
 
 const back = () => {
     window.history.back();
 };
 
+const isLoading = ref(false);
+const setIsLoading = (value) => {
+    isLoading.value = value;
+};
+
 const isDialogOpen = ref(false);
 const setIsDialogOpen = (value) => {
     isDialogOpen.value = value;
+    addMemberForm.reset();
+    addMemberForm.clearErrors();
 };
 
 const isAddMemberInputShown = ref(false);
+const setIsAddMemberInputShown = (value) => {
+    isAddMemberInputShown.value = value;
+};
+const addMemberForm = useForm({
+    email: "",
+});
+const onAddMemberClicked = () => {
+    setIsLoading(true);
+    addMemberForm
+        .transform((data) => ({
+            ...data,
+            group_id: props.group.id,
+        }))
+        .post(route("groups.add.member"), {
+            onSuccess: () => {
+                setIsLoading(false);
+                addMemberForm.reset();
+                router.reload({ only: ["groupMembers"] });
+            },
+            onError: () => {
+                setIsLoading(false);
+            },
+        });
+};
+const onClearAddMemberFormClicked = () => {
+    addMemberForm.reset("email");
+    addMemberForm.clearErrors();
+};
 
 const mockGroupPaymentSections = [
     {
@@ -310,12 +352,12 @@ const mockGroupPaymentSections = [
                                                 ><span
                                                     class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
                                                 >
-                                                    Group Members
+                                                    Group Members ({{ groupMembers.length ?? 0 }})
                                                 </span>
                                                 <button
                                                     type="button"
                                                     class="btn btn-link btn-xs m-0 flex flex-row gap-1 border-2 border-gray-300 no-underline hover:border-gray-800 dark:border-gray-600 dark:text-gray-50 hover:dark:border-gray-50"
-                                                    @click="isAddMemberInputShown = true"
+                                                    @click="setIsAddMemberInputShown(!isAddMemberInputShown)"
                                                 >
                                                     <PlusIcon class="h-3 w-3" />
                                                     <span>Add</span>
@@ -345,28 +387,47 @@ const mockGroupPaymentSections = [
                                                 leave-from="opacity-100"
                                                 leave-to="opacity-0"
                                             >
-                                                <div class="flex flex-row items-end gap-1 px-6 pb-4 transition-opacity">
-                                                    <div class="flex flex-1 flex-col gap-1">
-                                                        <span class="text-xs text-gray-500 dark:text-gray-50"
-                                                            >Enter an email to invite</span
+                                                <div class="flex flex-col gap-1 px-6 pb-4 transition-opacity">
+                                                    <div class="flex flex-row items-end gap-1">
+                                                        <div class="flex flex-1 flex-col gap-1">
+                                                            <span class="text-xs text-gray-500 dark:text-gray-50"
+                                                                >Enter an email to invite</span
+                                                            >
+                                                            <input
+                                                                type="text"
+                                                                class="input input-sm input-bordered text-xs dark:bg-gray-800"
+                                                                :class="addMemberForm.errors['email'] && 'border-error'"
+                                                                placeholder="...@gmail.com"
+                                                                v-model="addMemberForm.email"
+                                                            />
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-success btn-sm text-gray-50"
+                                                            :disabled="isLoading"
+                                                            @click="onAddMemberClicked"
                                                         >
-                                                        <input
-                                                            type="text"
-                                                            class="input input-sm input-bordered text-xs dark:bg-gray-800"
-                                                            placeholder="...@gmail.com"
-                                                        />
+                                                            <span
+                                                                :class="
+                                                                    isLoading && 'loading loading-spinner loading-xs'
+                                                                "
+                                                            ></span>
+                                                            <PaperAirplaneIcon class="h-4 w-4" />
+                                                            <span>Add</span>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-square btn-error btn-sm"
+                                                            @click="onClearAddMemberFormClicked"
+                                                        >
+                                                            <XMarkIcon class="h-4 w-4 text-gray-50" />
+                                                        </button>
                                                     </div>
-                                                    <button type="button" class="btn btn-success btn-sm text-gray-50">
-                                                        <PaperAirplaneIcon class="h-4 w-4" />
-                                                        <span>Add</span>
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-square btn-error btn-sm"
-                                                        @click="isAddMemberInputShown = false"
+                                                    <span
+                                                        class="text-xs text-error"
+                                                        v-if="addMemberForm.errors['email']"
+                                                        >{{ addMemberForm.errors["email"] }}</span
                                                     >
-                                                        <XMarkIcon class="h-4 w-4 text-gray-50" />
-                                                    </button>
                                                 </div>
                                             </TransitionChild>
                                         </TransitionRoot>

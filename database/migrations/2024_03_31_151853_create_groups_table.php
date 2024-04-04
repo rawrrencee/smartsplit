@@ -15,10 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('group_title');
             $table->unsignedBigInteger('owner_id');
-            $table->tinyInteger('active')->default(0);
-            $table->integer('member_count')->default(0);
             $table->string('img_path')->nullable();
-            $table->string('img_url')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

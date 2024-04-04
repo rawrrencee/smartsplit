@@ -2,24 +2,58 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\GroupMemberStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Group;
+use App\Models\GroupMember;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Validation\ValidationException;
 
 class GroupController extends Controller
 {
-    protected $CommonController;
+    protected $CommonController, $UserController;
 
-    public function __construct(CommonController $CommonController)
+    public function __construct(CommonController $CommonController, UserController $UserController)
     {
         $this->CommonController = $CommonController;
+        $this->UserController = $UserController;
     }
 
     public function getGroupsByOwnerId($userId)
     {
         return Group::whereOwnerId($userId)->get();
+    }
+
+    public function getGroupMembersByGroupId($groupId)
+    {
+        return GroupMember::whereGroupId($groupId)->get();
+    }
+
+    public function isGroupMemberWithUserIdExisting($groupId, $userId)
+    {
+        if (isset($userId)) {
+            return GroupMember::withTrashed()
+                ->whereGroupId($groupId)
+                ->whereUserId($userId)
+                ->exists();
+        }
+
+        return false;
+    }
+
+    public function isGroupMemberWithEmailExisting($groupId, $email)
+    {
+        if (isset($email)) {
+            return GroupMember::withTrashed()
+                ->whereGroupId($groupId)
+                ->whereEmail($email)
+                ->exists();
+        }
+
+        return false;
     }
 
     public function index(Request $request)
@@ -33,13 +67,21 @@ class GroupController extends Controller
         if ($id === 0) {
             return redirect()->route('404');
         }
-        $group = Group::withTrashed()->where('id', '=', $id)->first();
+
+        $group = Group::withTrashed()
+            ->where('id', '=', $id)
+            ->with(['groupMembers'])
+            ->with('groupMembers.user')
+            ->first();
 
         if (!isset($group)) {
             return redirect()->route('home');
         }
 
-        return Inertia::render('ViewGroup', ['group' => $group]);
+        return Inertia::render('ViewGroup', [
+            'group' => $group,
+            'groupMembers' => $group->groupMembers,
+        ]);
     }
 
     public function store(Request $request)
@@ -50,7 +92,6 @@ class GroupController extends Controller
         ]);
 
         $request['owner_id'] = auth()->user()->id;
-        $request['active'] = true;
 
         if (!empty($request['group_photo'])) {
             $path = $request->file('group_photo')->store('group-photos', 'private');
@@ -75,6 +116,46 @@ class GroupController extends Controller
             return Inertia::render('Groups', [
                 'errorMessage' => 'Failed to create record: ' . $this->CommonController->formatException($e),
             ]);
+        }
+    }
+
+    public function addMember(Request $request)
+    {
+        $request->validate([
+            'group_id' => 'required|exists:groups,id',
+            'email' => 'required|email|max:255'
+        ]);
+
+        $request['status'] = GroupMemberStatusEnum::PENDING->value;
+        $user = $this->UserController->getUserByEmail($request['email']);
+        if (isset($user)) {
+            $request['user_id'] = $user->id;
+
+            if ($this->isGroupMemberWithUserIdExisting($request['group_id'], $user->id)) {
+                throw ValidationException::withMessages(['email' => 'This user is already part of the group.']);
+            }
+        }
+
+        if ($this->isGroupMemberWithEmailExisting($request['group_id'], $request['email'])) {
+            throw ValidationException::withMessages(['email' => 'This user is already part of the group.']);
+        }
+
+        try {
+            DB::beginTransaction();
+            $group = GroupMember::create($request->all());
+            DB::commit();
+
+            return redirect()->back()
+                ->with('show', true)
+                ->with('type', 'default')
+                ->with('status', 'success')
+                ->with('message', 'Group member added successfully.')
+                ->with('route', 'groups.view')
+                ->with('id', $group->id);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return $this->CommonController->handleException($e);
         }
     }
 

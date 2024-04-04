@@ -6,22 +6,26 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Group extends Model
+class GroupMember extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-        'owner_id',
-        'group_title',
-        'active',
-        'img_path',
-        'img_url',
+        'group_id',
+        'user_id',
+        'email',
+        'status'
     ];
 
-    public function groupMembers()
+    public function group()
     {
-        return $this->hasMany(GroupMember::class);
+        return $this->belongsTo(Group::class);
+    }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'id', 'user_id');
     }
 }

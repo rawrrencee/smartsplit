@@ -12,7 +12,7 @@ defineProps({
 });
 
 const openGroup = (groupId) => {
-    router.get(route("view-group"), { id: groupId });
+    router.get(route("groups.view"), { id: groupId });
 };
 
 const isLoading = ref(false);
