@@ -1,10 +1,13 @@
 <script setup>
 import NavigationBarButton from "@/Components/NavigationBarButton.vue";
+import PlaceholderImage from "@/Components/PlaceholderImage.vue";
+import ServerImage from "@/Components/ServerImage.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
 import {
     ArrowLeftIcon,
     CurrencyDollarIcon,
+    ExclamationCircleIcon,
     PaperAirplaneIcon,
     PencilIcon,
     PlusIcon,
@@ -12,14 +15,12 @@ import {
 } from "@heroicons/vue/24/outline";
 import { router, useForm } from "@inertiajs/vue3";
 import { formatDate } from "@vueuse/shared";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 const props = defineProps({
     group: Object,
     groupMembers: Array,
 });
-
-console.log(props.group);
 
 const back = () => {
     window.history.back();
@@ -36,6 +37,22 @@ const setIsDialogOpen = (value) => {
     addMemberForm.reset();
     addMemberForm.clearErrors();
 };
+
+const featuredGroupMemberProfiles = computed(() => {
+    return (
+        props.groupMembers
+            ?.sort((a, b) => {
+                if (!!b.user) {
+                    return 1;
+                } else if (!!a.user) {
+                    return -1;
+                }
+
+                return 0;
+            })
+            .slice(0, 4) ?? []
+    );
+});
 
 const isAddMemberInputShown = ref(false);
 const setIsAddMemberInputShown = (value) => {
@@ -65,6 +82,9 @@ const onAddMemberClicked = () => {
 const onClearAddMemberFormClicked = () => {
     addMemberForm.reset("email");
     addMemberForm.clearErrors();
+};
+const onAppendEmailDomainClicked = () => {
+    addMemberForm.email = addMemberForm.email.includes("@") ? addMemberForm.email : `${addMemberForm.email}@gmail.com`;
 };
 
 const mockGroupPaymentSections = [
@@ -214,53 +234,43 @@ const mockGroupPaymentSections = [
         <div class="mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col gap-5">
                 <div class="flex flex-row items-center gap-4">
-                    <div class="avatar">
-                        <div class="h-16 w-16 rounded-xl">
-                            <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-                        </div>
-                    </div>
-                    <span class="truncate text-2xl font-medium dark:text-gray-100">Korea 2022</span>
+                    <ServerImage :size="12" v-if="group?.img_path" :image-url="group.img_path" />
+                    <PlaceholderImage v-else :size="12" />
+                    <span class="truncate text-2xl font-medium dark:text-gray-100">{{ group?.group_title }}</span>
                 </div>
                 <button type="button" class="flex flex-row items-center" @click="setIsDialogOpen(true)">
                     <div class="avatar-group -space-x-4 rtl:space-x-reverse">
-                        <div class="avatar">
-                            <div class="w-8">
-                                <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+                        <template v-for="(member, index) in featuredGroupMemberProfiles" :key="index">
+                            <div class="avatar" v-if="member?.user?.profile_photo_url">
+                                <div class="w-8">
+                                    <img :src="member?.user?.profile_photo_url" />
+                                </div>
                             </div>
-                        </div>
-                        <div class="avatar">
-                            <div class="w-8">
-                                <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-                            </div>
-                        </div>
-                        <div class="avatar">
-                            <div class="w-8">
-                                <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-                            </div>
-                        </div>
-                        <div class="avatar">
-                            <div class="w-8">
-                                <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-                            </div>
-                        </div>
-                        <div class="avatar">
-                            <div class="w-8">
-                                <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-                            </div>
-                        </div>
-                        <div class="avatar placeholder">
+                            <PlaceholderImage type="circle" :size="8" v-else />
+                        </template>
+
+                        <div
+                            class="avatar placeholder"
+                            v-if="groupMembers?.length - featuredGroupMemberProfiles?.length > 0"
+                        >
                             <div class="w-8 bg-neutral text-xs text-neutral-content">
-                                <span>+99</span>
+                                <span>+{{ groupMembers.length - featuredGroupMemberProfiles.length }}</span>
+                            </div>
+                        </div>
+
+                        <div class="avatar placeholder" v-if="groupMembers?.length === 0">
+                            <div class="w-8 bg-neutral text-xs text-neutral-content">
+                                <span>0</span>
                             </div>
                         </div>
                     </div>
                     <div class="rounded-md p-2 text-xs text-gray-500 hover:bg-gray-300 dark:text-gray-400">
-                        <span>170 members</span>
+                        <span>{{ groupMembers.length > 0 ? groupMembers.length : "" }} members</span>
                     </div>
                 </button>
             </div>
         </div>
-        <div class="mx-auto flex max-w-7xl flex-col gap-4 pt-12">
+        <div class="mx-auto flex max-w-7xl flex-col gap-4 pt-8">
             <div v-for="section in mockGroupPaymentSections" class="flex flex-col gap-2">
                 <div class="px-4 sm:px-6 lg:px-8">
                     <span class="font-semibold dark:text-gray-200">{{ formatDate(section.date, "MMMM YYYY") }}</span>
@@ -332,7 +342,7 @@ const mockGroupPaymentSections = [
 
             <div class="fixed inset-0 overflow-hidden">
                 <div class="absolute inset-0 overflow-hidden">
-                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-36">
+                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-20">
                         <TransitionChild
                             as="template"
                             enter="transform transition ease-in-out duration-500"
@@ -344,93 +354,155 @@ const mockGroupPaymentSections = [
                         >
                             <DialogPanel class="pointer-events-auto w-screen">
                                 <div
-                                    class="flex h-full flex-col rounded-t-2xl bg-gray-50 shadow-xl dark:bg-gray-900 dark:text-gray-200"
+                                    class="rounded-text-2xl flex h-full flex-col gap-4 bg-gray-50 shadow-xl dark:bg-gray-900 dark:text-gray-200"
                                 >
-                                    <div class="px-6 py-4">
-                                        <div class="flex flex-row items-center justify-between">
-                                            <DialogTitle as="div" class="flex flex-row items-start gap-2"
-                                                ><span
-                                                    class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
-                                                >
-                                                    Group Members ({{ groupMembers.length ?? 0 }})
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-link btn-xs m-0 flex flex-row gap-1 border-2 border-gray-300 no-underline hover:border-gray-800 dark:border-gray-600 dark:text-gray-50 hover:dark:border-gray-50"
-                                                    @click="setIsAddMemberInputShown(!isAddMemberInputShown)"
-                                                >
-                                                    <PlusIcon class="h-3 w-3" />
-                                                    <span>Add</span>
-                                                </button>
-                                            </DialogTitle>
-                                            <div class="ml-3 flex h-7 items-center">
-                                                <button
-                                                    type="button"
-                                                    class="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-                                                    @click="setIsDialogOpen(false)"
-                                                >
-                                                    <span class="absolute -inset-2.5" />
-                                                    <span class="sr-only">Close panel</span>
-                                                    <XMarkIcon class="h-6 w-6" aria-hidden="true" />
-                                                </button>
-                                            </div>
+                                    <div class="flex flex-row items-center justify-between px-6 pt-4">
+                                        <DialogTitle as="div" class="flex flex-row items-start gap-2"
+                                            ><span
+                                                class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
+                                            >
+                                                Group Members ({{ groupMembers.length ?? 0 }})
+                                            </span>
+                                            <button
+                                                type="button"
+                                                class="btn btn-link btn-xs m-0 flex flex-row gap-1 border-2 border-gray-300 no-underline hover:border-gray-800 dark:border-gray-600 dark:text-gray-50 hover:dark:border-gray-50"
+                                                @click="setIsAddMemberInputShown(!isAddMemberInputShown)"
+                                            >
+                                                <PlusIcon class="h-3 w-3" />
+                                                <span>Add</span>
+                                            </button>
+                                        </DialogTitle>
+                                        <div class="ml-3 flex h-7 items-center">
+                                            <button
+                                                type="button"
+                                                class="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+                                                @click="setIsDialogOpen(false)"
+                                            >
+                                                <span class="absolute -inset-2.5" />
+                                                <span class="sr-only">Close panel</span>
+                                                <XMarkIcon class="h-6 w-6" aria-hidden="true" />
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="flex-1 overflow-y-auto">
-                                        <TransitionRoot as="template" :show="isAddMemberInputShown">
-                                            <TransitionChild
-                                                as="template"
-                                                enter="ease-in-out duration-350"
-                                                enter-from="opacity-0"
-                                                enter-to="opacity-100"
-                                                leave="ease-in-out duration-350"
-                                                leave-from="opacity-100"
-                                                leave-to="opacity-0"
-                                            >
-                                                <div class="flex flex-col gap-1 px-6 pb-4 transition-opacity">
-                                                    <div class="flex flex-row items-end gap-1">
-                                                        <div class="flex flex-1 flex-col gap-1">
-                                                            <span class="text-xs text-gray-500 dark:text-gray-50"
-                                                                >Enter an email to invite</span
-                                                            >
-                                                            <input
-                                                                type="text"
-                                                                class="input input-sm input-bordered text-xs dark:bg-gray-800"
-                                                                :class="addMemberForm.errors['email'] && 'border-error'"
-                                                                placeholder="...@gmail.com"
-                                                                v-model="addMemberForm.email"
-                                                            />
-                                                        </div>
-                                                        <button
-                                                            type="button"
-                                                            class="btn btn-success btn-sm text-gray-50"
-                                                            :disabled="isLoading"
-                                                            @click="onAddMemberClicked"
-                                                        >
-                                                            <span
-                                                                :class="
-                                                                    isLoading && 'loading loading-spinner loading-xs'
-                                                                "
-                                                            ></span>
-                                                            <PaperAirplaneIcon class="h-4 w-4" />
-                                                            <span>Add</span>
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            class="btn btn-square btn-error btn-sm"
-                                                            @click="onClearAddMemberFormClicked"
-                                                        >
-                                                            <XMarkIcon class="h-4 w-4 text-gray-50" />
-                                                        </button>
-                                                    </div>
+                                    <TransitionRoot
+                                        as="template"
+                                        :show="
+                                            !isAddMemberInputShown && groupMembers?.some((m) => m.status === 'PENDING')
+                                        "
+                                    >
+                                        <TransitionChild
+                                            as="template"
+                                            enter="ease-in-out duration-350"
+                                            enter-from="opacity-0"
+                                            enter-to="opacity-100"
+                                            leave="ease-in-out duration-350"
+                                            leave-from="opacity-100"
+                                            leave-to="opacity-0"
+                                        >
+                                            <div class="flex flex-col px-6">
+                                                <span class="text-xs text-gray-400">
+                                                    Some new members have yet to accept the invitation to this group.
+                                                    You can still include them in the expenses, but someone else will
+                                                    need to settle up on their behalf.
+                                                </span>
+                                            </div>
+                                        </TransitionChild>
+                                    </TransitionRoot>
+                                    <TransitionRoot as="template" :show="isAddMemberInputShown">
+                                        <TransitionChild
+                                            as="template"
+                                            enter="ease-in-out duration-350"
+                                            enter-from="opacity-0"
+                                            enter-to="opacity-100"
+                                            leave="ease-in-out duration-350"
+                                            leave-from="opacity-100"
+                                            leave-to="opacity-0"
+                                        >
+                                            <div class="flex flex-col gap-1 px-6 transition-opacity">
+                                                <div class="flex flex-1 flex-col gap-1">
+                                                    <span class="text-xs text-gray-500 dark:text-gray-50"
+                                                        >Enter an email to invite</span
+                                                    >
+                                                    <input
+                                                        type="text"
+                                                        class="input input-sm input-bordered flex-shrink text-xs dark:bg-gray-800"
+                                                        :class="addMemberForm.errors['email'] && 'border-error'"
+                                                        placeholder="Email Address"
+                                                        v-model="addMemberForm.email"
+                                                    />
                                                     <span
                                                         class="text-xs text-error"
                                                         v-if="addMemberForm.errors['email']"
                                                         >{{ addMemberForm.errors["email"] }}</span
                                                     >
+                                                    <div class="flex flex-grow flex-row justify-between gap-1">
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-link btn-xs p-0 no-underline"
+                                                            @click="onAppendEmailDomainClicked"
+                                                        >
+                                                            <span>@gmail.com</span>
+                                                        </button>
+                                                        <div class="flex flex-row gap-1">
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-square btn-error btn-sm"
+                                                                @click="onClearAddMemberFormClicked"
+                                                            >
+                                                                <XMarkIcon class="h-4 w-4 text-gray-50" />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-success btn-sm text-gray-50"
+                                                                :disabled="isLoading"
+                                                                @click="onAddMemberClicked"
+                                                            >
+                                                                <span
+                                                                    :class="
+                                                                        isLoading &&
+                                                                        'loading loading-spinner loading-xs'
+                                                                    "
+                                                                ></span>
+                                                                <PaperAirplaneIcon class="h-4 w-4" />
+                                                                <span>Add</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </TransitionChild>
-                                        </TransitionRoot>
+                                            </div>
+                                        </TransitionChild>
+                                    </TransitionRoot>
+                                    <div class="flex-1 overflow-y-auto pb-4">
+                                        <div class="flex flex-col gap-3">
+                                            <template v-for="member in groupMembers">
+                                                <div
+                                                    class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-2 hover:bg-gray-100"
+                                                >
+                                                    <div class="flex flex-shrink flex-col">
+                                                        <div class="flex flex-row items-center gap-2 pl-2">
+                                                            <ServerImage v-if="member.img_url" />
+                                                            <PlaceholderImage :size="8" v-else />
+                                                            <div class="flex flex-col gap-1">
+                                                                <span class="break-all text-sm">{{
+                                                                    member.email
+                                                                }}</span>
+                                                                <div
+                                                                    class="flex flex-row items-center gap-1 text-gray-400"
+                                                                >
+                                                                    <ExclamationCircleIcon class="h-4 w-4" />
+                                                                    <span class="text-xs">{{ member.status }}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex flex-grow flex-col items-end">
+                                                        <button type="button" class="btn btn-square btn-error btn-sm">
+                                                            <XMarkIcon class="h-4 w-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
                                     </div>
                                 </div>
                             </DialogPanel>

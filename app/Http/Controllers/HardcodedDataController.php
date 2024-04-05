@@ -30,18 +30,28 @@ class HardcodedDataController extends Controller
                 'value' => 'Singapore dollar',
                 'symbol' => '&#83;&#36;'
             ),
+
             array(
                 'key' => 'MYR',
                 'countryName' => 'Malaysia',
                 'value' => 'Malaysian ringgit',
                 'symbol' => '&#82;&#77;'
             ),
+
+            array(
+                'key' => 'JPY',
+                'countryName' => 'Japan',
+                'value' => 'Japanese yen',
+                'symbol' => '&#165;'
+            ),
+
             array(
                 'key' => 'ALL',
                 'countryName' => 'Albania',
                 'value' => 'Albanian lek',
                 'symbol' => 'L'
             ),
+
             array(
                 'key' => 'AFN',
                 'countryName' => 'Afghanistan',
@@ -399,13 +409,6 @@ class HardcodedDataController extends Controller
                 'countryName' => 'Jamaica',
                 'value' => 'Jamaican dollar',
                 'symbol' => '&#74;&#36;'
-            ),
-
-            array(
-                'key' => 'JPY',
-                'countryName' => 'Japan',
-                'value' => 'Japanese yen',
-                'symbol' => '&#165;'
             ),
 
             array(

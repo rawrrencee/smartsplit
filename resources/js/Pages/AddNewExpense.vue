@@ -5,7 +5,7 @@ import ServerImage from "@/Components/ServerImage.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
 import { CheckCircleIcon } from "@heroicons/vue/20/solid";
-import { Bars2Icon, CalendarIcon, ListBulletIcon, XMarkIcon } from "@heroicons/vue/24/outline";
+import { Bars2Icon, CalendarIcon, ListBulletIcon, MagnifyingGlassIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 import { DatePicker } from "v-calendar";
 import "v-calendar/style.css";
 import { computed, ref } from "vue";
@@ -15,14 +15,28 @@ const props = defineProps({
     currencies: Array,
 });
 
-console.log(props.groups);
-
 const defaultExpenseGroupKey = "addExpenseDefaultGroupId";
+const defaultExpenseCurrencyKey = "addExpenseDefaultCurrency";
 
 const isDialogOpen = ref(false);
 const setIsDialogOpen = (value) => {
     isDialogOpen.value = value;
 };
+const dialogMode = ref("selectGroup");
+const setDialogMode = (mode) => {
+    dialogMode.value = mode;
+    isDialogOpen.value = true;
+};
+const dialogTitle = computed(() => {
+    switch (dialogMode.value) {
+        case "selectGroup":
+            return "Groups";
+        case "selectCurrency":
+            return "Currencies";
+        default:
+            return "";
+    }
+});
 
 const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(defaultExpenseGroupKey);
 const selectedGroupId = ref(getSelectedGroupIdFromSessionStorage());
@@ -42,6 +56,29 @@ const selectedDate = ref(new Date());
 const popover = ref({
     visibility: "focus",
 });
+
+const getSelectedCurrencyFromSessionStorage = () => {
+    return props.currencies?.find((c) => c.key === sessionStorage.getItem(defaultExpenseCurrencyKey));
+};
+const selectedCurrency = ref(getSelectedCurrencyFromSessionStorage() ?? props.currencies?.[0]);
+const currencyQuery = ref("");
+const setSelectedCurrency = (key) => {
+    sessionStorage.setItem(defaultExpenseCurrencyKey, key);
+    selectedCurrency.value = getSelectedCurrencyFromSessionStorage();
+    setIsDialogOpen(false);
+    currencyQuery.value = "";
+};
+const filteredCurrencies = computed(() =>
+    currencyQuery.value === ""
+        ? props.currencies
+        : props.currencies.filter((c) => {
+              const searchQuery = currencyQuery.value.toLowerCase().replace(/\s+/g, "");
+              const value = c.value.toLowerCase().replace(/\s+/g, "");
+              const key = c.key.toLowerCase().replace(/\s+/g, "");
+              const symbol = c.symbol.toLowerCase().replace(/\s+/g, "");
+              return value.includes(searchQuery) || key.includes(searchQuery) || symbol.includes(searchQuery);
+          }),
+);
 
 const expenseConfigurationState = ref(null);
 const updateExpenseConfigurationState = (buttonType) => {
@@ -68,7 +105,7 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
 <template>
     <AppLayout title="Home">
         <div
-            class="top-0 z-10 flex w-full flex-row items-center justify-between px-4 pb-8 pt-2 sm:px-6 lg:px-8 dark:text-gray-200"
+            class="top-0 z-10 flex w-full flex-row items-center justify-between p-4 pt-2 sm:px-6 lg:px-8 dark:text-gray-200"
         >
             <span class="text-lg font-bold">Add an expense</span>
             <button
@@ -79,13 +116,13 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
                 Save
             </button>
         </div>
-        <div class="mx-auto flex max-w-7xl flex-col gap-12 px-4 sm:px-6 lg:px-8 dark:text-gray-200">
+        <div class="mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:px-8 dark:text-gray-200">
             <div class="flex flex-col gap-2">
                 <div class="flex flex-col gap-1">
-                    <span>Expense to selected group:</span>
+                    <span>Expense to selected group</span>
                     <button
                         class="btn btn-outline max-w-80 dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
-                        @click="isDialogOpen = true"
+                        @click="setDialogMode('selectGroup')"
                     >
                         <div class="flex w-full flex-row items-center gap-2">
                             <ServerImage v-if="currentGroup?.img_path" :image-url="currentGroup?.img_path" :size="6" />
@@ -97,7 +134,7 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
                     </button>
                 </div>
 
-                <div class="flex flex-col items-start gap-2">
+                <div class="flex flex-col items-start gap-1">
                     <span>Date of expense</span>
                     <DatePicker v-model="selectedDate" :input-debounce="500" :popover="popover">
                         <template #default="{ inputValue, inputEvents }">
@@ -134,8 +171,9 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
                 <div class="flex flex-row gap-2">
                     <button
                         class="btn btn-square btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                        @click="setDialogMode('selectCurrency')"
                     >
-                        <span>US$</span>
+                        <span>{{ selectedCurrency?.symbol ?? "$" }}</span>
                     </button>
                     <input
                         type="text"
@@ -317,7 +355,7 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
 
             <div class="fixed inset-0 overflow-hidden">
                 <div class="absolute inset-0 overflow-hidden">
-                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-60">
+                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-48">
                         <TransitionChild
                             as="template"
                             enter="transform transition ease-in-out duration-500"
@@ -331,11 +369,11 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
                                 <div
                                     class="flex h-full flex-col rounded-t-2xl bg-gray-50 shadow-xl dark:bg-gray-900 dark:text-gray-200"
                                 >
-                                    <div class="p-6">
+                                    <div class="px-6 pb-3 pt-6">
                                         <div class="flex items-start justify-between">
                                             <DialogTitle
                                                 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
-                                                >Groups</DialogTitle
+                                                >{{ dialogTitle }}</DialogTitle
                                             >
                                             <div class="ml-3 flex h-7 items-center">
                                                 <button
@@ -350,12 +388,40 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="flex-1 overflow-y-auto">
+                                    <div class="flex-1 overflow-y-auto pb-4">
                                         <GroupList
+                                            v-if="dialogMode === 'selectGroup'"
                                             :groups="groups"
                                             :hide-owed-amounts="true"
                                             @group-clicked="onGroupClicked"
                                         />
+                                        <div class="flex flex-col gap-2" v-else>
+                                            <div class="flex flex-col px-6 py-2">
+                                                <label
+                                                    class="input input-sm input-bordered flex items-center gap-2 border-0 outline-0"
+                                                >
+                                                    <MagnifyingGlassIcon class="h-4 w-4 text-gray-400" />
+                                                    <input
+                                                        type="text"
+                                                        class="grow border-transparent focus:border-transparent focus:ring-0"
+                                                        placeholder="Filter currencies"
+                                                        v-model="currencyQuery"
+                                                    />
+                                                </label>
+                                            </div>
+                                            <div class="flex flex-col gap-2">
+                                                <template v-for="(c, i) in filteredCurrencies" :key="i">
+                                                    <button
+                                                        type="button"
+                                                        class="flex flex-row items-center justify-between px-6 py-2 text-start hover:bg-gray-100"
+                                                        @click="setSelectedCurrency(c.key)"
+                                                    >
+                                                        <span>{{ `${c.value} - ${c.key}` }}</span>
+                                                        <span>({{ c.symbol }})</span>
+                                                    </button>
+                                                </template>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </DialogPanel>
