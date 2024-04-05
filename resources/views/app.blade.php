@@ -4,6 +4,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="Smartsplit - Expense sharing simplified" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/img/icons/apple-touch-icon.png" sizes="180x180" />
+    <link rel="mask-icon" href="/img/icons/safari-pinned-tab.svg" color="#fafafa" />
+    <meta name="theme-color" content="#fafafa" />
 
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
