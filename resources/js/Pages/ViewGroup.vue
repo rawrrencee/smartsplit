@@ -265,7 +265,11 @@ const mockGroupPaymentSections = [
                         </div>
                     </div>
                     <div class="rounded-md p-2 text-xs text-gray-500 hover:bg-gray-300 dark:text-gray-400">
-                        <span>{{ groupMembers.length > 0 ? groupMembers.length : "" }} members</span>
+                        <span
+                            >{{ groupMembers.length > 0 ? groupMembers.length : "" }} member{{
+                                groupMembers?.length === 1 ? "" : "s"
+                            }}</span
+                        >
                     </div>
                 </button>
             </div>
@@ -342,7 +346,7 @@ const mockGroupPaymentSections = [
 
             <div class="fixed inset-0 overflow-hidden">
                 <div class="absolute inset-0 overflow-hidden">
-                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-20">
+                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-48">
                         <TransitionChild
                             as="template"
                             enter="transform transition ease-in-out duration-500"
@@ -354,7 +358,7 @@ const mockGroupPaymentSections = [
                         >
                             <DialogPanel class="pointer-events-auto w-screen">
                                 <div
-                                    class="rounded-text-2xl flex h-full flex-col gap-4 bg-gray-50 shadow-xl dark:bg-gray-900 dark:text-gray-200"
+                                    class="flex h-full flex-col gap-4 rounded-t-2xl bg-gray-50 shadow-xl dark:bg-gray-900 dark:text-gray-200"
                                 >
                                     <div class="flex flex-row items-center justify-between px-6 pt-4">
                                         <DialogTitle as="div" class="flex flex-row items-start gap-2"
@@ -476,10 +480,10 @@ const mockGroupPaymentSections = [
                                         <div class="flex flex-col gap-3">
                                             <template v-for="member in groupMembers">
                                                 <div
-                                                    class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-2 hover:bg-gray-100"
+                                                    class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-3 hover:bg-gray-100"
                                                 >
                                                     <div class="flex flex-shrink flex-col">
-                                                        <div class="flex flex-row items-center gap-2 pl-2">
+                                                        <div class="flex flex-row items-center gap-3">
                                                             <ServerImage v-if="member.img_url" />
                                                             <PlaceholderImage :size="8" v-else />
                                                             <div class="flex flex-col gap-1">
