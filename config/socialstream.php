@@ -11,8 +11,8 @@ return [
         Providers::google(),
     ],
     'features' => [
-        // Features::createAccountOnFirstLogin(),
         // Features::generateMissingEmails(),
+        Features::createAccountOnFirstLogin(),
         Features::rememberSession(),
         Features::providerAvatars(),
         Features::refreshOAuthTokens(),
