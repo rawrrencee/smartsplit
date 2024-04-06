@@ -34,6 +34,7 @@ const createGroup = (formData) => {
     setIsLoading(true);
     formData.post(route("groups.add"), {
         onSuccess: () => {
+            setIsLoading(false);
             setIsDialogOpen(false);
             groupForm.reset();
         },

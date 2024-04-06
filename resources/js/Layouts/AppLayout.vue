@@ -11,6 +11,7 @@ import {
 } from "@heroicons/vue/24/outline";
 import { Head } from "@inertiajs/vue3";
 import { computed } from "vue";
+import { Toaster } from "vue-sonner";
 
 defineProps({
     title: String,
@@ -47,6 +48,7 @@ const navigationItems = [
 
 <template>
     <div data-theme="splitsmartLight" :class="!isLightMode && 'dark'">
+        <Toaster richColors position="top-center" />
         <Head :title="title" />
 
         <Banner />

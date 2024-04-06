@@ -32,22 +32,32 @@ class GroupController extends Controller
         return GroupMember::whereGroupId($groupId)->get();
     }
 
-    public function isGroupMemberWithUserIdExisting($groupId, $userId)
+    public function isGroupMemberWithUserIdExisting($groupId, $userId, $trashed)
     {
-        if (isset($userId)) {
+        if ($trashed) {
             return GroupMember::withTrashed()
-                ->whereGroupId($groupId)
-                ->whereUserId($userId)
+                ->where('group_id', $groupId)
+                ->where('user_id', $userId)
+                ->exists();
+        } else {
+            return GroupMember::withoutTrashed()
+                ->where('group_id', $groupId)
+                ->where('user_id', $userId)
                 ->exists();
         }
 
         return false;
     }
 
-    public function isGroupMemberWithEmailExisting($groupId, $email)
+    public function isGroupMemberWithEmailExisting($groupId, $email, $trashed)
     {
-        if (isset($email)) {
+        if ($trashed) {
             return GroupMember::withTrashed()
+                ->whereGroupId($groupId)
+                ->whereEmail($email)
+                ->exists();
+        } else {
+            return GroupMember::withoutTrashed()
                 ->whereGroupId($groupId)
                 ->whereEmail($email)
                 ->exists();
@@ -70,17 +80,20 @@ class GroupController extends Controller
 
         $group = Group::withTrashed()
             ->where('id', '=', $id)
-            ->with(['groupMembers'])
-            ->with('groupMembers.user')
             ->first();
 
         if (!isset($group)) {
             return redirect()->route('home');
         }
 
+        $groupMembers = GroupMember::withTrashed()
+            ->where('group_id', $id)
+            ->with(['user'])
+            ->get();
+
         return Inertia::render('ViewGroup', [
             'group' => $group,
-            'groupMembers' => $group->groupMembers,
+            'groupMembers' => $groupMembers,
         ]);
     }
 
@@ -101,6 +114,9 @@ class GroupController extends Controller
         try {
             DB::beginTransaction();
             $group = Group::create($request->all());
+            $creatorGroupMember = $this->buildGroupMemberWithUser($group->id, auth()->user()->id, GroupMemberStatusEnum::ACCEPTED);
+            $creatorGroupMember->save();
+
             DB::commit();
 
             return redirect()->route('groups')
@@ -131,18 +147,24 @@ class GroupController extends Controller
         if (isset($user)) {
             $request['user_id'] = $user->id;
 
-            if ($this->isGroupMemberWithUserIdExisting($request['group_id'], $user->id)) {
+            if ($this->isGroupMemberWithUserIdExisting($request['group_id'], $user->id, false)) {
                 throw ValidationException::withMessages(['email' => 'This user is already part of the group.']);
             }
         }
 
-        if ($this->isGroupMemberWithEmailExisting($request['group_id'], $request['email'])) {
+        if ($this->isGroupMemberWithEmailExisting($request['group_id'], $request['email'], false)) {
             throw ValidationException::withMessages(['email' => 'This user is already part of the group.']);
         }
 
+        $groupMember = GroupMember::withTrashed()->where('email', $request['email'])->first();
+
         try {
             DB::beginTransaction();
-            $group = GroupMember::create($request->all());
+            if (isset($groupMember) && $groupMember->trashed()) {
+                $groupMember->restore();
+            } else {
+                $groupMember = GroupMember::create($request->all());
+            }
             DB::commit();
 
             return redirect()->back()
@@ -151,12 +173,46 @@ class GroupController extends Controller
                 ->with('status', 'success')
                 ->with('message', 'Group member added successfully.')
                 ->with('route', 'groups.view')
-                ->with('id', $group->id);
+                ->with('id', $groupMember->id);
         } catch (\Exception $e) {
             DB::rollBack();
 
             return $this->CommonController->handleException($e);
         }
+    }
+
+    public function removeMember(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:group_members,id',
+        ]);
+
+        $groupMember = GroupMember::whereId($request['id'])->first();
+        if (isset($groupMember) && $groupMember->user_id != auth()->user()->id && $this->isGroupMemberWithUserIdExisting($groupMember->group_id, auth()->user()->id, false)) {
+            try {
+                DB::beginTransaction();
+                $groupMember->delete();
+                DB::commit();
+
+                return redirect()->back()
+                    ->with('show', true)
+                    ->with('type', 'default')
+                    ->with('status', 'success')
+                    ->with('message', 'Group member removed successfully.')
+                    ->with('route', 'groups.view')
+                    ->with('id', $groupMember->group_id);
+            } catch (\Exception $e) {
+                DB::rollBack();
+
+                return $this->CommonController->handleException($e);
+            }
+        }
+
+        return redirect()->back()
+            ->with('show', true)
+            ->with('type', 'default')
+            ->with('status', 'error')
+            ->with('message', 'Group member was not removed successfully due to an error.');
     }
 
     public function edit(Request $request)
@@ -230,5 +286,20 @@ class GroupController extends Controller
 
             return $this->CommonController->handleException($e, 'default', 'delete');
         }
+    }
+
+    private function buildGroupMemberWithUser(int $groupId, int $userId, GroupMemberStatusEnum $status): GroupMember
+    {
+        $groupMember = new GroupMember();
+        $groupMember->group_id = $groupId;
+        $groupMember->user_id = $userId;
+        $groupMember->status = $status->value;
+
+        $user = $this->UserController->getUserByUserId($userId);
+        if ($user) {
+            $groupMember->email = $user->email;
+        }
+
+        return $groupMember;
     }
 }

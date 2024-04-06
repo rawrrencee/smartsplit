@@ -42,6 +42,7 @@ Route::middleware([
         Route::get('/', [GroupController::class, 'index'])->name('groups');
         Route::post('/add', [GroupController::class, 'store'])->name('groups.add');
         Route::post('/add-member', [GroupController::class, 'addMember'])->name('groups.add.member');
+        Route::post('/remove-member', [GroupController::class, 'removeMember'])->name('groups.remove.member');
         Route::get('/view-group', [GroupController::class, 'view'])->name('groups.view');
     });
 

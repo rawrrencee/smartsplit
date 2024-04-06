@@ -1,7 +1,9 @@
 <script setup>
+import { showToastIfNeeded } from "@/Common";
 import NavigationBarButton from "@/Components/NavigationBarButton.vue";
 import PlaceholderImage from "@/Components/PlaceholderImage.vue";
 import ServerImage from "@/Components/ServerImage.vue";
+import { GroupMemberStatusEnum } from "@/Enums/GroupMemberStatusEnum.js";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
 import {
@@ -16,6 +18,7 @@ import {
 import { router, useForm } from "@inertiajs/vue3";
 import { formatDate } from "@vueuse/shared";
 import { computed, ref } from "vue";
+import { toast } from "vue-sonner";
 
 const props = defineProps({
     group: Object,
@@ -37,10 +40,15 @@ const setIsDialogOpen = (value) => {
     addMemberForm.reset();
     addMemberForm.clearErrors();
 };
-
+const activeGroupMembers = computed(() => {
+    return props.groupMembers.filter((member) => !member.deleted_at) ?? [];
+});
+const deletedGroupMembers = computed(() => {
+    return props.groupMembers.filter((member) => !!member.deleted_at) ?? [];
+});
 const featuredGroupMemberProfiles = computed(() => {
     return (
-        props.groupMembers
+        activeGroupMembers.value
             ?.sort((a, b) => {
                 if (!!b.user) {
                     return 1;
@@ -69,12 +77,12 @@ const onAddMemberClicked = () => {
             group_id: props.group.id,
         }))
         .post(route("groups.add.member"), {
-            onSuccess: () => {
-                setIsLoading(false);
+            onSuccess: (s) => {
                 addMemberForm.reset();
                 router.reload({ only: ["groupMembers"] });
+                showToastIfNeeded(toast, s.props.flash);
             },
-            onError: () => {
+            onFinish: () => {
                 setIsLoading(false);
             },
         });
@@ -85,6 +93,31 @@ const onClearAddMemberFormClicked = () => {
 };
 const onAppendEmailDomainClicked = () => {
     addMemberForm.email = addMemberForm.email.includes("@") ? addMemberForm.email : `${addMemberForm.email}@gmail.com`;
+};
+const removeMemberForm = useForm({
+    id: "",
+});
+const onRemoveMemberClicked = (member) => {
+    if (!confirm("Are you sure you want to remove this member?")) return;
+    setIsLoading(true);
+    removeMemberForm
+        .transform(() => ({
+            id: member.id,
+        }))
+        .post(route("groups.remove.member"), {
+            onSuccess: (s) => {
+                addMemberForm.reset();
+                router.reload({ only: ["groupMembers"] });
+                showToastIfNeeded(toast, s.props.flash);
+            },
+            onFinish: () => {
+                setIsLoading(false);
+            },
+        });
+};
+const onRestoreDeletedGroupMemberClicked = (member) => {
+    addMemberForm.email = member.email;
+    onAddMemberClicked();
 };
 
 const mockGroupPaymentSections = [
@@ -251,14 +284,14 @@ const mockGroupPaymentSections = [
 
                         <div
                             class="avatar placeholder"
-                            v-if="groupMembers?.length - featuredGroupMemberProfiles?.length > 0"
+                            v-if="activeGroupMembers?.length - featuredGroupMemberProfiles?.length > 0"
                         >
                             <div class="w-8 bg-neutral text-xs text-neutral-content">
-                                <span>+{{ groupMembers.length - featuredGroupMemberProfiles.length }}</span>
+                                <span>+{{ activeGroupMembers.length - featuredGroupMemberProfiles.length }}</span>
                             </div>
                         </div>
 
-                        <div class="avatar placeholder" v-if="groupMembers?.length === 0">
+                        <div class="avatar placeholder" v-if="activeGroupMembers?.length === 0">
                             <div class="w-8 bg-neutral text-xs text-neutral-content">
                                 <span>0</span>
                             </div>
@@ -266,8 +299,8 @@ const mockGroupPaymentSections = [
                     </div>
                     <div class="rounded-md p-2 text-xs text-gray-500 hover:bg-gray-300 dark:text-gray-400">
                         <span
-                            >{{ groupMembers.length > 0 ? groupMembers.length : "" }} member{{
-                                groupMembers?.length === 1 ? "" : "s"
+                            >{{ activeGroupMembers.length > 0 ? activeGroupMembers.length : "" }} member{{
+                                activeGroupMembers?.length === 1 ? "" : "s"
                             }}</span
                         >
                     </div>
@@ -365,7 +398,7 @@ const mockGroupPaymentSections = [
                                             ><span
                                                 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
                                             >
-                                                Group Members ({{ groupMembers.length ?? 0 }})
+                                                Group Members ({{ activeGroupMembers.length ?? 0 }})
                                             </span>
                                             <button
                                                 type="button"
@@ -391,7 +424,8 @@ const mockGroupPaymentSections = [
                                     <TransitionRoot
                                         as="template"
                                         :show="
-                                            !isAddMemberInputShown && groupMembers?.some((m) => m.status === 'PENDING')
+                                            !isAddMemberInputShown &&
+                                            activeGroupMembers?.some((m) => m.status === 'PENDING')
                                         "
                                     >
                                         <TransitionChild
@@ -462,10 +496,8 @@ const mockGroupPaymentSections = [
                                                                 @click="onAddMemberClicked"
                                                             >
                                                                 <span
-                                                                    :class="
-                                                                        isLoading &&
-                                                                        'loading loading-spinner loading-xs'
-                                                                    "
+                                                                    class="loading loading-spinner loading-xs"
+                                                                    v-if="isLoading"
                                                                 ></span>
                                                                 <PaperAirplaneIcon class="h-4 w-4" />
                                                                 <span>Add</span>
@@ -478,7 +510,7 @@ const mockGroupPaymentSections = [
                                     </TransitionRoot>
                                     <div class="flex-1 overflow-y-auto pb-4">
                                         <div class="flex flex-col gap-3">
-                                            <template v-for="member in groupMembers">
+                                            <template v-for="member in activeGroupMembers">
                                                 <div
                                                     class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-3 hover:bg-gray-100"
                                                 >
@@ -492,6 +524,9 @@ const mockGroupPaymentSections = [
                                                                 }}</span>
                                                                 <div
                                                                     class="flex flex-row items-center gap-1 text-gray-400"
+                                                                    v-if="
+                                                                        member.status !== GroupMemberStatusEnum.ACCEPTED
+                                                                    "
                                                                 >
                                                                     <ExclamationCircleIcon class="h-4 w-4" />
                                                                     <span class="text-xs">{{ member.status }}</span>
@@ -499,13 +534,55 @@ const mockGroupPaymentSections = [
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="flex flex-grow flex-col items-end">
-                                                        <button type="button" class="btn btn-square btn-error btn-sm">
-                                                            <XMarkIcon class="h-4 w-4" />
+                                                    <div
+                                                        class="flex flex-grow flex-col items-end"
+                                                        v-if="member.user_id !== $page.props.auth.user.id"
+                                                    >
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-square btn-error btn-sm"
+                                                            @click="onRemoveMemberClicked(member)"
+                                                        >
+                                                            <span
+                                                                class="loading loading-spinner loading-sm"
+                                                                v-if="isLoading"
+                                                            />
+                                                            <XMarkIcon class="h-4 w-4" v-else />
                                                         </button>
                                                     </div>
                                                 </div>
                                             </template>
+                                            <div v-if="deletedGroupMembers.length > 0" class="flex flex-col">
+                                                <div class="divider m-0 p-0"></div>
+                                                <div class="flex flex-col gap-3 pb-3 pt-2">
+                                                    <div class="flex flex-col gap-3 px-6">
+                                                        <span class="text-md font-medium">Deleted Members</span>
+                                                        <span class="text-xs text-gray-400">
+                                                            Deleted members cannot be included in new expenses, but will
+                                                            remain visible in older expenses. You can invite them to the
+                                                            group again if needed.
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex flex-col gap-2">
+                                                        <template v-for="member in deletedGroupMembers">
+                                                            <div
+                                                                class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-1 hover:bg-gray-100"
+                                                            >
+                                                                <span class="break-all text-xs">{{
+                                                                    member.email
+                                                                }}</span>
+                                                                <button
+                                                                    type="button"
+                                                                    class="btn btn-link btn-xs no-underline"
+                                                                    @click="onRestoreDeletedGroupMemberClicked(member)"
+                                                                >
+                                                                    Restore
+                                                                </button>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

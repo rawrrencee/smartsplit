@@ -121,7 +121,7 @@ const onCreateClicked = () => {
                     Cancel
                 </button>
                 <button :disabled="isLoading" type="button" class="btn btn-primary" @click="onCreateClicked">
-                    <span :class="isLoading && 'loading loading-spinner'"></span>
+                    <span class="loading loading-spinner" v-if="isLoading"></span>
                     Create
                 </button>
             </div>
