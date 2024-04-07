@@ -1,4 +1,5 @@
 <script setup>
+import { getImgSrcFromPath } from "@/Common";
 import { PhotoIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 import { ref } from "vue";
 
@@ -6,6 +7,7 @@ const props = defineProps({
     form: Object,
     group: Object,
     isLoading: Boolean,
+    isEditing: Boolean,
 });
 const emit = defineEmits(["cancelClicked", "createClicked"]);
 
@@ -20,6 +22,7 @@ const updatePhotoPreview = (event) => {
         photoPreview.value = e.target.result;
     };
     reader.readAsDataURL(photoFile.value);
+    props.form.group_photo = photoFile.value;
 };
 const onCreateClicked = () => {
     emit(
@@ -41,15 +44,18 @@ const onRemovePhotoClicked = () => {
         <div class="flex-1">
             <div class="flex flex-col gap-4">
                 <div class="space-y-2 px-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
-                    <div>
-                        <label for="group-name" class="block text-sm font-medium leading-6 sm:mt-1.5">Name</label>
-                    </div>
+                    <label for="group_title" class="block text-sm font-medium leading-6 sm:mt-1.5 dark:text-gray-50"
+                        >Name</label
+                    >
                     <div class="flex flex-col gap-1 sm:col-span-2">
                         <input
                             type="text"
-                            name="group-name"
-                            class="input input-bordered w-full dark:bg-gray-800 dark:text-gray-50"
-                            :class="form.errors['group_title'] && 'border-error'"
+                            name="group_title"
+                            class="input input-bordered w-full dark:text-gray-50"
+                            :class="[
+                                form.errors['group_title'] && 'border-error',
+                                isEditing ? 'dark:bg-gray-900' : 'dark:bg-gray-800',
+                            ]"
                             :maxlength="25"
                             v-model="form.group_title"
                         />
@@ -60,25 +66,23 @@ const onRemovePhotoClicked = () => {
                 </div>
 
                 <div class="flex flex-col gap-2 px-6">
-                    <span class="text-sm font-medium">Image</span>
+                    <span class="text-sm font-medium dark:text-gray-50">Image</span>
                     <div class="flex flex-row items-center gap-2">
                         <label
                             for="group_photo"
-                            class="relative flex cursor-pointer flex-row items-center gap-2 rounded-md text-gray-400"
+                            class="relative flex cursor-pointer flex-row items-center gap-2 rounded-md text-gray-400 dark:text-gray-50"
                             :class="
                                 !photoFile
-                                    ? 'border-2 border-dashed hover:border-gray-800 hover:bg-gray-800 hover:text-gray-200'
+                                    ? 'border-2 border-dashed hover:border-gray-800 hover:bg-gray-700 hover:text-gray-50 dark:hover:border-gray-600 dark:hover:bg-gray-900'
                                     : 'border-0 border-none hover:border-none'
                             "
                         >
-                            <div v-if="!photoPreview" class="flex flex-col items-center gap-4">
-                                <div class="avatar">
-                                    <div class="grid h-12 w-12 place-content-center rounded">
-                                        <img
-                                            v-if="group?.img_path"
-                                            :src="getImgSrcFromPath(group?.img_path)"
-                                            class="h-8 w-8 rounded-lg object-cover"
-                                        />
+                            <div class="avatar h-12 w-12" v-if="!photoPreview || (group?.img_path && !photoPreview)">
+                                <div class="mask">
+                                    <div class="grid h-full w-full place-content-center">
+                                        <div class="h-8 w-8 rounded-2xl object-cover" v-if="group?.img_path">
+                                            <img :src="getImgSrcFromPath(group?.img_path)" />
+                                        </div>
                                         <PhotoIcon class="mx-auto h-8 w-8" aria-hidden="true" v-else />
                                     </div>
                                 </div>
@@ -90,7 +94,7 @@ const onRemovePhotoClicked = () => {
                                 />
                             </div>
                             <div class="pr-2" v-if="!photoFile">
-                                <span class="text-xs">Add a group photo</span>
+                                <span class="text-xs">{{ isEditing ? "Replace" : "Add a" }} group photo</span>
                             </div>
                             <input
                                 id="group_photo"
@@ -113,7 +117,7 @@ const onRemovePhotoClicked = () => {
                 </div>
             </div>
         </div>
-        <div class="flex-shrink-0 px-6 py-5 sm:px-6">
+        <div class="flex-shrink-0 px-6 py-5 sm:px-6" v-if="!isEditing">
             <div class="flex justify-between space-x-3">
                 <button :disabled="isLoading" type="button" class="btn btn-neutral" @click="$emit('cancelClicked')">
                     Cancel

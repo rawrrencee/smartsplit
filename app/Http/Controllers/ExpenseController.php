@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\GroupMemberStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Group;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class ExpenseController extends Controller
     {
         return Inertia::render('AddNewExpense', [
             'currencies' => $this->HardcodedDataController->getCurrencies(),
-            'groups' => $this->GroupController->getGroupsByMemberUserId($request->user()->id)
+            'groups' => $this->GroupController->getGroupsByMemberUserIdOrEmail($request->user()->id, null, GroupMemberStatusEnum::ACCEPTED, false, true)
         ]);
     }
 }

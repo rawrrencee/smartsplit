@@ -141,25 +141,27 @@ const handlePendingRequestStatusChange = (groupId, status) => {
     </AppLayout>
 
     <DialogAnimated :dialogTitle :isDialogOpen @dialog-closed="setIsDialogOpen(false)">
-        <CreateOrEditGroup
-            :form="groupForm"
-            :isLoading
-            @cancel-clicked="setIsDialogOpen(false)"
-            @create-clicked="createGroup"
-            v-if="dialogMode === 'CreateGroup'"
-        />
-        <div class="flex flex-col gap-2 pb-4 text-sm">
-            <template v-for="group in pendingGroups">
-                <div class="flex flex-row justify-between gap-2 rounded-2xl px-6 py-2 hover:bg-gray-100">
-                    <PendingRequestRowItem
-                        :group="group"
-                        :is-loading="isLoading"
-                        size="sm"
-                        @accept-clicked="handlePendingRequestStatusChange(group.id, GroupMemberStatusEnum.ACCEPTED)"
-                        @reject-clicked="handlePendingRequestStatusChange(group.id, GroupMemberStatusEnum.REJECTED)"
-                    />
-                </div>
-            </template>
-        </div>
+        <template v-slot:body>
+            <CreateOrEditGroup
+                :form="groupForm"
+                :isLoading
+                @cancel-clicked="setIsDialogOpen(false)"
+                @create-clicked="createGroup"
+                v-if="dialogMode === 'CreateGroup'"
+            />
+            <div class="flex flex-col gap-2 pb-4 text-sm">
+                <template v-for="group in pendingGroups">
+                    <div class="flex flex-row justify-between gap-2 rounded-2xl px-6 py-2 hover:bg-gray-100">
+                        <PendingRequestRowItem
+                            :group="group"
+                            :is-loading="isLoading"
+                            size="sm"
+                            @accept-clicked="handlePendingRequestStatusChange(group.id, GroupMemberStatusEnum.ACCEPTED)"
+                            @reject-clicked="handlePendingRequestStatusChange(group.id, GroupMemberStatusEnum.REJECTED)"
+                        />
+                    </div>
+                </template>
+            </div>
+        </template>
     </DialogAnimated>
 </template>

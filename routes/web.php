@@ -27,6 +27,10 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/404', function () {
+    return Inertia::render('Error/404');
+})->name('404');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
@@ -41,22 +45,20 @@ Route::middleware([
     Route::prefix('groups')->group(function () {
         Route::get('/', [GroupController::class, 'index'])->name('groups');
         Route::post('/add', [GroupController::class, 'store'])->name('groups.add');
-        Route::post('/add-member', [GroupController::class, 'addMember'])->name('groups.add.member');
-        Route::post('/remove-member', [GroupController::class, 'removeMember'])->name('groups.remove.member');
-        Route::get('/view-group', [GroupController::class, 'view'])->name('groups.view');
+        Route::get('/view', [GroupController::class, 'view'])->name('groups.view');
+        Route::get('/edit', [GroupController::class, 'edit'])->name('groups.edit');
+        Route::post('/update', [GroupController::class, 'update'])->name('groups.update');
     });
 
     Route::prefix('group-members')->group(function () {
+        Route::post('/add', [GroupController::class, 'addMember'])->name('groups-members.add');
         Route::post('/update', [GroupController::class, 'updatePendingGroupRequestStatus'])->name('group-members.update');
+        Route::post('/remove', [GroupController::class, 'removeMember'])->name('groups-members.remove');
     });
 
     Route::prefix('expenses')->group(function () {
         Route::get('/add', [ExpenseController::class, 'addExpensePage'])->name('expenses.add');
     });
-
-    Route::get('/edit-group', function () {
-        return Inertia::render('EditGroup');
-    })->name('edit-group');
 
     Route::get('/settle-up', function () {
         return Inertia::render('SettleUp');

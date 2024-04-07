@@ -16,21 +16,23 @@ defineEmits(["groupClicked"]);
         <li
             v-for="group in groups"
             :key="group.id"
-            class="flex items-center justify-between gap-2 bg-gray-50 px-6 py-5 hover:cursor-pointer hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-700"
+            class="flex flex-row items-center justify-between gap-2 bg-gray-50 px-6 py-5 hover:cursor-pointer hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-700"
             @click="$emit('groupClicked', group.id)"
         >
             <div class="flex flex-row items-center gap-4">
                 <ServerImage v-if="group.img_path" :image-url="group.img_path" />
                 <PlaceholderImage v-else />
                 <div class="flex flex-col gap-1">
-                    <span class="text-md font-medium text-gray-600 dark:text-gray-200">{{ group.group_title }}</span>
+                    <span class="break-words text-sm font-medium text-gray-600 dark:text-gray-200">{{
+                        group.group_title
+                    }}</span>
                     <div class="flex flex-row items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-400">
                         <UserIcon class="h-3 w-3" />
-                        <span class="text-xs">{{ group.member_count ?? 0 }}</span>
+                        <span class="text-xs">{{ group.group_members.length ?? 0 }}</span>
                     </div>
                 </div>
             </div>
-            <div class="text-right text-xs" v-if="!hideOwedAmounts">
+            <div class="flex-shrink-0 text-right text-xs" v-if="!hideOwedAmounts">
                 <span v-if="group.loggedInUserBalance === 0 || !group.loggedInUserBalance" class="text-success"
                     >settled up</span
                 >

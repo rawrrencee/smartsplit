@@ -47,10 +47,14 @@ defineEmits(["dialogClosed"]);
                                 >
                                     <div class="p-6">
                                         <div class="flex items-start justify-between">
-                                            <DialogTitle
-                                                class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
-                                                >{{ dialogTitle }}</DialogTitle
-                                            >
+                                            <DialogTitle as="div" class="flex flex-row flex-wrap items-start gap-2">
+                                                <span
+                                                    class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
+                                                >
+                                                    {{ dialogTitle }}
+                                                </span>
+                                                <slot name="dialogTitle" />
+                                            </DialogTitle>
                                             <div class="ml-3 flex h-7 items-center">
                                                 <button
                                                     type="button"
@@ -65,7 +69,7 @@ defineEmits(["dialogClosed"]);
                                         </div>
                                     </div>
                                     <div class="flex-1 overflow-y-auto">
-                                        <slot />
+                                        <slot name="body" />
                                     </div>
                                 </div>
                             </DialogPanel>

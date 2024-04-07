@@ -1,11 +1,12 @@
 <script setup>
 import { showToastIfNeeded } from "@/Common";
+import DialogAnimated from "@/Components/DialogAnimated.vue";
 import NavigationBarButton from "@/Components/NavigationBarButton.vue";
 import PlaceholderImage from "@/Components/PlaceholderImage.vue";
 import ServerImage from "@/Components/ServerImage.vue";
 import { GroupMemberStatusEnum } from "@/Enums/GroupMemberStatusEnum.js";
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
+import { TransitionChild, TransitionRoot } from "@headlessui/vue";
 import {
     ArrowLeftIcon,
     CurrencyDollarIcon,
@@ -76,7 +77,7 @@ const onAddMemberClicked = () => {
             ...data,
             group_id: props.group.id,
         }))
-        .post(route("groups.add.member"), {
+        .post(route("groups-members.add"), {
             onSuccess: (s) => {
                 addMemberForm.reset();
                 router.reload({ only: ["groupMembers"] });
@@ -104,7 +105,7 @@ const onRemoveMemberClicked = (member) => {
         .transform(() => ({
             id: member.id,
         }))
-        .post(route("groups.remove.member"), {
+        .post(route("groups-members.remove"), {
             onSuccess: (s) => {
                 addMemberForm.reset();
                 router.reload({ only: ["groupMembers"] });
@@ -262,7 +263,10 @@ const mockGroupPaymentSections = [
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
         >
             <NavigationBarButton :icon="ArrowLeftIcon" :on-click="back" />
-            <NavigationBarButton :icon="PencilIcon" :on-click="() => router.get(route('edit-group'))" />
+            <NavigationBarButton
+                :icon="PencilIcon"
+                :on-click="() => router.get(route('groups.edit'), { id: group.id })"
+            />
         </div>
         <div class="mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col gap-5">
@@ -365,238 +369,175 @@ const mockGroupPaymentSections = [
         </div>
     </AppLayout>
 
-    <TransitionRoot as="template" :show="isDialogOpen">
-        <Dialog as="div" class="relative z-10" @close="setIsDialogOpen(false)">
-            <TransitionChild
-                as="template"
-                enter="ease-in-out duration-500"
-                enter-from="opacity-0"
-                enter-to="opacity-100"
-                leave="ease-in-out duration-500"
-                leave-from="opacity-100"
-                leave-to="opacity-0"
+    <DialogAnimated
+        :is-dialog-open="isDialogOpen"
+        :dialog-title="`Group Members (${activeGroupMembers.length ?? 0})`"
+        :padding-top="32"
+        @dialog-closed="setIsDialogOpen(false)"
+    >
+        <template v-slot:dialogTitle>
+            <button
+                type="button"
+                class="btn btn-link btn-xs m-0 flex flex-row gap-1 border-2 border-gray-300 no-underline hover:border-gray-800 dark:border-gray-600 dark:text-gray-50 hover:dark:border-gray-50"
+                @click="setIsAddMemberInputShown(!isAddMemberInputShown)"
             >
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-            </TransitionChild>
-
-            <div class="fixed inset-0 overflow-hidden">
-                <div class="absolute inset-0 overflow-hidden">
-                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-32">
-                        <TransitionChild
-                            as="template"
-                            enter="transform transition ease-in-out duration-500"
-                            enter-from="translate-y-full"
-                            enter-to="translate-y-0"
-                            leave="transform transition ease-in-out duration-500"
-                            leave-from="translate-y-0"
-                            leave-to="translate-y-full"
-                        >
-                            <DialogPanel class="pointer-events-auto w-screen">
-                                <div
-                                    class="flex h-full flex-col gap-4 rounded-t-2xl bg-gray-50 shadow-xl dark:bg-gray-900 dark:text-gray-200"
+                <PlusIcon class="h-3 w-3" />
+                <span>Add</span>
+            </button>
+        </template>
+        <template v-slot:body>
+            <TransitionRoot
+                as="template"
+                :show="!isAddMemberInputShown && activeGroupMembers?.some((m) => m.status === 'PENDING')"
+            >
+                <TransitionChild
+                    as="template"
+                    enter="ease-in-out duration-350"
+                    enter-from="opacity-0"
+                    enter-to="opacity-100"
+                    leave="ease-in-out duration-350"
+                    leave-from="opacity-100"
+                    leave-to="opacity-0"
+                >
+                    <div class="flex flex-col px-6">
+                        <span class="text-xs text-gray-400">
+                            Some new members have yet to accept the invitation to this group. You can still include them
+                            in the expenses, but someone else will need to settle up on their behalf.
+                        </span>
+                    </div>
+                </TransitionChild>
+            </TransitionRoot>
+            <TransitionRoot as="template" :show="isAddMemberInputShown">
+                <TransitionChild
+                    as="template"
+                    enter="ease-in-out duration-350"
+                    enter-from="opacity-0"
+                    enter-to="opacity-100"
+                    leave="ease-in-out duration-350"
+                    leave-from="opacity-100"
+                    leave-to="opacity-0"
+                >
+                    <div class="flex flex-col gap-1 px-6 transition-opacity">
+                        <div class="flex flex-1 flex-col gap-1">
+                            <span class="text-xs text-gray-500 dark:text-gray-50">Enter an email to invite</span>
+                            <input
+                                type="text"
+                                class="input input-sm input-bordered flex-shrink text-xs dark:bg-gray-800"
+                                :class="addMemberForm.errors['email'] && 'border-error'"
+                                placeholder="Email Address"
+                                v-model="addMemberForm.email"
+                            />
+                            <span class="text-xs text-error" v-if="addMemberForm.errors['email']">{{
+                                addMemberForm.errors["email"]
+                            }}</span>
+                            <div class="flex flex-grow flex-row justify-between gap-1">
+                                <button
+                                    type="button"
+                                    class="btn btn-link btn-xs p-0 no-underline dark:text-gray-200"
+                                    @click="onAppendEmailDomainClicked"
                                 >
-                                    <div class="flex flex-row items-center justify-between gap-3 px-6 pt-4">
-                                        <DialogTitle as="div" class="flex flex-row flex-wrap items-start gap-2"
-                                            ><span
-                                                class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
-                                            >
-                                                Group Members ({{ activeGroupMembers.length ?? 0 }})
-                                            </span>
-                                            <button
-                                                type="button"
-                                                class="btn btn-link btn-xs m-0 flex flex-row gap-1 border-2 border-gray-300 no-underline hover:border-gray-800 dark:border-gray-600 dark:text-gray-50 hover:dark:border-gray-50"
-                                                @click="setIsAddMemberInputShown(!isAddMemberInputShown)"
-                                            >
-                                                <PlusIcon class="h-3 w-3" />
-                                                <span>Add</span>
-                                            </button>
-                                        </DialogTitle>
-                                        <div class="flex h-7 items-center">
-                                            <button
-                                                type="button"
-                                                class="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-                                                @click="setIsDialogOpen(false)"
-                                            >
-                                                <span class="absolute -inset-2.5" />
-                                                <span class="sr-only">Close panel</span>
-                                                <XMarkIcon class="h-6 w-6" aria-hidden="true" />
-                                            </button>
+                                    <span>@gmail.com</span>
+                                </button>
+                                <div class="flex flex-row gap-1">
+                                    <button
+                                        type="button"
+                                        class="btn btn-square btn-error btn-sm"
+                                        @click="onClearAddMemberFormClicked"
+                                    >
+                                        <XMarkIcon class="h-4 w-4 text-gray-50" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn btn-success btn-sm text-gray-50"
+                                        :disabled="isLoading"
+                                        @click="onAddMemberClicked"
+                                    >
+                                        <span class="loading loading-spinner loading-xs" v-if="isLoading"></span>
+                                        <PaperAirplaneIcon class="h-4 w-4" />
+                                        <span>Add</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </TransitionChild>
+            </TransitionRoot>
+            <div class="flex-1 overflow-y-auto py-4">
+                <div class="flex flex-col gap-3">
+                    <template v-for="member in activeGroupMembers">
+                        <div
+                            class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-3 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                            <div class="flex flex-shrink flex-col">
+                                <div class="flex flex-row items-center gap-3">
+                                    <div class="avatar" v-if="member?.user?.profile_photo_url">
+                                        <div class="mask mask-squircle w-8">
+                                            <img :src="member?.user?.profile_photo_url" />
                                         </div>
                                     </div>
-                                    <TransitionRoot
-                                        as="template"
-                                        :show="
-                                            !isAddMemberInputShown &&
-                                            activeGroupMembers?.some((m) => m.status === 'PENDING')
-                                        "
-                                    >
-                                        <TransitionChild
-                                            as="template"
-                                            enter="ease-in-out duration-350"
-                                            enter-from="opacity-0"
-                                            enter-to="opacity-100"
-                                            leave="ease-in-out duration-350"
-                                            leave-from="opacity-100"
-                                            leave-to="opacity-0"
+                                    <PlaceholderImage :size="8" v-else />
+                                    <div class="flex flex-col gap-1">
+                                        <span class="break-all text-sm">{{ member.email }}</span>
+                                        <span
+                                            v-if="$page.props.auth.user.id === member.user_id"
+                                            class="badge badge-sm text-xs font-semibold"
+                                            >YOU</span
                                         >
-                                            <div class="flex flex-col px-6">
-                                                <span class="text-xs text-gray-400">
-                                                    Some new members have yet to accept the invitation to this group.
-                                                    You can still include them in the expenses, but someone else will
-                                                    need to settle up on their behalf.
-                                                </span>
-                                            </div>
-                                        </TransitionChild>
-                                    </TransitionRoot>
-                                    <TransitionRoot as="template" :show="isAddMemberInputShown">
-                                        <TransitionChild
-                                            as="template"
-                                            enter="ease-in-out duration-350"
-                                            enter-from="opacity-0"
-                                            enter-to="opacity-100"
-                                            leave="ease-in-out duration-350"
-                                            leave-from="opacity-100"
-                                            leave-to="opacity-0"
+                                        <div
+                                            class="flex flex-row items-center gap-1 text-gray-400"
+                                            v-if="member.status !== GroupMemberStatusEnum.ACCEPTED"
                                         >
-                                            <div class="flex flex-col gap-1 px-6 transition-opacity">
-                                                <div class="flex flex-1 flex-col gap-1">
-                                                    <span class="text-xs text-gray-500 dark:text-gray-50"
-                                                        >Enter an email to invite</span
-                                                    >
-                                                    <input
-                                                        type="text"
-                                                        class="input input-sm input-bordered flex-shrink text-xs dark:bg-gray-800"
-                                                        :class="addMemberForm.errors['email'] && 'border-error'"
-                                                        placeholder="Email Address"
-                                                        v-model="addMemberForm.email"
-                                                    />
-                                                    <span
-                                                        class="text-xs text-error"
-                                                        v-if="addMemberForm.errors['email']"
-                                                        >{{ addMemberForm.errors["email"] }}</span
-                                                    >
-                                                    <div class="flex flex-grow flex-row justify-between gap-1">
-                                                        <button
-                                                            type="button"
-                                                            class="btn btn-link btn-xs p-0 no-underline dark:text-gray-200"
-                                                            @click="onAppendEmailDomainClicked"
-                                                        >
-                                                            <span>@gmail.com</span>
-                                                        </button>
-                                                        <div class="flex flex-row gap-1">
-                                                            <button
-                                                                type="button"
-                                                                class="btn btn-square btn-error btn-sm"
-                                                                @click="onClearAddMemberFormClicked"
-                                                            >
-                                                                <XMarkIcon class="h-4 w-4 text-gray-50" />
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                class="btn btn-success btn-sm text-gray-50"
-                                                                :disabled="isLoading"
-                                                                @click="onAddMemberClicked"
-                                                            >
-                                                                <span
-                                                                    class="loading loading-spinner loading-xs"
-                                                                    v-if="isLoading"
-                                                                ></span>
-                                                                <PaperAirplaneIcon class="h-4 w-4" />
-                                                                <span>Add</span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </TransitionChild>
-                                    </TransitionRoot>
-                                    <div class="flex-1 overflow-y-auto pb-4">
-                                        <div class="flex flex-col gap-3">
-                                            <template v-for="member in activeGroupMembers">
-                                                <div
-                                                    class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-3 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                >
-                                                    <div class="flex flex-shrink flex-col">
-                                                        <div class="flex flex-row items-center gap-3">
-                                                            <div class="avatar" v-if="member?.user?.profile_photo_url">
-                                                                <div class="mask mask-squircle w-8">
-                                                                    <img :src="member?.user?.profile_photo_url" />
-                                                                </div>
-                                                            </div>
-                                                            <PlaceholderImage :size="8" v-else />
-                                                            <div class="flex flex-col gap-1">
-                                                                <span class="break-all text-sm">{{
-                                                                    member.email
-                                                                }}</span>
-                                                                <div
-                                                                    class="flex flex-row items-center gap-1 text-gray-400"
-                                                                    v-if="
-                                                                        member.status !== GroupMemberStatusEnum.ACCEPTED
-                                                                    "
-                                                                >
-                                                                    <ExclamationCircleIcon class="h-4 w-4" />
-                                                                    <span class="text-xs">{{ member.status }}</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div
-                                                        class="flex flex-grow flex-col items-end"
-                                                        v-if="member.user_id !== $page.props.auth.user.id"
-                                                    >
-                                                        <button
-                                                            type="button"
-                                                            class="btn btn-square btn-error btn-sm"
-                                                            @click="onRemoveMemberClicked(member)"
-                                                        >
-                                                            <span
-                                                                class="loading loading-spinner loading-sm"
-                                                                v-if="isLoading"
-                                                            />
-                                                            <XMarkIcon class="h-4 w-4" v-else />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </template>
-                                            <div v-if="deletedGroupMembers.length > 0" class="flex flex-col">
-                                                <div class="divider m-0 p-0"></div>
-                                                <div class="flex flex-col gap-3 pb-3 pt-2">
-                                                    <div class="flex flex-col gap-3 px-6">
-                                                        <span class="text-md font-medium">Deleted Members</span>
-                                                        <span class="text-xs text-gray-400">
-                                                            Deleted members cannot be included in new expenses, but will
-                                                            remain visible in older expenses. You can invite them to the
-                                                            group again if needed.
-                                                        </span>
-                                                    </div>
-                                                    <div class="flex flex-col gap-2">
-                                                        <template v-for="member in deletedGroupMembers">
-                                                            <div
-                                                                class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                            >
-                                                                <span class="break-all text-xs">{{
-                                                                    member.email
-                                                                }}</span>
-                                                                <button
-                                                                    type="button"
-                                                                    class="btn btn-link btn-xs no-underline"
-                                                                    @click="onRestoreDeletedGroupMemberClicked(member)"
-                                                                >
-                                                                    Invite
-                                                                </button>
-                                                            </div>
-                                                        </template>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <ExclamationCircleIcon class="h-4 w-4" />
+                                            <span class="text-xs">{{ member.status }}</span>
                                         </div>
                                     </div>
                                 </div>
-                            </DialogPanel>
-                        </TransitionChild>
+                            </div>
+                            <div
+                                class="flex flex-grow flex-col items-end"
+                                v-if="member.user_id !== $page.props.auth.user.id"
+                            >
+                                <button
+                                    type="button"
+                                    class="btn btn-square btn-error btn-sm"
+                                    @click="onRemoveMemberClicked(member)"
+                                >
+                                    <span class="loading loading-spinner loading-sm" v-if="isLoading" />
+                                    <XMarkIcon class="h-4 w-4" v-else />
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                    <div v-if="deletedGroupMembers.length > 0" class="flex flex-col">
+                        <div class="divider m-0 p-0"></div>
+                        <div class="flex flex-col gap-3 pb-3 pt-2">
+                            <div class="flex flex-col gap-3 px-6">
+                                <span class="text-md font-medium">Deleted Members</span>
+                                <span class="text-xs text-gray-400">
+                                    Deleted members cannot be included in new expenses, but will remain visible in older
+                                    expenses. You can invite them to the group again if needed.
+                                </span>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <template v-for="member in deletedGroupMembers">
+                                    <div
+                                        class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    >
+                                        <span class="break-all text-xs">{{ member.email }}</span>
+                                        <button
+                                            type="button"
+                                            class="btn btn-link btn-xs no-underline"
+                                            @click="onRestoreDeletedGroupMemberClicked(member)"
+                                        >
+                                            Invite
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </Dialog>
-    </TransitionRoot>
+        </template>
+    </DialogAnimated>
 </template>

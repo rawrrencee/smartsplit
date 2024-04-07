@@ -28,9 +28,9 @@ class GroupController extends Controller
         return Group::whereOwnerId($userId)->get();
     }
 
-    public function getGroupsByMemberUserIdOrEmail($userId, $email = null, $status)
+    public function getGroupsByMemberUserIdOrEmail($userId, $email = null, GroupMemberStatusEnum $status = null, $withTrashed = false, $withUser = false)
     {
-        return Group::whereHas('groupMembers', function ($query) use ($userId, $email, $status) {
+        $mainQuery = Group::whereHas('groupMembers', function ($query) use ($userId, $email, $status, $withTrashed) {
             $query->where(function ($query) use ($userId, $email) {
                 if (isset($email)) {
                     $query->where('user_id', '=', $userId)
@@ -41,9 +41,24 @@ class GroupController extends Controller
             });
 
             if (isset($status)) {
-                $query->where('status', $status);
+                $query->where('status', $status->value);
             }
-        })->get();
+
+            if ($withTrashed) {
+                $query->withTrashed();
+            }
+        });
+
+        $mainQuery->with(['groupMembers' => function ($query) use ($withUser) {
+            $query->select('id', 'group_id', 'user_id', 'status');
+            if ($withUser) {
+                $query->with(['user' => function ($query) {
+                    $query->select('id', 'name', 'email');
+                }]);
+            }
+        }]);
+
+        return $mainQuery->get();
     }
 
     public function getGroupMembersByGroupId($groupId)
@@ -93,8 +108,8 @@ class GroupController extends Controller
     public function index(Request $request)
     {
         return Inertia::render('Groups', [
-            'groups' => $this->getGroupsByMemberUserIdOrEmail($request->user()->id, $request->user()->email, GroupMemberStatusEnum::ACCEPTED->value),
-            'pendingGroups' => $this->getGroupsByMemberUserIdOrEmail($request->user()->id, $request->user()->email, GroupMemberStatusEnum::PENDING->value)
+            'groups' => $this->getGroupsByMemberUserIdOrEmail($request->user()->id, $request->user()->email, GroupMemberStatusEnum::ACCEPTED),
+            'pendingGroups' => $this->getGroupsByMemberUserIdOrEmail($request->user()->id, $request->user()->email, GroupMemberStatusEnum::PENDING)
         ]);
     }
 
@@ -249,10 +264,61 @@ class GroupController extends Controller
 
     public function edit(Request $request)
     {
+        $id = intval($request['id']);
+        if ($id === 0) {
+            return redirect()->route('404');
+        }
+
+        $group = Group::withTrashed()
+            ->where('id', '=', $id)
+            ->first();
+
+        if (!isset($group)) {
+            return redirect()->route('home');
+        }
+
+        return Inertia::render('EditGroup', [
+            'group' => $group,
+        ]);
     }
 
     public function update(Request $request)
     {
+        $request->validate([
+            'id' => 'required|exists:groups,id',
+            'group_title' => 'required|max:25',
+            'group_photo' => 'nullable|image',
+        ]);
+
+        $group = Group::whereId($request['id'])->first();
+
+        if (!empty($request['group_photo'])) {
+            $path = $request->file('group_photo')->store('group-photos', 'private');
+            $request['img_path'] = $path;
+        }
+
+        try {
+            DB::beginTransaction();
+            $group->update($request->all());
+
+            DB::commit();
+
+            return redirect()->back()
+                ->with('show', true)
+                ->with('type', 'default')
+                ->with('status', 'success')
+                ->with('message', 'Group updated successfully.')
+                ->with('route', 'groups')
+                ->with('id', $group->id);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()
+                ->with('show', true)
+                ->with('type', 'default')
+                ->with('status', 'error')
+                ->with('message', 'Failed to update record: ' . $this->CommonController->formatException($e));
+        }
     }
 
     public function updatePendingGroupRequestStatus(Request $request)
