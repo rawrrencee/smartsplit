@@ -22,7 +22,7 @@ class ExpenseController extends Controller
     public function addExpensePage(Request $request)
     {
         return Inertia::render('AddNewExpense', [
-            'currencies' => $this->HardcodedDataController->getCurrencies(),
+            'currencies' => $request['withCurrencies'] ? $this->HardcodedDataController->getCurrencies() : [],
             'groups' => $this->GroupController->getGroupsByMemberUserIdOrEmail($request->user()->id, null, GroupMemberStatusEnum::ACCEPTED, false, true)
         ]);
     }

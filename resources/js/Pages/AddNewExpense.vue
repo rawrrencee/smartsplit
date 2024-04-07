@@ -1,4 +1,5 @@
 <script setup>
+import { to2DecimalPlacesIfValid } from "@/Common.js";
 import GroupList from "@/Components/GroupList.vue";
 import PlaceholderImage from "@/Components/PlaceholderImage.vue";
 import ServerImage from "@/Components/ServerImage.vue";
@@ -6,17 +7,53 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
 import { CheckCircleIcon } from "@heroicons/vue/20/solid";
 import { Bars2Icon, CalendarIcon, ListBulletIcon, MagnifyingGlassIcon, XMarkIcon } from "@heroicons/vue/24/outline";
+import { router, useForm } from "@inertiajs/vue3";
 import { DatePicker } from "v-calendar";
 import "v-calendar/style.css";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
+
+onMounted(() => {
+    getCurrenciesIfNeeded();
+});
 
 const props = defineProps({
     groups: Array,
-    currencies: Array,
+    currencies: {
+        type: Array,
+        default: localStorage.getItem(defaultCurrenciesKey)
+            ? JSON.parse(localStorage.getItem(defaultCurrenciesKey))
+            : [],
+    },
 });
 
 const defaultExpenseGroupKey = "addExpenseDefaultGroupId";
 const defaultExpenseCurrencyKey = "addExpenseDefaultCurrency";
+const defaultCurrenciesKey = "currencies";
+
+const getCurrenciesIfNeeded = () => {
+    const storedCurrencies = localStorage.getItem(defaultCurrenciesKey);
+    if (!storedCurrencies) {
+        router.get(
+            route("expenses.add", { withCurrencies: true }),
+            {},
+            {
+                only: ["currencies"],
+                onSuccess: (s) => {
+                    localStorage.setItem(defaultCurrenciesKey, JSON.stringify(s.props.currencies));
+                },
+                onFinish: () => {
+                    setTimeout(() => {
+                        router.visit(route("expenses.add"));
+                    }, 200);
+                },
+            },
+        );
+    }
+};
+const currencies = computed(() => {
+    const storedCurrencies = localStorage.getItem(defaultCurrenciesKey);
+    return storedCurrencies ? JSON.parse(storedCurrencies) : [];
+});
 
 const isDialogOpen = ref(false);
 const setIsDialogOpen = (value) => {
@@ -38,6 +75,17 @@ const dialogTitle = computed(() => {
     }
 });
 
+const expenseForm = useForm({
+    group_id: null,
+    date_of_expense: new Date(),
+    description: null,
+    currency_key: null,
+    amount: null,
+    split_mode: null,
+    payer_ids: [],
+    payee_ids: [],
+});
+
 const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(defaultExpenseGroupKey);
 const selectedGroupId = ref(getSelectedGroupIdFromSessionStorage());
 const setSelectedGroup = (groupId) => {
@@ -52,15 +100,14 @@ const currentGroup = computed(() => {
     return props.groups.find((group) => `${group.id}` === selectedGroupId.value);
 });
 
-const selectedDate = ref(new Date());
 const popover = ref({
     visibility: "focus",
 });
 
 const getSelectedCurrencyFromSessionStorage = () => {
-    return props.currencies?.find((c) => c.key === sessionStorage.getItem(defaultExpenseCurrencyKey));
+    return currencies.value?.find((c) => c.key === sessionStorage.getItem(defaultExpenseCurrencyKey));
 };
-const selectedCurrency = ref(getSelectedCurrencyFromSessionStorage() ?? props.currencies?.[0]);
+const selectedCurrency = ref(getSelectedCurrencyFromSessionStorage() ?? currencies.value?.[0]);
 const currencyQuery = ref("");
 const setSelectedCurrency = (key) => {
     sessionStorage.setItem(defaultExpenseCurrencyKey, key);
@@ -70,8 +117,8 @@ const setSelectedCurrency = (key) => {
 };
 const filteredCurrencies = computed(() =>
     currencyQuery.value === ""
-        ? props.currencies
-        : props.currencies.filter((c) => {
+        ? currencies.value
+        : currencies.value.filter((c) => {
               const searchQuery = currencyQuery.value.toLowerCase().replace(/\s+/g, "");
               const value = c.value.toLowerCase().replace(/\s+/g, "");
               const key = c.key.toLowerCase().replace(/\s+/g, "");
@@ -90,7 +137,6 @@ const updateExpenseConfigurationState = (buttonType) => {
         return;
     }
     expenseConfigurationState.value = buttonType;
-    console.log(expenseConfigurationState.value);
 };
 const isPaidBySelectionShown = computed(() => expenseConfigurationState.value === "paidBy");
 const isSelectSplitModeShown = computed(() => expenseConfigurationState.value === "splitMode");
@@ -136,7 +182,7 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
 
                 <div class="flex flex-col items-start gap-1">
                     <span>Date of expense</span>
-                    <DatePicker v-model="selectedDate" :input-debounce="500" :popover="popover">
+                    <DatePicker v-model="expenseForm.date_of_expense" :input-debounce="500" :popover="popover">
                         <template #default="{ inputValue, inputEvents }">
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 z-10 flex items-center pl-3">
@@ -176,9 +222,11 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
                         <span>{{ selectedCurrency?.symbol ?? "$" }}</span>
                     </button>
                     <input
-                        type="text"
+                        type="number"
                         placeholder="0.00"
-                        class="input input-bordered w-full dark:border-0 dark:bg-gray-900 dark:text-gray-50"
+                        class="input input-bordered w-full [appearance:textfield] disabled:bg-gray-300 dark:border-0 dark:bg-gray-900 dark:text-gray-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        v-model="expenseForm.amount"
+                        @focusout="expenseForm.amount = to2DecimalPlacesIfValid(expenseForm.amount)"
                     />
                 </div>
             </div>
@@ -224,7 +272,10 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
                                     <input type="checkbox" class="checkbox checkbox-xs dark:bg-gray-600" />
                                     <span class="label-text text-xs dark:text-gray-50">Select All</span>
                                 </label>
-                                <span class="text-xs">Total to pay: US$ 20.00</span>
+                                <span class="text-xs"
+                                    >Total to pay: {{ selectedCurrency.symbol ?? "$"
+                                    }}{{ expenseForm.amount ?? "0.00" }}</span
+                                >
                             </div>
                             <div
                                 class="flex flex-row items-center justify-between gap-3 p-4 hover:bg-gray-200 dark:hover:bg-gray-700"

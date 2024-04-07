@@ -37,6 +37,7 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/photo', [CommonController::class, 'showPhoto'])->name('photo');
+    Route::get('/currencies', [CommonController::class, 'getCurrencies'])->name('currencies');
 
     Route::get('/home', function () {
         return Inertia::render('Home');
