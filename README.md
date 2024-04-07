@@ -133,3 +133,6 @@
 >
 >       SCOUT_DRIVER=meilisearch
 >       MEILISEARCH_HOST=http://meilisearch:7700
+>       GOOGLE_CLIENT_ID="abcdef.apps.googleusercontent.com"
+>       GOOGLE_CLIENT_SECRET="secret"
+>       GOOGLE_REDIRECT_URI=http://localhost/oauth/google/callback
