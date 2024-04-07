@@ -273,7 +273,9 @@ const mockGroupPaymentSections = [
                 <div class="flex flex-row items-center gap-4">
                     <ServerImage :size="12" v-if="group?.img_path" :image-url="group.img_path" />
                     <PlaceholderImage v-else :size="12" />
-                    <span class="text-2xl font-medium dark:text-gray-100">{{ group?.group_title }}</span>
+                    <span class="min-w-0 break-words text-2xl font-medium dark:text-gray-100">{{
+                        group?.group_title
+                    }}</span>
                 </div>
                 <button type="button" class="flex flex-row items-center" @click="setIsDialogOpen(true)">
                     <div class="avatar-group -space-x-4 rtl:space-x-reverse">
@@ -337,25 +339,25 @@ const mockGroupPaymentSections = [
                                     <CurrencyDollarIcon class="h-8 w-8 flex-shrink-0 text-success" />
                                     <span class="break-word text-sm">{{ payment.title }}</span>
                                 </div>
-                                <div v-else class="flex flex-grow flex-row items-center justify-between gap-2">
+                                <div v-else class="flex min-w-0 flex-grow flex-row items-center justify-between gap-2">
                                     <div class="avatar flex-shrink-0">
                                         <div class="h-8 w-8 rounded">
                                             <img :src="payment.imageUrl" />
                                         </div>
                                     </div>
-                                    <div class="flex flex-grow flex-col text-sm">
+                                    <div class="flex min-w-0 flex-grow flex-col text-xs">
                                         <span class="dark:text-gray-200">{{ payment.title }}</span>
-                                        <span class="break-word text-xs text-gray-500 dark:text-gray-300"
+                                        <span class="break-words text-gray-500 dark:text-gray-300"
                                             >{{ payment.payerName }} paid {{ payment.currency
                                             }}{{ payment.amount }}</span
                                         >
                                     </div>
                                     <div
-                                        class="flex flex-shrink-0 flex-col text-right text-sm"
+                                        class="flex min-w-0 flex-shrink-0 flex-col break-words text-right text-xs"
                                         :class="payment.currentUserBorrowed ? 'text-error' : 'text-success'"
                                     >
                                         <span>you {{ payment.currentUserBorrowed ? "borrowed" : "lent" }}</span>
-                                        <span class="text-xs"
+                                        <span
                                             >{{ payment.currencyBorrowedOrLent
                                             }}{{ payment.amountBorrowedOrLent }}</span
                                         >

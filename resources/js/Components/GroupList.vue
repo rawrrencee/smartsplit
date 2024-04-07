@@ -19,10 +19,10 @@ defineEmits(["groupClicked"]);
             class="flex flex-row items-center justify-between gap-2 bg-gray-50 px-6 py-5 hover:cursor-pointer hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-700"
             @click="$emit('groupClicked', group.id)"
         >
-            <div class="flex flex-row items-center gap-4">
+            <div class="flex min-w-0 flex-row items-center gap-4">
                 <ServerImage v-if="group.img_path" :image-url="group.img_path" />
                 <PlaceholderImage v-else />
-                <div class="flex flex-col gap-1">
+                <div class="flex min-w-0 flex-col gap-1">
                     <span class="break-words text-sm font-medium text-gray-600 dark:text-gray-200">{{
                         group.group_title
                     }}</span>
@@ -32,7 +32,7 @@ defineEmits(["groupClicked"]);
                     </div>
                 </div>
             </div>
-            <div class="flex-shrink-0 text-right text-xs" v-if="!hideOwedAmounts">
+            <div class="min-w-0 flex-shrink-0 text-right text-xs" v-if="!hideOwedAmounts">
                 <span v-if="group.loggedInUserBalance === 0 || !group.loggedInUserBalance" class="text-success"
                     >settled up</span
                 >
