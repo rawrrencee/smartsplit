@@ -9,7 +9,7 @@ const props = defineProps({
     isLoading: Boolean,
     isEditing: Boolean,
 });
-const emit = defineEmits(["cancelClicked", "createClicked"]);
+const emit = defineEmits(["cancelClicked", "createClicked", "deletePhotoClicked"]);
 
 const photoPreview = ref(null);
 const photoFile = ref(null);
@@ -70,21 +70,19 @@ const onRemovePhotoClicked = () => {
                     <div class="flex flex-row items-center gap-2">
                         <label
                             for="group_photo"
-                            class="relative flex cursor-pointer flex-row items-center gap-2 rounded-md text-gray-400 dark:text-gray-50"
+                            class="relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-md p-2 text-gray-400 dark:text-gray-50"
                             :class="
                                 !photoFile
                                     ? 'border-2 border-dashed hover:border-gray-800 hover:bg-gray-700 hover:text-gray-50 dark:hover:border-gray-600 dark:hover:bg-gray-900'
                                     : 'border-0 border-none hover:border-none'
                             "
                         >
-                            <div class="avatar h-12 w-12" v-if="!photoPreview || (group?.img_path && !photoPreview)">
-                                <div class="mask">
-                                    <div class="grid h-full w-full place-content-center">
-                                        <div class="h-8 w-8 rounded-2xl object-cover" v-if="group?.img_path">
-                                            <img :src="getImgSrcFromPath(group?.img_path)" />
-                                        </div>
-                                        <PhotoIcon class="mx-auto h-8 w-8" aria-hidden="true" v-else />
-                                    </div>
+                            <div class="avatar" v-if="!photoPreview || (group?.img_path && !photoPreview)">
+                                <div class="mask mask-squircle grid w-20 grid-cols-1 place-content-center">
+                                    <template v-if="group?.img_path">
+                                        <img :src="getImgSrcFromPath(group?.img_path)" />
+                                    </template>
+                                    <PhotoIcon class="mx-auto h-8 w-8" aria-hidden="true" v-else />
                                 </div>
                             </div>
                             <div v-else class="self-center">
@@ -93,9 +91,9 @@ const onRemovePhotoClicked = () => {
                                     :style="'background-image: url(\'' + photoPreview + '\');'"
                                 />
                             </div>
-                            <div class="pr-2" v-if="!photoFile">
-                                <span class="text-xs">{{ isEditing ? "Replace" : "Add a" }} group photo</span>
-                            </div>
+                            <span v-if="!photoFile" class="text-xs"
+                                >{{ isEditing && group?.img_path ? "Replace" : "Add a" }} group photo</span
+                            >
                             <input
                                 id="group_photo"
                                 name="group_photo"
@@ -112,6 +110,16 @@ const onRemovePhotoClicked = () => {
                             @click="onRemovePhotoClicked"
                         >
                             <XMarkIcon class="h-6 w-6" aria-hidden="true" />
+                        </button>
+                    </div>
+                    <div v-if="isEditing && group?.img_path">
+                        <button
+                            type="button"
+                            class="btn btn-error btn-xs pt-0 no-underline"
+                            @click="$emit('deletePhotoClicked')"
+                        >
+                            <XMarkIcon class="h-4 w-4" />
+                            <span>Delete Photo</span>
                         </button>
                     </div>
                 </div>

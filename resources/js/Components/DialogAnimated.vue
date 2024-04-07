@@ -1,13 +1,29 @@
 <script setup>
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
 import { XMarkIcon } from "@heroicons/vue/24/outline";
+import { computed } from "vue";
 
-defineProps({
+const props = defineProps({
     isDialogOpen: Boolean,
     dialogTitle: String,
     paddingTop: Number,
+    size: String,
 });
 
+const paddingTop = computed(() => {
+    switch (props.size) {
+        case "xs":
+            return "pt-60";
+        case "sm":
+            return "pt-44";
+        case "lg":
+            return "pt-32";
+        case "xl":
+            return "pt-28";
+        default:
+            return "pt-28";
+    }
+});
 defineEmits(["dialogClosed"]);
 </script>
 
@@ -23,15 +39,12 @@ defineEmits(["dialogClosed"]);
                 leave-from="opacity-100"
                 leave-to="opacity-0"
             >
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 pt-4 transition-opacity" />
             </TransitionChild>
 
             <div class="fixed inset-0 overflow-hidden">
                 <div class="absolute inset-0 overflow-hidden">
-                    <div
-                        class="pointer-events-none fixed inset-y-0 flex max-w-full"
-                        :class="paddingTop >= 0 ? `pt-${paddingTop}` : 'pt-28'"
-                    >
+                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full" :class="paddingTop">
                         <TransitionChild
                             as="template"
                             enter="transform transition ease-in-out duration-500"

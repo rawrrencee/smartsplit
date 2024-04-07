@@ -13,7 +13,7 @@ const props = defineProps({
 });
 
 const back = () => {
-    window.history.back();
+    router.visit(route("groups.view", { id: props.group.id }));
 };
 
 const isLoading = ref(false);
@@ -30,13 +30,34 @@ const updateGroup = () => {
     groupForm.post(route("groups.update"), {
         onSuccess: (s) => {
             groupForm.reset();
-            showToastIfNeeded(toast, s.props.flash);
+            setTimeout(() => {
+                showToastIfNeeded(toast, s.props.flash);
+            }, 200);
             router.visit(route("groups.view", { id: props.group.id }));
         },
         onFinish: () => {
             setIsLoading(false);
         },
     });
+};
+const onDeletePhotoClicked = () => {
+    if (!confirm("Are you sure you want to delete this group photo?")) return;
+    setIsLoading(true);
+    router.post(
+        route("groups.delete-photo"),
+        { id: props.group.id },
+        {
+            onSuccess: (s) => {
+                showToastIfNeeded(toast, s.props.flash);
+                router.reload({
+                    only: ["group"],
+                });
+            },
+            onFinish: () => {
+                setIsLoading(false);
+            },
+        },
+    );
 };
 </script>
 
@@ -55,7 +76,13 @@ const updateGroup = () => {
             </button>
         </div>
         <div class="flex h-full flex-col overflow-y-auto">
-            <CreateOrEditGroup :form="groupForm" :group="group" :isLoading :isEditing="true" />
+            <CreateOrEditGroup
+                :form="groupForm"
+                :group="group"
+                :isLoading
+                :isEditing="true"
+                @delete-photo-clicked="onDeletePhotoClicked"
+            />
         </div>
     </AppLayout>
 </template>

@@ -27,7 +27,7 @@ const props = defineProps({
 });
 
 const back = () => {
-    window.history.back();
+    router.visit(route("groups"));
 };
 
 const isLoading = ref(false);
@@ -373,6 +373,7 @@ const mockGroupPaymentSections = [
         :is-dialog-open="isDialogOpen"
         :dialog-title="`Group Members (${activeGroupMembers.length ?? 0})`"
         :padding-top="32"
+        size="xl"
         @dialog-closed="setIsDialogOpen(false)"
     >
         <template v-slot:dialogTitle>
@@ -399,7 +400,7 @@ const mockGroupPaymentSections = [
                     leave-from="opacity-100"
                     leave-to="opacity-0"
                 >
-                    <div class="flex flex-col px-6">
+                    <div class="flex flex-col px-6 pb-4">
                         <span class="text-xs text-gray-400">
                             Some new members have yet to accept the invitation to this group. You can still include them
                             in the expenses, but someone else will need to settle up on their behalf.
@@ -462,7 +463,7 @@ const mockGroupPaymentSections = [
                     </div>
                 </TransitionChild>
             </TransitionRoot>
-            <div class="flex-1 overflow-y-auto py-4">
+            <div class="flex-1 overflow-y-auto pb-4 pt-2">
                 <div class="flex flex-col gap-3">
                     <template v-for="member in activeGroupMembers">
                         <div

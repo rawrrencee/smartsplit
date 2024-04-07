@@ -48,7 +48,7 @@ const navigationItems = [
 
 <template>
     <div data-theme="splitsmartLight" :class="!isLightMode && 'dark'">
-        <Toaster richColors position="top-center" />
+        <Toaster richColors position="top-center" class="z-10" />
         <Head :title="title" />
 
         <Banner />
