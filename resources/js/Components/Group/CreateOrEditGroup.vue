@@ -12,6 +12,7 @@ const emit = defineEmits(["cancelClicked", "createClicked"]);
 const photoPreview = ref(null);
 const photoFile = ref(null);
 const updatePhotoPreview = (event) => {
+    if (!event.target.files[0]) return;
     photoFile.value = event.target.files[0];
     if (!photoFile.value) return;
     const reader = new FileReader();
@@ -29,6 +30,10 @@ const onCreateClicked = () => {
         })),
     );
 };
+const onRemovePhotoClicked = () => {
+    photoFile.value = null;
+    photoPreview.value = null;
+};
 </script>
 
 <template>
@@ -45,6 +50,7 @@ const onCreateClicked = () => {
                             name="group-name"
                             class="input input-bordered w-full dark:bg-gray-800 dark:text-gray-50"
                             :class="form.errors['group_title'] && 'border-error'"
+                            :maxlength="25"
                             v-model="form.group_title"
                         />
                         <span v-if="form.errors['group_title']" class="text-error">
@@ -53,34 +59,29 @@ const onCreateClicked = () => {
                     </div>
                 </div>
 
-                <div class="space-y-2 px-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
-                    <label for="group_photo" class="block text-sm font-medium leading-6">Image</label>
-                    <div
-                        class="mt-2 flex max-w-lg justify-center rounded-lg border border-dashed px-6 py-10 sm:col-span-2"
-                    >
-                        <div class="flex flex-col justify-center gap-2 text-center">
-                            <div v-if="!photoPreview" class="mt-2 flex flex-col items-center gap-4">
-                                <img
-                                    v-if="group?.img_url || group?.img_path"
-                                    :src="group?.img_path ? getImgSrcFromPath(group?.img_path) : group?.img_url"
-                                    class="h-20 w-20 rounded-lg object-cover"
-                                />
-                                <PhotoIcon class="mx-auto h-12 w-12" aria-hidden="true" v-else />
-                                <button
-                                    type="button"
-                                    class="btn btn-ghost btn-sm"
-                                    v-if="group?.img_path"
-                                    :disabled="!!group?.img_url && !group?.img_path"
-                                    @click="deletePhoto"
-                                >
-                                    <div class="flex items-center gap-2">
-                                        <XMarkIcon class="h-3 w-3" />
-                                        <span>Remove</span>
+                <div class="flex flex-col gap-2 px-6">
+                    <span class="text-sm font-medium">Image</span>
+                    <div class="flex flex-row items-center gap-2">
+                        <label
+                            for="group_photo"
+                            class="relative flex cursor-pointer flex-row items-center gap-2 rounded-md text-gray-400"
+                            :class="
+                                !photoFile
+                                    ? 'border-2 border-dashed hover:border-gray-800 hover:bg-gray-800 hover:text-gray-200'
+                                    : 'border-0 border-none hover:border-none'
+                            "
+                        >
+                            <div v-if="!photoPreview" class="flex flex-col items-center gap-4">
+                                <div class="avatar">
+                                    <div class="grid h-12 w-12 place-content-center rounded">
+                                        <img
+                                            v-if="group?.img_path"
+                                            :src="getImgSrcFromPath(group?.img_path)"
+                                            class="h-8 w-8 rounded-lg object-cover"
+                                        />
+                                        <PhotoIcon class="mx-auto h-8 w-8" aria-hidden="true" v-else />
                                     </div>
-                                </button>
-                                <span class="text-xs" v-if="group?.img_url && !group?.img_path"
-                                    >Image populated from Image URL (filled in below)</span
-                                >
+                                </div>
                             </div>
                             <div v-else class="self-center">
                                 <span
@@ -88,29 +89,26 @@ const onCreateClicked = () => {
                                     :style="'background-image: url(\'' + photoPreview + '\');'"
                                 />
                             </div>
-                            <div class="flex flex-col">
-                                <div class="flex justify-center text-sm leading-6">
-                                    <label
-                                        for="group_photo"
-                                        class="relative cursor-pointer rounded-md font-semibold hover:text-secondary"
-                                    >
-                                        <span
-                                            >Click to upload
-                                            {{ group?.img_path ? "another" : "a new" }}
-                                            file</span
-                                        >
-                                        <input
-                                            id="group_photo"
-                                            name="group_photo"
-                                            type="file"
-                                            class="sr-only"
-                                            @change="updatePhotoPreview"
-                                        />
-                                    </label>
-                                </div>
-                                <p class="text-xs leading-5 text-gray-600">PNG or JPG up to 10MB</p>
+                            <div class="pr-2" v-if="!photoFile">
+                                <span class="text-xs">Add a group photo</span>
                             </div>
-                        </div>
+                            <input
+                                id="group_photo"
+                                name="group_photo"
+                                type="file"
+                                class="sr-only"
+                                @click="$event.target.value = ''"
+                                @change="updatePhotoPreview"
+                            />
+                        </label>
+                        <button
+                            v-if="photoFile"
+                            type="button"
+                            class="btn btn-square btn-error btn-xs"
+                            @click="onRemovePhotoClicked"
+                        >
+                            <XMarkIcon class="h-6 w-6" aria-hidden="true" />
+                        </button>
                     </div>
                 </div>
             </div>

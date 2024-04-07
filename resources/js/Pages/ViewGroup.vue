@@ -269,7 +269,7 @@ const mockGroupPaymentSections = [
                 <div class="flex flex-row items-center gap-4">
                     <ServerImage :size="12" v-if="group?.img_path" :image-url="group.img_path" />
                     <PlaceholderImage v-else :size="12" />
-                    <span class="truncate text-2xl font-medium dark:text-gray-100">{{ group?.group_title }}</span>
+                    <span class="text-2xl font-medium dark:text-gray-100">{{ group?.group_title }}</span>
                 </div>
                 <button type="button" class="flex flex-row items-center" @click="setIsDialogOpen(true)">
                     <div class="avatar-group -space-x-4 rtl:space-x-reverse">
@@ -329,7 +329,7 @@ const mockGroupPaymentSections = [
                                     class="flex flex-row items-center gap-2"
                                 >
                                     <CurrencyDollarIcon class="h-8 w-8 flex-shrink-0 text-success" />
-                                    <span class="truncate text-sm">{{ payment.title }}</span>
+                                    <span class="break-word text-sm">{{ payment.title }}</span>
                                 </div>
                                 <div v-else class="flex flex-grow flex-row items-center justify-between gap-2">
                                     <div class="avatar flex-shrink-0">
@@ -339,7 +339,7 @@ const mockGroupPaymentSections = [
                                     </div>
                                     <div class="flex flex-grow flex-col text-sm">
                                         <span class="dark:text-gray-200">{{ payment.title }}</span>
-                                        <span class="truncate text-xs text-gray-500 dark:text-gray-300"
+                                        <span class="break-word text-xs text-gray-500 dark:text-gray-300"
                                             >{{ payment.payerName }} paid {{ payment.currency
                                             }}{{ payment.amount }}</span
                                         >
@@ -379,7 +379,7 @@ const mockGroupPaymentSections = [
 
             <div class="fixed inset-0 overflow-hidden">
                 <div class="absolute inset-0 overflow-hidden">
-                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-48">
+                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-32">
                         <TransitionChild
                             as="template"
                             enter="transform transition ease-in-out duration-500"
@@ -393,8 +393,8 @@ const mockGroupPaymentSections = [
                                 <div
                                     class="flex h-full flex-col gap-4 rounded-t-2xl bg-gray-50 shadow-xl dark:bg-gray-900 dark:text-gray-200"
                                 >
-                                    <div class="flex flex-row items-center justify-between px-6 pt-4">
-                                        <DialogTitle as="div" class="flex flex-row items-start gap-2"
+                                    <div class="flex flex-row items-center justify-between gap-3 px-6 pt-4">
+                                        <DialogTitle as="div" class="flex flex-row flex-wrap items-start gap-2"
                                             ><span
                                                 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
                                             >
@@ -409,7 +409,7 @@ const mockGroupPaymentSections = [
                                                 <span>Add</span>
                                             </button>
                                         </DialogTitle>
-                                        <div class="ml-3 flex h-7 items-center">
+                                        <div class="flex h-7 items-center">
                                             <button
                                                 type="button"
                                                 class="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
@@ -516,7 +516,11 @@ const mockGroupPaymentSections = [
                                                 >
                                                     <div class="flex flex-shrink flex-col">
                                                         <div class="flex flex-row items-center gap-3">
-                                                            <ServerImage v-if="member.img_url" />
+                                                            <div class="avatar" v-if="member?.user?.profile_photo_url">
+                                                                <div class="mask mask-squircle w-8">
+                                                                    <img :src="member?.user?.profile_photo_url" />
+                                                                </div>
+                                                            </div>
                                                             <PlaceholderImage :size="8" v-else />
                                                             <div class="flex flex-col gap-1">
                                                                 <span class="break-all text-sm">{{
@@ -576,7 +580,7 @@ const mockGroupPaymentSections = [
                                                                     class="btn btn-link btn-xs no-underline"
                                                                     @click="onRestoreDeletedGroupMemberClicked(member)"
                                                                 >
-                                                                    Restore
+                                                                    Invite
                                                                 </button>
                                                             </div>
                                                         </template>

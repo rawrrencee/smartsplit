@@ -100,7 +100,7 @@ class GroupController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'group_title' => 'required|max:255',
+            'group_title' => 'required|max:25',
             'group_photo' => 'nullable|image',
         ]);
 
@@ -162,6 +162,8 @@ class GroupController extends Controller
             DB::beginTransaction();
             if (isset($groupMember) && $groupMember->trashed()) {
                 $groupMember->restore();
+                $groupMember->status = GroupMemberStatusEnum::PENDING->value;
+                $groupMember->save();
             } else {
                 $groupMember = GroupMember::create($request->all());
             }
@@ -188,7 +190,10 @@ class GroupController extends Controller
         ]);
 
         $groupMember = GroupMember::whereId($request['id'])->first();
-        if (isset($groupMember) && $groupMember->user_id != auth()->user()->id && $this->isGroupMemberWithUserIdExisting($groupMember->group_id, auth()->user()->id, false)) {
+        $isRequestorGroupMember = $this->isGroupMemberWithUserIdExisting($groupMember->group_id, auth()->user()->id, false);
+
+        $canDelete = $isRequestorGroupMember && $this->isGroupMemberWithEmailExisting($groupMember->group_id, $groupMember->email, false);
+        if (isset($groupMember) && $canDelete) {
             try {
                 DB::beginTransaction();
                 $groupMember->delete();
