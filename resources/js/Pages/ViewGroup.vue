@@ -297,7 +297,9 @@ const mockGroupPaymentSections = [
                             </div>
                         </div>
                     </div>
-                    <div class="rounded-md p-2 text-xs text-gray-500 hover:bg-gray-300 dark:text-gray-400">
+                    <div
+                        class="rounded-md p-2 text-xs text-gray-500 hover:bg-gray-300 dark:text-gray-400 dark:hover:bg-gray-900"
+                    >
                         <span
                             >{{ activeGroupMembers.length > 0 ? activeGroupMembers.length : "" }} member{{
                                 activeGroupMembers?.length === 1 ? "" : "s"
@@ -476,7 +478,7 @@ const mockGroupPaymentSections = [
                                                     <div class="flex flex-grow flex-row justify-between gap-1">
                                                         <button
                                                             type="button"
-                                                            class="btn btn-link btn-xs p-0 no-underline"
+                                                            class="btn btn-link btn-xs p-0 no-underline dark:text-gray-200"
                                                             @click="onAppendEmailDomainClicked"
                                                         >
                                                             <span>@gmail.com</span>
@@ -512,7 +514,7 @@ const mockGroupPaymentSections = [
                                         <div class="flex flex-col gap-3">
                                             <template v-for="member in activeGroupMembers">
                                                 <div
-                                                    class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-3 hover:bg-gray-100"
+                                                    class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-3 hover:bg-gray-100 dark:hover:bg-gray-700"
                                                 >
                                                     <div class="flex flex-shrink flex-col">
                                                         <div class="flex flex-row items-center gap-3">
@@ -570,7 +572,7 @@ const mockGroupPaymentSections = [
                                                     <div class="flex flex-col gap-2">
                                                         <template v-for="member in deletedGroupMembers">
                                                             <div
-                                                                class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-1 hover:bg-gray-100"
+                                                                class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
                                                             >
                                                                 <span class="break-all text-xs">{{
                                                                     member.email

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Models\GroupMember;
 use App\Models\User;
+use App\Rules\EnumValue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -27,9 +28,32 @@ class GroupController extends Controller
         return Group::whereOwnerId($userId)->get();
     }
 
+    public function getGroupsByMemberUserIdOrEmail($userId, $email = null, $status)
+    {
+        return Group::whereHas('groupMembers', function ($query) use ($userId, $email, $status) {
+            $query->where(function ($query) use ($userId, $email) {
+                if (isset($email)) {
+                    $query->where('user_id', '=', $userId)
+                        ->orWhere('email', '=', $email);
+                } else {
+                    $query->where('user_id', $userId);
+                }
+            });
+
+            if (isset($status)) {
+                $query->where('status', $status);
+            }
+        })->get();
+    }
+
     public function getGroupMembersByGroupId($groupId)
     {
         return GroupMember::whereGroupId($groupId)->get();
+    }
+
+    public function getGroupMembersByEmail($email)
+    {
+        return GroupMember::whereEmail($email)->get();
     }
 
     public function isGroupMemberWithUserIdExisting($groupId, $userId, $trashed)
@@ -68,7 +92,10 @@ class GroupController extends Controller
 
     public function index(Request $request)
     {
-        return Inertia::render('Groups', ['groups' => $this->getGroupsByOwnerId($request->user()->id)]);
+        return Inertia::render('Groups', [
+            'groups' => $this->getGroupsByMemberUserIdOrEmail($request->user()->id, $request->user()->email, GroupMemberStatusEnum::ACCEPTED->value),
+            'pendingGroups' => $this->getGroupsByMemberUserIdOrEmail($request->user()->id, $request->user()->email, GroupMemberStatusEnum::PENDING->value)
+        ]);
     }
 
     public function view(Request $request)
@@ -226,6 +253,51 @@ class GroupController extends Controller
 
     public function update(Request $request)
     {
+    }
+
+    public function updatePendingGroupRequestStatus(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:group_members,id',
+            'status' => ['required', new EnumValue(GroupMemberStatusEnum::cases())],
+        ]);
+        $groupMember = GroupMember::whereGroupId($request['id'])->where(function ($query) {
+            $query->where('user_id', '=', auth()->user()->id)
+                ->orWhere('email', '=', auth()->user()->email);
+        })->first();
+
+        if (isset($groupMember)) {
+            try {
+                DB::beginTransaction();
+                $groupMember->update(['status' => $request['status']]);
+
+                if ($request['status'] == GroupMemberStatusEnum::ACCEPTED->value) {
+                    $message = 'Group invite accepted successfully.';
+                } else {
+                    $message = 'Group invite rejected successfully.';
+                }
+
+                DB::commit();
+
+                return redirect()->back()
+                    ->with('show', true)
+                    ->with('type', 'default')
+                    ->with('status', 'success')
+                    ->with('message', $message)
+                    ->with('route', 'groups.view')
+                    ->with('id', $groupMember->group_id);
+            } catch (\Exception $e) {
+                DB::rollBack();
+
+                return $this->CommonController->handleException($e);
+            }
+        }
+
+        return redirect()->back()
+            ->with('show', true)
+            ->with('type', 'default')
+            ->with('status', 'error')
+            ->with('message', 'Group invite was not updated successfully due to an error.');
     }
 
     public function deletePhoto(Request $request)

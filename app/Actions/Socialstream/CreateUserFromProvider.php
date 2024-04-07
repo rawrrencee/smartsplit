@@ -2,6 +2,7 @@
 
 namespace App\Actions\Socialstream;
 
+use App\Http\Controllers\GroupController;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use JoelButcher\Socialstream\Contracts\CreatesConnectedAccounts;
@@ -15,13 +16,15 @@ class CreateUserFromProvider implements CreatesUserFromProvider
      * The creates connected accounts instance.
      */
     public CreatesConnectedAccounts $createsConnectedAccounts;
+    public GroupController $groupController;
 
     /**
      * Create a new action instance.
      */
-    public function __construct(CreatesConnectedAccounts $createsConnectedAccounts)
+    public function __construct(CreatesConnectedAccounts $createsConnectedAccounts, GroupController $groupController)
     {
         $this->createsConnectedAccounts = $createsConnectedAccounts;
+        $this->groupController = $groupController;
     }
 
     /**
@@ -38,6 +41,14 @@ class CreateUserFromProvider implements CreatesUserFromProvider
 
                 if (Socialstream::hasProviderAvatarsFeature() && $providerUser->getAvatar()) {
                     $user->setProfilePhotoFromUrl($providerUser->getAvatar());
+                }
+
+                // Link the user to any existing group memberships by email
+                $groupMembers = $this->groupController->getGroupMembersByEmail($user->email);
+                foreach ($groupMembers as $m) {
+                    if (!isset($m->user_id)) {
+                        $m->update(['user_id' => $user->id]);
+                    }
                 }
 
                 $this->createsConnectedAccounts->create($user, $provider, $providerUser);

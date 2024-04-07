@@ -46,6 +46,10 @@ Route::middleware([
         Route::get('/view-group', [GroupController::class, 'view'])->name('groups.view');
     });
 
+    Route::prefix('group-members')->group(function () {
+        Route::post('/update', [GroupController::class, 'updatePendingGroupRequestStatus'])->name('group-members.update');
+    });
+
     Route::prefix('expenses')->group(function () {
         Route::get('/add', [ExpenseController::class, 'addExpensePage'])->name('expenses.add');
     });

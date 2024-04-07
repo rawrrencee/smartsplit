@@ -1,20 +1,30 @@
 <script setup>
+import { showToastIfNeeded } from "@/Common";
+import DialogAnimated from "@/Components/DialogAnimated.vue";
 import CreateOrEditGroup from "@/Components/Group/CreateOrEditGroup.vue";
+import PendingRequestRowItem from "@/Components/Group/PendingRequestRowItem.vue";
 import GroupList from "@/Components/GroupList.vue";
+import { GroupMemberStatusEnum } from "@/Enums/GroupMemberStatusEnum";
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/vue/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/vue/24/outline";
 import { router, useForm } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import { toast } from "vue-sonner";
 
-defineProps({
+const props = defineProps({
     groups: Array,
+    pendingGroups: Array,
 });
 
-const openGroup = (groupId) => {
+const viewGroup = (groupId) => {
     router.get(route("groups.view"), { id: groupId });
 };
 
+const dialogMode = ref("CreateGroup");
+const setDialogMode = (mode) => {
+    dialogMode.value = mode;
+};
+const dialogTitle = computed(() => (dialogMode.value === "CreateGroup" ? "Groups" : "Pending Requests"));
 const isLoading = ref(false);
 const setIsLoading = (value) => {
     isLoading.value = value;
@@ -25,6 +35,14 @@ const setIsDialogOpen = (value) => {
     groupForm.clearErrors();
     groupForm.reset();
 };
+const openCreateGroupDialog = () => {
+    setIsDialogOpen(true);
+    setDialogMode("CreateGroup");
+};
+const openViewPendingRequestsDialog = () => {
+    setIsDialogOpen(true);
+    setDialogMode("PendingRequests");
+};
 
 const groupForm = useForm({
     group_title: "",
@@ -34,21 +52,43 @@ const createGroup = (formData) => {
     setIsLoading(true);
     formData.post(route("groups.add"), {
         onSuccess: () => {
-            setIsLoading(false);
             setIsDialogOpen(false);
             groupForm.reset();
         },
-        onError: (e) => {
+        onFinish: () => {
             setIsLoading(false);
         },
     });
+};
+
+const pendingRequestForm = useForm({
+    id: null,
+    status: null,
+});
+const handlePendingRequestStatusChange = (groupId, status) => {
+    setIsLoading(true);
+    pendingRequestForm
+        .transform((data) => ({
+            ...data,
+            id: groupId,
+            status,
+        }))
+        .post(route("group-members.update"), {
+            onSuccess: (s) => {
+                showToastIfNeeded(toast, s.props.flash);
+                router.reload({ only: ["pendingGroups"] });
+            },
+            onFinish: () => {
+                setIsLoading(false);
+            },
+        });
 };
 </script>
 
 <template>
     <AppLayout title="Home">
         <div
-            class="sticky top-0 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
+            class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 backdrop-blur sm:px-6 lg:px-8"
         >
             <div class="flex w-full flex-row items-center justify-between py-2">
                 <button type="button" class="btn btn-link px-0 text-gray-600 dark:text-gray-200">
@@ -58,82 +98,68 @@ const createGroup = (formData) => {
                 <button
                     type="button"
                     class="btn btn-link pr-0 text-gray-600 no-underline dark:text-gray-200"
-                    @click="setIsDialogOpen(true)"
+                    @click="openCreateGroupDialog"
                 >
                     Create group
                 </button>
             </div>
         </div>
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="overflow-x-auto rounded-xl shadow-md">
-                <GroupList :groups="groups" @group-clicked="openGroup" />
+        <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col gap-2" v-if="pendingGroups.length > 0">
+                <div class="flex flex-row flex-wrap items-center gap-2">
+                    <span class="font-semibold dark:text-gray-50">Pending Requests ({{ pendingGroups.length }})</span>
+                    <button
+                        type="button"
+                        class="btn btn-link btn-xs no-underline"
+                        v-if="pendingGroups.length > 3"
+                        @click="openViewPendingRequestsDialog"
+                    >
+                        View All
+                    </button>
+                </div>
+                <div class="flex flex-col gap-2 text-xs">
+                    <div
+                        class="flex flex-row justify-between gap-2 rounded-lg bg-gray-50 p-2 dark:bg-gray-900"
+                        v-for="group in pendingGroups.slice(0, 3)"
+                    >
+                        <PendingRequestRowItem
+                            :group="group"
+                            :is-loading="isLoading"
+                            @accept-clicked="handlePendingRequestStatusChange(group.id, GroupMemberStatusEnum.ACCEPTED)"
+                            @reject-clicked="handlePendingRequestStatusChange(group.id, GroupMemberStatusEnum.REJECTED)"
+                        />
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <span class="font-semibold">Groups</span>
+                <div class="overflow-x-hidden rounded-xl shadow-md">
+                    <GroupList :groups="groups" @group-clicked="viewGroup" />
+                </div>
             </div>
         </div>
     </AppLayout>
 
-    <TransitionRoot as="template" :show="isDialogOpen">
-        <Dialog as="div" class="relative z-10" @close="setIsDialogOpen(false)">
-            <TransitionChild
-                as="template"
-                enter="ease-in-out duration-500"
-                enter-from="opacity-0"
-                enter-to="opacity-100"
-                leave="ease-in-out duration-500"
-                leave-from="opacity-100"
-                leave-to="opacity-0"
-            >
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-            </TransitionChild>
-
-            <div class="fixed inset-0 overflow-hidden">
-                <div class="absolute inset-0 overflow-hidden">
-                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-28">
-                        <TransitionChild
-                            as="template"
-                            enter="transform transition ease-in-out duration-500"
-                            enter-from="translate-y-full"
-                            enter-to="translate-y-0"
-                            leave="transform transition ease-in-out duration-500"
-                            leave-from="translate-y-0"
-                            leave-to="translate-y-full"
-                        >
-                            <DialogPanel class="pointer-events-auto w-screen">
-                                <div
-                                    class="flex h-full flex-col rounded-t-2xl bg-gray-50 shadow-xl dark:bg-gray-900 dark:text-gray-200"
-                                >
-                                    <div class="p-6">
-                                        <div class="flex items-start justify-between">
-                                            <DialogTitle
-                                                class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
-                                                >Groups</DialogTitle
-                                            >
-                                            <div class="ml-3 flex h-7 items-center">
-                                                <button
-                                                    type="button"
-                                                    class="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-                                                    @click="setIsDialogOpen(false)"
-                                                >
-                                                    <span class="absolute -inset-2.5" />
-                                                    <span class="sr-only">Close panel</span>
-                                                    <XMarkIcon class="h-6 w-6" aria-hidden="true" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex-1 overflow-y-auto">
-                                        <CreateOrEditGroup
-                                            :form="groupForm"
-                                            :isLoading
-                                            @cancel-clicked="setIsDialogOpen(false)"
-                                            @create-clicked="createGroup"
-                                        />
-                                    </div>
-                                </div>
-                            </DialogPanel>
-                        </TransitionChild>
-                    </div>
+    <DialogAnimated :dialogTitle :isDialogOpen @dialog-closed="setIsDialogOpen(false)">
+        <CreateOrEditGroup
+            :form="groupForm"
+            :isLoading
+            @cancel-clicked="setIsDialogOpen(false)"
+            @create-clicked="createGroup"
+            v-if="dialogMode === 'CreateGroup'"
+        />
+        <div class="flex flex-col gap-2 pb-4 text-sm">
+            <template v-for="group in pendingGroups">
+                <div class="flex flex-row justify-between gap-2 rounded-2xl px-6 py-2 hover:bg-gray-100">
+                    <PendingRequestRowItem
+                        :group="group"
+                        :is-loading="isLoading"
+                        size="sm"
+                        @accept-clicked="handlePendingRequestStatusChange(group.id, GroupMemberStatusEnum.ACCEPTED)"
+                        @reject-clicked="handlePendingRequestStatusChange(group.id, GroupMemberStatusEnum.REJECTED)"
+                    />
                 </div>
-            </div>
-        </Dialog>
-    </TransitionRoot>
+            </template>
+        </div>
+    </DialogAnimated>
 </template>

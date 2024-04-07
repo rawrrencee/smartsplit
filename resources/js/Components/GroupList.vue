@@ -16,7 +16,7 @@ defineEmits(["groupClicked"]);
         <li
             v-for="group in groups"
             :key="group.id"
-            class="flex items-center justify-between gap-2 bg-gray-50 px-6 py-5 hover:cursor-pointer hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
+            class="flex items-center justify-between gap-2 bg-gray-50 px-6 py-5 hover:cursor-pointer hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-700"
             @click="$emit('groupClicked', group.id)"
         >
             <div class="flex flex-row items-center gap-4">
