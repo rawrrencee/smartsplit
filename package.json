@@ -27,6 +27,7 @@
         "@heroicons/vue": "^2.1.1",
         "@popperjs/core": "^2.11.8",
         "@vueuse/core": "^10.9.0",
+        "primevue": "^3.51.0",
         "v-calendar": "^3.1.2",
         "vue-sonner": "^1.1.2"
     }
