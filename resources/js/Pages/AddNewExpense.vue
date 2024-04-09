@@ -83,8 +83,8 @@ const generateExpenseDetail = (user, shouldSelectAll = false) => {
     });
 };
 const updatePayerFormArray = () => {
-    payerFormArray.value = currentGroup.value.group_members?.map((m) => generateExpenseDetail(m.user)) ?? [];
-    payeeFormArray.value = currentGroup.value.group_members?.map((m) => generateExpenseDetail(m.user, true)) ?? [];
+    payerFormArray.value = currentGroup.value?.group_members?.map((m) => generateExpenseDetail(m.user)) ?? [];
+    payeeFormArray.value = currentGroup.value?.group_members?.map((m) => generateExpenseDetail(m.user, true)) ?? [];
 };
 const allPayersSelected = computed(() => {
     return payerFormArray.value.every((payer) => payer.isSelected);
