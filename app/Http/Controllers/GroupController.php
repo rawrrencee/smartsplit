@@ -53,7 +53,7 @@ class GroupController extends Controller
             $query->select('id', 'group_id', 'user_id', 'status');
             if ($withUser) {
                 $query->with(['user' => function ($query) {
-                    $query->select('id', 'name', 'email');
+                    $query->select('id', 'name', 'email', 'profile_photo_path');
                 }]);
             }
         }]);

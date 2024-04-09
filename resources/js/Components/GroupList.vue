@@ -1,6 +1,6 @@
 <script setup lang="js">
-import PlaceholderImage from "@/Components/PlaceholderImage.vue";
-import ServerImage from "@/Components/ServerImage.vue";
+import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
+import ServerImage from "@/Components/Image/ServerImage.vue";
 import { UserIcon } from "@heroicons/vue/24/outline";
 
 defineProps({

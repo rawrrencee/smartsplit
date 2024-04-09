@@ -1,6 +1,6 @@
 <script setup>
-import PlaceholderImage from "@/Components/PlaceholderImage.vue";
-import ServerImage from "@/Components/ServerImage.vue";
+import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
+import ServerImage from "@/Components/Image/ServerImage.vue";
 import { CheckIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 
 defineProps({

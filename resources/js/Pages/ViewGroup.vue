@@ -1,9 +1,9 @@
 <script setup>
 import { showToastIfNeeded } from "@/Common";
 import DialogAnimated from "@/Components/DialogAnimated.vue";
+import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
+import ServerImage from "@/Components/Image/ServerImage.vue";
 import NavigationBarButton from "@/Components/NavigationBarButton.vue";
-import PlaceholderImage from "@/Components/PlaceholderImage.vue";
-import ServerImage from "@/Components/ServerImage.vue";
 import { GroupMemberStatusEnum } from "@/Enums/GroupMemberStatusEnum.js";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { TransitionChild, TransitionRoot } from "@headlessui/vue";
@@ -271,7 +271,12 @@ const mockGroupPaymentSections = [
         <div class="mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col gap-5">
                 <div class="flex flex-row items-center gap-4">
-                    <ServerImage :size="12" v-if="group?.img_path" :image-url="group.img_path" />
+                    <ServerImage
+                        :size="12"
+                        v-if="group?.img_path"
+                        :image-url="group.img_path"
+                        :preview-enabled="true"
+                    />
                     <PlaceholderImage v-else :size="12" />
                     <span class="min-w-0 break-words text-2xl font-medium dark:text-gray-100">{{
                         group?.group_title

@@ -10,8 +10,9 @@ export const showToastIfNeeded = (toast, flash) => {
 };
 
 export const to2DecimalPlacesIfValid = (value) => {
-    if (typeof value === "number" && !isNaN(value) && Number.parseFloat(value) >= 0) {
-        return Number.parseFloat(value).toFixed(2);
+    const floatVal = Number.parseFloat(value);
+    if (typeof floatVal === "number" && !isNaN(floatVal)) {
+        return floatVal.toFixed(2);
     }
-    return value ?? 0.0;
+    return value ?? (0.0).toFixed(2);
 };

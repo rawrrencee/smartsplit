@@ -1,59 +1,35 @@
 <script setup>
 import { to2DecimalPlacesIfValid } from "@/Common.js";
 import GroupList from "@/Components/GroupList.vue";
-import PlaceholderImage from "@/Components/PlaceholderImage.vue";
-import ServerImage from "@/Components/ServerImage.vue";
+import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
+import ProfilePhotoImage from "@/Components/Image/ProfilePhotoImage.vue";
+import ServerImage from "@/Components/Image/ServerImage.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
-import { CheckCircleIcon } from "@heroicons/vue/20/solid";
-import { Bars2Icon, CalendarIcon, ListBulletIcon, MagnifyingGlassIcon, XMarkIcon } from "@heroicons/vue/24/outline";
-import { router, useForm } from "@inertiajs/vue3";
+import { CalendarIcon, ListBulletIcon, MagnifyingGlassIcon, XMarkIcon } from "@heroicons/vue/24/outline";
+import { useForm } from "@inertiajs/vue3";
+import InputNumber from "primevue/inputnumber";
 import { DatePicker } from "v-calendar";
 import "v-calendar/style.css";
 import { computed, onMounted, ref } from "vue";
 
+// #region Configs
+const defaultExpenseGroupKey = "addExpenseDefaultGroupId";
+const defaultExpenseCurrencyKey = "addExpenseDefaultCurrency";
+
 onMounted(() => {
-    getCurrenciesIfNeeded();
+    setSelectedGroup(getSelectedGroupIdFromSessionStorage());
 });
 
 const props = defineProps({
     groups: Array,
-    currencies: {
-        type: Array,
-        default: localStorage.getItem(defaultCurrenciesKey)
-            ? JSON.parse(localStorage.getItem(defaultCurrenciesKey))
-            : [],
-    },
+    currencies: Array,
+    auth: Object,
 });
-
-const defaultExpenseGroupKey = "addExpenseDefaultGroupId";
-const defaultExpenseCurrencyKey = "addExpenseDefaultCurrency";
-const defaultCurrenciesKey = "currencies";
-
-const getCurrenciesIfNeeded = () => {
-    const storedCurrencies = localStorage.getItem(defaultCurrenciesKey);
-    if (!storedCurrencies) {
-        router.get(
-            route("expenses.add", { withCurrencies: true }),
-            {},
-            {
-                only: ["currencies"],
-                onSuccess: (s) => {
-                    localStorage.setItem(defaultCurrenciesKey, JSON.stringify(s.props.currencies));
-                },
-                onFinish: () => {
-                    setTimeout(() => {
-                        router.visit(route("expenses.add"));
-                    }, 200);
-                },
-            },
-        );
-    }
-};
-const currencies = computed(() => {
-    const storedCurrencies = localStorage.getItem(defaultCurrenciesKey);
-    return storedCurrencies ? JSON.parse(storedCurrencies) : [];
+const popover = ref({
+    visibility: "focus",
 });
+// #endregion Configs
 
 const isDialogOpen = ref(false);
 const setIsDialogOpen = (value) => {
@@ -75,23 +51,6 @@ const dialogTitle = computed(() => {
     }
 });
 
-const expenseForm = useForm({
-    group_id: null,
-    date_of_expense: new Date(),
-    description: null,
-    currency_key: null,
-    amount: null,
-    split_mode: null,
-    payer_ids: [],
-    payee_ids: [],
-});
-
-const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(defaultExpenseGroupKey);
-const selectedGroupId = ref(getSelectedGroupIdFromSessionStorage());
-const setSelectedGroup = (groupId) => {
-    sessionStorage.setItem(defaultExpenseGroupKey, groupId);
-    selectedGroupId.value = getSelectedGroupIdFromSessionStorage();
-};
 const onGroupClicked = (groupId) => {
     setSelectedGroup(groupId);
     setIsDialogOpen(false);
@@ -100,14 +59,122 @@ const currentGroup = computed(() => {
     return props.groups.find((group) => `${group.id}` === selectedGroupId.value);
 });
 
-const popover = ref({
-    visibility: "focus",
+// #region Expense Form
+const expenseForm = useForm({
+    group_id: null,
+    date_of_expense: new Date(),
+    description: null,
+    currency_key: null,
+    amount: null,
+    split_mode: null,
+    payer_details: [],
+    payee_details: [],
 });
 
-const getSelectedCurrencyFromSessionStorage = () => {
-    return currencies.value?.find((c) => c.key === sessionStorage.getItem(defaultExpenseCurrencyKey));
+const payerFormArray = ref([]);
+const payeeFormArray = ref([]);
+
+const generateExpenseDetail = (user, shouldSelectAll = false) => {
+    return useForm({
+        user_id: user.id,
+        amount: null,
+        isSelected: shouldSelectAll,
+        user,
+    });
 };
-const selectedCurrency = ref(getSelectedCurrencyFromSessionStorage() ?? currencies.value?.[0]);
+const updatePayerFormArray = () => {
+    payerFormArray.value = currentGroup.value.group_members?.map((m) => generateExpenseDetail(m.user)) ?? [];
+    payeeFormArray.value = currentGroup.value.group_members?.map((m) => generateExpenseDetail(m.user, true)) ?? [];
+};
+const allPayersSelected = computed(() => {
+    return payerFormArray.value.every((payer) => payer.isSelected);
+});
+const allPayeesSelected = computed(() => {
+    return payeeFormArray.value.every((payee) => payee.isSelected);
+});
+const paidByString = computed(() => {
+    if (selectedPayerForms.value.length === 1 && props.auth.user.id === selectedPayerForms.value?.[0]?.user_id) {
+        return "you";
+    } else if (selectedPayerForms.value.length === 1) {
+        return selectedPayerForms.value?.[0]?.user?.name ?? "";
+    } else if (selectedPayerForms.value.length > 1) {
+        return "multiple";
+    } else {
+        return "none";
+    }
+});
+const splitEquallyString = computed(() => {
+    if (selectedPayeeForms.value.length === 0) return "equally";
+    const firstAmount = selectedPayeeForms.value[0].amount;
+    if (selectedPayeeForms.value.every((f) => f.amount === firstAmount)) return "equally";
+    return "inequally";
+});
+const selectedPayerForms = computed(() => payerFormArray.value.filter((f) => f.isSelected));
+const selectedPayeeForms = computed(() => payeeFormArray.value.filter((f) => f.isSelected));
+const toggleAllUsers = (formArray, allSelected) => {
+    formArray.forEach((f) => (f.amount = null));
+    if (allSelected) {
+        formArray.forEach((payer) => {
+            payer.isSelected = false;
+        });
+    } else {
+        formArray.forEach((payer) => {
+            payer.isSelected = true;
+        });
+    }
+};
+
+const remainingPayerAmount = computed(() => {
+    const totalAmount = payerFormArray.value
+        .filter((f) => f.isSelected)
+        .reduce((total, payer) => total + payer.amount, 0);
+    return expenseForm.amount - totalAmount;
+});
+
+const remainingPayeeAmount = computed(() => {
+    const totalAmount = payeeFormArray.value
+        .filter((f) => f.isSelected)
+        .reduce((total, payee) => total + payee.amount, 0);
+    return expenseForm.amount - totalAmount;
+});
+
+const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(defaultExpenseGroupKey);
+const selectedGroupId = ref(getSelectedGroupIdFromSessionStorage());
+const setSelectedGroup = (groupId) => {
+    sessionStorage.setItem(defaultExpenseGroupKey, groupId);
+    selectedGroupId.value = getSelectedGroupIdFromSessionStorage();
+    updatePayerFormArray();
+};
+
+const setPayerAsSelfAndDistributeExpense = () => {
+    payerFormArray.value.forEach((f) => {
+        f.isSelected = f.user_id === props.auth.user.id;
+    });
+    onDistributeExpenseToSelectedUsersEquallyClicked(selectedPayerForms.value);
+};
+const onDistributeExpenseToSelectedUsersEquallyClicked = (selectedForms) => {
+    const payerCount = selectedForms.length;
+    if (payerCount === 0) {
+        return;
+    }
+    let remainder = expenseForm.amount;
+    const amountPerPayer = Number.parseFloat(to2DecimalPlacesIfValid(expenseForm.amount / payerCount));
+    selectedForms.forEach((p, i) => {
+        if (i !== payerCount - 1) {
+            p.amount = amountPerPayer;
+            remainder -= amountPerPayer;
+        } else {
+            p.amount = remainder;
+        }
+    });
+};
+// #endregion Expense Form
+
+// #region Currency
+const getSelectedCurrencyFromSessionStorage = () => {
+    return props.currencies?.find((c) => c.key === sessionStorage.getItem(defaultExpenseCurrencyKey));
+};
+const selectedCurrency = ref(getSelectedCurrencyFromSessionStorage() ?? props.currencies?.[0]);
 const currencyQuery = ref("");
 const setSelectedCurrency = (key) => {
     sessionStorage.setItem(defaultExpenseCurrencyKey, key);
@@ -117,8 +184,8 @@ const setSelectedCurrency = (key) => {
 };
 const filteredCurrencies = computed(() =>
     currencyQuery.value === ""
-        ? currencies.value
-        : currencies.value.filter((c) => {
+        ? props.currencies
+        : props.currencies.filter((c) => {
               const searchQuery = currencyQuery.value.toLowerCase().replace(/\s+/g, "");
               const value = c.value.toLowerCase().replace(/\s+/g, "");
               const key = c.key.toLowerCase().replace(/\s+/g, "");
@@ -126,8 +193,10 @@ const filteredCurrencies = computed(() =>
               return value.includes(searchQuery) || key.includes(searchQuery) || symbol.includes(searchQuery);
           }),
 );
+// #endregion Currency
 
-const expenseConfigurationState = ref(null);
+// #region Tabs
+const expenseConfigurationState = ref("paidBy");
 const updateExpenseConfigurationState = (buttonType) => {
     if (
         (buttonType === "paidBy" && expenseConfigurationState.value === "paidBy") ||
@@ -140,12 +209,7 @@ const updateExpenseConfigurationState = (buttonType) => {
 };
 const isPaidBySelectionShown = computed(() => expenseConfigurationState.value === "paidBy");
 const isSelectSplitModeShown = computed(() => expenseConfigurationState.value === "splitMode");
-
-const splitModeTab = ref("equally");
-const updateSplitModeTab = (tabType) => {
-    splitModeTab.value = tabType;
-};
-const isSplitEqually = computed(() => splitModeTab.value === "equally");
+// #endregion Tabs
 </script>
 
 <template>
@@ -221,36 +285,51 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
                     >
                         <span>{{ selectedCurrency?.symbol ?? "$" }}</span>
                     </button>
-                    <input
-                        type="number"
+                    <InputNumber
+                        :unstyled="true"
+                        :pt="{
+                            root: {
+                                class: ['w-full'],
+                            },
+                            input: {
+                                root: {
+                                    class: ['input input-bordered w-full'],
+                                },
+                            },
+                        }"
                         placeholder="0.00"
-                        class="input input-bordered w-full [appearance:textfield] disabled:bg-gray-300 dark:border-0 dark:bg-gray-900 dark:text-gray-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                         v-model="expenseForm.amount"
-                        @focusout="expenseForm.amount = to2DecimalPlacesIfValid(expenseForm.amount)"
+                        inputId="minmaxfraction"
+                        :minFractionDigits="2"
+                        :maxFractionDigits="2"
                     />
                 </div>
             </div>
 
             <div class="flex flex-col gap-5">
-                <div class="flex flex-row items-center justify-center gap-2">
-                    <span>Paid by</span>
-                    <button
-                        type="button"
-                        class="btn dark:text-gray-200 dark:hover:border-gray-50"
-                        :class="[isPaidBySelectionShown ? 'btn-neutral' : 'btn-outline']"
-                        @click="updateExpenseConfigurationState('paidBy')"
-                    >
-                        <span>you</span>
-                    </button>
-                    <span>and split</span>
-                    <button
-                        type="button"
-                        class="btn dark:text-gray-200 dark:hover:border-gray-50"
-                        :class="[isSelectSplitModeShown ? 'btn-neutral' : 'btn-outline']"
-                        @click="updateExpenseConfigurationState('splitMode')"
-                    >
-                        <span>equally</span>
-                    </button>
+                <div class="flex flex-row flex-wrap justify-center gap-2 px-2">
+                    <div class="flex flex-row items-center justify-center gap-2">
+                        <span>Paid by</span>
+                        <button
+                            type="button"
+                            class="btn btn-sm dark:text-gray-200 dark:hover:border-gray-50"
+                            :class="[isPaidBySelectionShown ? 'btn-neutral' : 'btn-outline']"
+                            @click="updateExpenseConfigurationState('paidBy')"
+                        >
+                            <span>{{ paidByString }}</span>
+                        </button>
+                    </div>
+                    <div class="flex flex-row items-center justify-center gap-2">
+                        <span>and split</span>
+                        <button
+                            type="button"
+                            class="btn btn-sm dark:text-gray-200 dark:hover:border-gray-50"
+                            :class="[isSelectSplitModeShown ? 'btn-neutral' : 'btn-outline']"
+                            @click="updateExpenseConfigurationState('splitMode')"
+                        >
+                            <span>{{ splitEquallyString }}</span>
+                        </button>
+                    </div>
                 </div>
                 <TransitionRoot as="template" :show="isPaidBySelectionShown">
                     <TransitionChild
@@ -265,43 +344,82 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
                         <div
                             class="flex flex-col rounded-xl bg-gray-50 transition-opacity dark:bg-gray-900 dark:text-gray-50"
                         >
-                            <div
-                                class="flex flex-row items-center justify-between gap-2 border-b-[1px] p-4 dark:border-gray-700"
-                            >
-                                <label class="label flex cursor-pointer flex-row items-center gap-2 p-0">
-                                    <input type="checkbox" class="checkbox checkbox-xs dark:bg-gray-600" />
-                                    <span class="label-text text-xs dark:text-gray-50">Select All</span>
-                                </label>
-                                <span class="text-xs"
-                                    >Total to pay: {{ selectedCurrency.symbol ?? "$"
-                                    }}{{ expenseForm.amount ?? "0.00" }}</span
-                                >
-                            </div>
-                            <div
-                                class="flex flex-row items-center justify-between gap-3 p-4 hover:bg-gray-200 dark:hover:bg-gray-700"
-                            >
-                                <div class="flex flex-row items-center gap-4">
+                            <div class="flex flex-col gap-2 border-b-[1px] p-4 dark:border-gray-700">
+                                <div class="flex flex-row items-center justify-between gap-2">
                                     <label class="label flex cursor-pointer flex-row items-center gap-2 p-0">
-                                        <input type="checkbox" class="checkbox checkbox-xs dark:bg-gray-600" />
-                                        <div class="avatar">
-                                            <div class="mask mask-squircle w-8">
-                                                <img
-                                                    src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                                                />
-                                            </div>
-                                        </div>
-                                        <span class="break-all text-sm">Rose MariaMariaMariaMariaMariaMariaMaria</span>
+                                        <input
+                                            type="checkbox"
+                                            class="checkbox checkbox-xs dark:bg-gray-600"
+                                            :checked="allPayersSelected"
+                                            @change="toggleAllUsers(payerFormArray, allPayersSelected)"
+                                        />
+                                        <span class="label-text text-xs dark:text-gray-50">Select All</span>
                                     </label>
+                                    <span class="text-xs"
+                                        >Total paid: {{ selectedCurrency.symbol ?? "$"
+                                        }}{{ to2DecimalPlacesIfValid(expenseForm.amount) ?? "0.00" }}</span
+                                    >
                                 </div>
-                                <input
-                                    type="number"
-                                    min="0.00"
-                                    placeholder="0.00"
-                                    class="input input-sm input-bordered max-w-16 [appearance:textfield] disabled:bg-gray-300 dark:bg-gray-900 dark:text-gray-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                />
                             </div>
-                            <div class="flex flex-row justify-end border-t-[1px] p-4 dark:border-gray-700">
-                                <span class="text-xs">Remaining: US$ 20.00</span>
+
+                            <div class="flex w-full flex-row flex-wrap gap-2 px-4 py-4">
+                                <button type="button" class="btn btn-xs" @click="setPayerAsSelfAndDistributeExpense">
+                                    Myself
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-xs"
+                                    @click="onDistributeExpenseToSelectedUsersEquallyClicked(selectedPayerForms)"
+                                    v-if="selectedPayerForms.length > 1"
+                                >
+                                    Divide equally between selected
+                                </button>
+                            </div>
+                            <template v-for="form in payerFormArray" :key="form.user_id">
+                                <div
+                                    class="flex flex-row items-center justify-between gap-3 p-4 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                >
+                                    <div class="flex flex-row items-center gap-4">
+                                        <label class="label flex cursor-pointer flex-row items-center gap-2 p-0">
+                                            <input
+                                                type="checkbox"
+                                                :checked="form.isSelected"
+                                                class="checkbox checkbox-xs dark:bg-gray-600"
+                                                @change="() => (form.isSelected = !form.isSelected)"
+                                            />
+                                            <ProfilePhotoImage :image-url="form.user.profile_photo_url" />
+                                            <span class="break-all text-sm">{{ form.user.name }}</span>
+                                        </label>
+                                    </div>
+                                    <div class="w-24 flex-shrink" v-if="form.isSelected">
+                                        <InputNumber
+                                            :unstyled="true"
+                                            :pt="{
+                                                root: {
+                                                    class: ['w-full'],
+                                                },
+                                                input: {
+                                                    root: {
+                                                        class: ['input input-bordered input-sm w-full'],
+                                                    },
+                                                },
+                                            }"
+                                            placeholder="0.00"
+                                            v-model="form.amount"
+                                            :inputId="`minmaxfraction-${form.user_id}`"
+                                            :minFractionDigits="2"
+                                            :maxFractionDigits="2"
+                                        />
+                                    </div>
+                                </div>
+                            </template>
+
+                            <div class="flex flex-row justify-end border-t-[1px] p-4 text-xs dark:border-gray-700">
+                                <span>Remaining:&nbsp;</span
+                                ><span :class="remainingPayerAmount !== 0 && 'text-error'"
+                                    >{{ remainingPayerAmount < 0 ? "-" : "" }}{{ selectedCurrency.symbol ?? "$"
+                                    }}{{ to2DecimalPlacesIfValid(Math.abs(remainingPayerAmount)) ?? "0.00" }}</span
+                                >
                             </div>
                         </div>
                     </TransitionChild>
@@ -317,71 +435,81 @@ const isSplitEqually = computed(() => splitModeTab.value === "equally");
                         leave-from="opacity-100"
                         leave-to="opacity-0"
                     >
-                        <div class="flex flex-col rounded-xl bg-gray-50 transition-opacity dark:bg-gray-900">
-                            <div role="tablist" class="tabs-boxed tabs bg-gray-50 p-4 dark:bg-gray-900">
-                                <a
-                                    role="tab"
-                                    class="tab"
-                                    :class="[
-                                        splitModeTab === 'equally' ? 'tab-active' : 'bg-gray-200 dark:bg-gray-700',
-                                    ]"
-                                    @click="updateSplitModeTab('equally')"
-                                >
-                                    <Bars2Icon class="h-5 w-5" />
-                                </a>
-                                <a
-                                    role="tab"
-                                    class="tab text-wrap"
-                                    :class="[
-                                        splitModeTab !== 'equally' ? 'tab-active' : 'bg-gray-200 dark:bg-gray-700',
-                                    ]"
-                                    @click="updateSplitModeTab('exactAmount')"
-                                >
-                                    <span class="text-xl font-extrabold dark:text-gray-50">1.23</span>
-                                </a>
-                            </div>
-                            <div
-                                class="flex flex-row items-center justify-between gap-2 border-b-[1px] p-4 dark:border-gray-700"
-                            >
-                                <label class="label flex cursor-pointer flex-row items-center gap-2 p-0">
-                                    <input
-                                        type="checkbox"
-                                        class="checkbox checkbox-xs dark:bg-gray-600"
-                                        :checked="true"
-                                    />
-                                    <span class="label-text text-xs dark:text-gray-50">Select All</span>
-                                </label>
-                                <span class="text-xs">Total to split: US$ 20.00</span>
-                            </div>
-                            <div class="flex flex-row items-center justify-between p-4 hover:bg-gray-200">
-                                <div class="flex flex-row items-center gap-4">
+                        <div
+                            class="flex flex-col rounded-xl bg-gray-50 transition-opacity dark:bg-gray-900 dark:text-gray-50"
+                        >
+                            <div class="flex flex-col gap-2 border-b-[1px] p-4 dark:border-gray-700">
+                                <div class="flex flex-row items-center justify-between gap-2">
                                     <label class="label flex cursor-pointer flex-row items-center gap-2 p-0">
                                         <input
                                             type="checkbox"
-                                            :checked="true"
                                             class="checkbox checkbox-xs dark:bg-gray-600"
+                                            :checked="allPayeesSelected"
+                                            @change="toggleAllUsers(payeeFormArray, allPayeesSelected)"
                                         />
-                                        <div class="avatar">
-                                            <div class="mask mask-squircle w-8">
-                                                <img
-                                                    src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                                                />
-                                            </div>
-                                        </div>
-                                        <span class="break-all text-sm">Rose Maria</span>
+                                        <span class="label-text text-xs dark:text-gray-50">Select All</span>
                                     </label>
+                                    <span class="text-xs"
+                                        >Total paid: {{ selectedCurrency.symbol ?? "$"
+                                        }}{{ to2DecimalPlacesIfValid(expenseForm.amount) ?? "0.00" }}</span
+                                    >
                                 </div>
-                                <CheckCircleIcon v-if="isSplitEqually" class="h-8 w-8 text-success" />
-                                <input
-                                    type="number"
-                                    min="0.00"
-                                    placeholder="0.00"
-                                    class="input input-sm input-bordered max-w-16 [appearance:textfield] disabled:bg-gray-300 dark:bg-gray-900 dark:text-gray-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                    v-else
-                                />
                             </div>
-                            <div class="flex flex-row justify-end border-t-[1px] p-4 dark:border-gray-700">
-                                <span class="text-xs">Split equally: US $20.00/ person</span>
+
+                            <div class="w-full gap-2 px-4 py-4" v-if="selectedPayeeForms.length > 1">
+                                <button
+                                    type="button"
+                                    class="btn btn-xs"
+                                    @click="onDistributeExpenseToSelectedUsersEquallyClicked(selectedPayeeForms)"
+                                >
+                                    Divide equally between selected
+                                </button>
+                            </div>
+                            <template v-for="form in payeeFormArray" :key="form.user_id">
+                                <div
+                                    class="flex flex-row items-center justify-between gap-3 p-4 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                >
+                                    <div class="flex flex-row items-center gap-4">
+                                        <label class="label flex cursor-pointer flex-row items-center gap-2 p-0">
+                                            <input
+                                                type="checkbox"
+                                                :checked="form.isSelected"
+                                                class="checkbox checkbox-xs dark:bg-gray-600"
+                                                @change="() => (form.isSelected = !form.isSelected)"
+                                            />
+                                            <ProfilePhotoImage :image-url="form.user.profile_photo_url" />
+                                            <span class="break-all text-sm">{{ form.user.name }}</span>
+                                        </label>
+                                    </div>
+                                    <div class="w-24 flex-shrink" v-if="form.isSelected">
+                                        <InputNumber
+                                            :unstyled="true"
+                                            :pt="{
+                                                root: {
+                                                    class: ['w-full'],
+                                                },
+                                                input: {
+                                                    root: {
+                                                        class: ['input input-bordered input-sm w-full'],
+                                                    },
+                                                },
+                                            }"
+                                            placeholder="0.00"
+                                            v-model="form.amount"
+                                            :inputId="`minmaxfraction-${form.user_id}`"
+                                            :minFractionDigits="2"
+                                            :maxFractionDigits="2"
+                                        />
+                                    </div>
+                                </div>
+                            </template>
+
+                            <div class="flex flex-row justify-end border-t-[1px] p-4 text-xs dark:border-gray-700">
+                                <span>Remaining:&nbsp;</span
+                                ><span :class="remainingPayeeAmount !== 0 && 'text-error'"
+                                    >{{ remainingPayeeAmount < 0 ? "-" : "" }}{{ selectedCurrency.symbol ?? "$"
+                                    }}{{ to2DecimalPlacesIfValid(Math.abs(remainingPayeeAmount)) ?? "0.00" }}</span
+                                >
                             </div>
                         </div>
                     </TransitionChild>

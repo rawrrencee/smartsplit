@@ -77,8 +77,8 @@ const onRemovePhotoClicked = () => {
                                     : 'border-0 border-none hover:border-none'
                             "
                         >
-                            <div class="avatar" v-if="!photoPreview || (group?.img_path && !photoPreview)">
-                                <div class="mask mask-squircle grid w-10 grid-cols-1 place-content-center pt-1">
+                            <div class="avatar pt-1" v-if="!photoPreview || (group?.img_path && !photoPreview)">
+                                <div class="mask mask-squircle grid w-10 grid-cols-1 place-content-center">
                                     <template v-if="group?.img_path">
                                         <img :src="getImgSrcFromPath(group?.img_path)" />
                                     </template>
