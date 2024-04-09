@@ -198,7 +198,10 @@ class GroupController extends Controller
             throw ValidationException::withMessages(['email' => 'This user is already part of the group.']);
         }
 
-        $groupMember = GroupMember::withTrashed()->where('email', $request['email'])->first();
+        $groupMember = GroupMember::withTrashed()
+            ->where('group_id', $request['group_id'])
+            ->where('email', $request['email'])
+            ->first();
 
         try {
             DB::beginTransaction();
