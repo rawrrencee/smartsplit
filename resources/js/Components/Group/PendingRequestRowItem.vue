@@ -16,20 +16,21 @@ defineEmits(["acceptClicked", "rejectClicked"]);
 </script>
 
 <template>
-    <div class="flex flex-row items-center gap-2">
+    <div class="flex min-w-0 flex-row items-center gap-2">
         <ServerImage v-if="group.img_path" :image-url="group.img_path" :size="4" />
         <PlaceholderImage :size="4" v-else />
-        <span class="break-words dark:text-gray-50">{{ group.group_title }}</span>
+        <span class="min-w-0 break-words dark:text-gray-50">{{ group.group_title }}</span>
     </div>
     <div class="flex flex-shrink-0 flex-row items-center gap-2">
         <button
             type="button"
-            class="btn btn-square btn-success text-gray-50"
+            class="btn btn-success text-gray-50"
             :class="`btn-${size}`"
             :disabled="isLoading"
             @click="$emit('acceptClicked')"
         >
             <CheckIcon class="h-4 w-4" />
+            <span>Accept</span>
         </button>
         <button
             type="button"

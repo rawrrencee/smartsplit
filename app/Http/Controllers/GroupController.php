@@ -335,6 +335,9 @@ class GroupController extends Controller
         if (isset($groupMember)) {
             try {
                 DB::beginTransaction();
+                if (!isset($groupMember->user_id)) {
+                    $groupMember->update(['user_id' => auth()->user()->id]);
+                }
                 $groupMember->update(['status' => $request['status']]);
 
                 if ($request['status'] == GroupMemberStatusEnum::ACCEPTED->value) {

@@ -482,6 +482,11 @@ const mockGroupPaymentSections = [
                                     <div class="flex flex-col gap-1">
                                         <span class="break-all text-sm">{{ member.email }}</span>
                                         <span
+                                            v-if="group.owner_id === member.user_id"
+                                            class="badge badge-sm text-xs font-semibold"
+                                            >CREATOR</span
+                                        >
+                                        <span
                                             v-if="$page.props.auth.user.id === member.user_id"
                                             class="badge badge-sm text-xs font-semibold"
                                             >YOU</span
@@ -498,7 +503,7 @@ const mockGroupPaymentSections = [
                             </div>
                             <div
                                 class="flex flex-grow flex-col items-end"
-                                v-if="member.user_id !== $page.props.auth.user.id"
+                                v-if="member.user_id !== $page.props.auth.user.id && member.user_id !== group.owner_id"
                             >
                                 <button
                                     type="button"
