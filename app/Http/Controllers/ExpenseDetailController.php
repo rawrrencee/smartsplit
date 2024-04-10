@@ -36,8 +36,6 @@ class ExpenseDetailController extends Controller
 
             if (count($intersectCurrencies) > 0) {
                 foreach ($intersectCurrencies as $key => $value) {
-                    error_log(json_encode($overallDeltaForReceiver['JPY']['amount']));
-
                     if ($overallDeltaForReceiver[$key]['amount'] < 0 && $overallDeltaForGroupMember[$key]['amount'] > 0) {
                         if (abs($overallDeltaForReceiver[$key]['amount']) >= $overallDeltaForGroupMember[$key]['amount']) {
                             $overallDeltaForReceiver[$key]['amount'] += $overallDeltaForGroupMember[$key]['amount'];
