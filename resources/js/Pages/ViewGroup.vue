@@ -428,13 +428,22 @@ const mockGroupPaymentSections = [
                     <div class="flex flex-col gap-1 px-6 transition-opacity">
                         <div class="flex flex-1 flex-col gap-1">
                             <span class="text-xs text-gray-500 dark:text-gray-50">Enter an email to invite</span>
-                            <input
-                                type="text"
-                                class="input input-sm input-bordered flex-shrink text-xs dark:bg-gray-800"
-                                :class="addMemberForm.errors['email'] && 'border-error'"
-                                placeholder="Email Address"
-                                v-model="addMemberForm.email"
-                            />
+                            <div class="flex flex-row gap-1">
+                                <input
+                                    type="text"
+                                    class="input input-sm input-bordered flex-shrink flex-grow text-xs dark:bg-gray-800"
+                                    :class="addMemberForm.errors['email'] && 'border-error'"
+                                    placeholder="Email Address"
+                                    v-model="addMemberForm.email"
+                                />
+                                <button
+                                    type="button"
+                                    class="btn btn-square btn-outline btn-sm border-gray-400 text-gray-400"
+                                    @click="onClearAddMemberFormClicked"
+                                >
+                                    <XMarkIcon class="h-4 w-4" />
+                                </button>
+                            </div>
                             <span class="text-xs text-error" v-if="addMemberForm.errors['email']">{{
                                 addMemberForm.errors["email"]
                             }}</span>
@@ -447,13 +456,6 @@ const mockGroupPaymentSections = [
                                     <span>@gmail.com</span>
                                 </button>
                                 <div class="flex flex-row gap-1">
-                                    <button
-                                        type="button"
-                                        class="btn btn-square btn-error btn-sm"
-                                        @click="onClearAddMemberFormClicked"
-                                    >
-                                        <XMarkIcon class="h-4 w-4 text-gray-50" />
-                                    </button>
                                     <button
                                         type="button"
                                         class="btn btn-success btn-sm text-gray-50"
@@ -485,19 +487,26 @@ const mockGroupPaymentSections = [
                                     </div>
                                     <PlaceholderImage :size="8" v-else />
                                     <div class="flex flex-col gap-1">
-                                        <span class="break-all text-sm">{{ member.email }}</span>
+                                        <div class="flex flex-row flex-wrap items-center gap-2">
+                                            <span class="break-all text-sm">{{ member.email }}</span
+                                            ><span
+                                                v-if="$page.props.auth.user.id === member.user_id"
+                                                class="badge badge-sm text-xs font-semibold"
+                                                >YOU</span
+                                            >
+                                        </div>
                                         <span
                                             v-if="group.owner_id === member.user_id"
-                                            class="badge badge-sm text-xs font-semibold"
+                                            class="badge badge-primary badge-sm text-xs font-semibold"
                                             >CREATOR</span
                                         >
-                                        <span
-                                            v-if="$page.props.auth.user.id === member.user_id"
-                                            class="badge badge-sm text-xs font-semibold"
-                                            >YOU</span
-                                        >
                                         <div
-                                            class="flex flex-row items-center gap-1 text-gray-400"
+                                            class="flex flex-row items-center gap-1"
+                                            :class="
+                                                member.status === GroupMemberStatusEnum.REJECTED
+                                                    ? 'text-error'
+                                                    : 'text-gray-400'
+                                            "
                                             v-if="member.status !== GroupMemberStatusEnum.ACCEPTED"
                                         >
                                             <ExclamationCircleIcon class="h-4 w-4" />
@@ -513,6 +522,7 @@ const mockGroupPaymentSections = [
                                 <button
                                     type="button"
                                     class="btn btn-square btn-error btn-sm"
+                                    :disabled="isLoading"
                                     @click="onRemoveMemberClicked(member)"
                                 >
                                     <span class="loading loading-spinner loading-sm" v-if="isLoading" />
@@ -542,7 +552,8 @@ const mockGroupPaymentSections = [
                                             class="btn btn-link btn-xs no-underline"
                                             @click="onRestoreDeletedGroupMemberClicked(member)"
                                         >
-                                            Invite
+                                            <span class="loading loading-spinner loading-xs" v-if="isLoading"></span>
+                                            <span v-else>Invite</span>
                                         </button>
                                     </div>
                                 </template>

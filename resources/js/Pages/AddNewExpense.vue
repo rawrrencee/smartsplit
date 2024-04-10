@@ -306,7 +306,7 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                 </div>
             </div>
 
-            <div class="flex flex-col gap-5">
+            <div class="flex flex-col gap-5" v-if="currentGroup">
                 <div class="flex flex-row flex-wrap justify-center gap-2 px-2">
                     <div class="flex flex-row items-center justify-center gap-2">
                         <span>Paid by</span>
@@ -456,7 +456,7 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                 </div>
                             </div>
 
-                            <div class="w-full gap-2 px-4 py-4" v-if="selectedPayeeForms.length > 1">
+                            <div class="w-full gap-2 px-4 py-4" v-if="selectedPayeeForms.length > 0">
                                 <button
                                     type="button"
                                     class="btn btn-xs"
