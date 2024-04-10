@@ -11,8 +11,10 @@ const recentGroup = ref(getRememberRecentGroup());
 const onClick = (name) => {
     if (name === "groups") {
         const recentGroup = getRememberRecentGroup();
-        if (recentGroup) {
+        if (recentGroup.id) {
             router.get(route("groups.view"), { id: recentGroup.id });
+        } else {
+            router.visit(route(name));
         }
     } else {
         router.visit(route(name));
