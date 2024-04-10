@@ -26,11 +26,16 @@ import { toast } from "vue-sonner";
 const props = defineProps({
     group: Object,
     groupMembers: Array,
+    userAmounts: Object,
+    userOwes: Object,
 });
 
 const back = () => {
     router.visit(route("groups"));
 };
+
+console.log(props.userOwes);
+console.log(props.groupMembers);
 
 const rememberRecentGroup = ref(getRememberRecentGroup());
 const setRememberRecentGroupIfNeeded = () => {
@@ -53,6 +58,23 @@ const setIsDialogOpen = (value) => {
     addMemberForm.reset();
     addMemberForm.clearErrors();
 };
+
+const currenciesPaidByUser = computed(() => {
+    return Object.entries(props.userAmounts).map((val) => {
+        return {
+            key: val[0],
+            symbol: val[1].symbol,
+            amount: val[1].amount,
+        };
+    });
+});
+const positiveCurrencies = computed(() => {
+    return currenciesPaidByUser.value.filter((v) => v.amount > 0);
+});
+const negativeCurrencies = computed(() => {
+    return currenciesPaidByUser.value.filter((v) => v.amount < 0);
+});
+
 const activeGroupMembers = computed(() => {
     return props.groupMembers.filter((member) => !member.deleted_at) ?? [];
 });
@@ -341,7 +363,32 @@ const mockGroupPaymentSections = [
                 </button>
             </div>
         </div>
-        <div class="mx-auto flex max-w-7xl flex-col gap-4 pt-8">
+        <div class="flex w-full flex-col gap-1 px-4 pt-6" v-if="positiveCurrencies.length || negativeCurrencies.length">
+            <div class="text-sm font-bold text-success" v-if="positiveCurrencies.length">
+                <span>You are owed&nbsp;</span>
+                <template v-for="(c, i) in positiveCurrencies">
+                    <span v-if="i > 0">&nbsp;&plus;&nbsp;</span><span>{{ c.symbol }}{{ c.amount }}</span>
+                </template>
+            </div>
+            <div class="text-sm font-bold text-error" v-if="negativeCurrencies.length">
+                <span>You owe&nbsp;</span>
+                <template v-for="(c, i) in negativeCurrencies">
+                    <span v-if="i > 0">&nbsp;&plus;&nbsp;</span><span>{{ c.symbol }}{{ Math.abs(c.amount) }}</span>
+                </template>
+            </div>
+            <div class="flex flex-col gap-1 pl-4 text-xs" v-if="Object.keys(userOwes).length">
+                <template v-for="userId in Object.keys(userOwes)">
+                    <span
+                        >You owe&nbsp;<span
+                            >{{ groupMembers?.find((m) => `${m.user_id}` === userId)?.user?.name }}&nbsp;</span
+                        ><span class="text-error"
+                            >{{ userOwes[userId].symbol }}{{ userOwes[userId].amount }}</span
+                        ></span
+                    >
+                </template>
+            </div>
+        </div>
+        <div class="mx-auto flex max-w-7xl flex-col gap-4 pt-6">
             <div v-for="section in mockGroupPaymentSections" class="flex flex-col gap-2">
                 <div class="px-4 sm:px-6 lg:px-8">
                     <span class="font-semibold dark:text-gray-200">{{ formatDate(section.date, "MMMM YYYY") }}</span>

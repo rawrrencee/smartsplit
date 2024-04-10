@@ -428,7 +428,6 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                     type="button"
                                     class="btn btn-xs"
                                     @click="onDistributeExpenseToSelectedUsersEquallyClicked(selectedPayerForms)"
-                                    v-if="selectedPayerForms.length > 1"
                                 >
                                     Divide equally between selected
                                 </button>
