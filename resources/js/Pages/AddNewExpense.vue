@@ -1,5 +1,6 @@
 <script setup>
-import { to2DecimalPlacesIfValid } from "@/Common.js";
+import { showToastIfNeeded, to2DecimalPlacesIfValid } from "@/Common.js";
+import CategoryIcon from "@/Components/CategoryIcon.vue";
 import GroupList from "@/Components/GroupList.vue";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
 import ProfilePhotoImage from "@/Components/Image/ProfilePhotoImage.vue";
@@ -7,11 +8,13 @@ import ServerImage from "@/Components/Image/ServerImage.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
 import { CalendarIcon, ListBulletIcon, MagnifyingGlassIcon, XMarkIcon } from "@heroicons/vue/24/outline";
-import { useForm } from "@inertiajs/vue3";
+import { CheckCircleIcon } from "@heroicons/vue/24/solid";
+import { router, useForm } from "@inertiajs/vue3";
 import InputNumber from "primevue/inputnumber";
 import { DatePicker } from "v-calendar";
 import "v-calendar/style.css";
 import { computed, onMounted, ref } from "vue";
+import { toast } from "vue-sonner";
 
 // #region Configs
 const defaultExpenseGroupKey = "addExpenseDefaultGroupId";
@@ -23,12 +26,18 @@ onMounted(() => {
 
 const props = defineProps({
     groups: Array,
+    categories: Array,
     currencies: Array,
     auth: Object,
 });
 const popover = ref({
     visibility: "focus",
 });
+
+const isLoading = ref(false);
+const setIsLoading = (value) => {
+    isLoading.value = value;
+};
 // #endregion Configs
 
 const isDialogOpen = ref(false);
@@ -46,6 +55,8 @@ const dialogTitle = computed(() => {
             return "Groups";
         case "selectCurrency":
             return "Currencies";
+        case "selectCategory":
+            return "Categories";
         default:
             return "";
     }
@@ -60,20 +71,20 @@ const currentGroup = computed(() => {
 });
 
 // #region Expense Form
+const payerFormArray = ref([]);
+const receiverFormArray = ref([]);
+
 const expenseForm = useForm({
     group_id: null,
-    date_of_expense: new Date(),
+    date: new Date(),
+    category: null,
     description: null,
     currency_key: null,
     amount: null,
-    split_mode: null,
+    is_settlement: false,
     payer_details: [],
-    payee_details: [],
+    receiver_details: [],
 });
-
-const payerFormArray = ref([]);
-const payeeFormArray = ref([]);
-
 const generateExpenseDetail = (user, shouldSelectAll = false) => {
     return useForm({
         user_id: user.id,
@@ -82,15 +93,22 @@ const generateExpenseDetail = (user, shouldSelectAll = false) => {
         user,
     });
 };
+const mapExpenseDetailToFormData = (expenseDetail) => {
+    return {
+        user_id: expenseDetail.user_id,
+        amount: expenseDetail.amount,
+    };
+};
+
 const updatePayerFormArray = () => {
     payerFormArray.value = currentGroup.value?.group_members?.map((m) => generateExpenseDetail(m.user)) ?? [];
-    payeeFormArray.value = currentGroup.value?.group_members?.map((m) => generateExpenseDetail(m.user, true)) ?? [];
+    receiverFormArray.value = currentGroup.value?.group_members?.map((m) => generateExpenseDetail(m.user, true)) ?? [];
 };
 const allPayersSelected = computed(() => {
     return payerFormArray.value.every((payer) => payer.isSelected);
 });
-const allPayeesSelected = computed(() => {
-    return payeeFormArray.value.every((payee) => payee.isSelected);
+const allReceiversSelected = computed(() => {
+    return receiverFormArray.value.every((receiver) => receiver.isSelected);
 });
 const paidByString = computed(() => {
     if (selectedPayerForms.value.length === 1 && props.auth.user.id === selectedPayerForms.value?.[0]?.user_id) {
@@ -104,13 +122,13 @@ const paidByString = computed(() => {
     }
 });
 const splitEquallyString = computed(() => {
-    if (selectedPayeeForms.value.length === 0) return "equally";
-    const firstAmount = selectedPayeeForms.value[0].amount;
-    if (selectedPayeeForms.value.every((f) => f.amount === firstAmount)) return "equally";
+    if (selectedReceiverForms.value.length === 0) return "equally";
+    const firstAmount = selectedReceiverForms.value[0].amount;
+    if (selectedReceiverForms.value.every((f) => f.amount === firstAmount)) return "equally";
     return "inequally";
 });
 const selectedPayerForms = computed(() => payerFormArray.value.filter((f) => f.isSelected));
-const selectedPayeeForms = computed(() => payeeFormArray.value.filter((f) => f.isSelected));
+const selectedReceiverForms = computed(() => receiverFormArray.value.filter((f) => f.isSelected));
 const toggleAllUsers = (formArray, allSelected) => {
     formArray.forEach((f) => (f.amount = null));
     if (allSelected) {
@@ -130,11 +148,10 @@ const remainingPayerAmount = computed(() => {
         .reduce((total, payer) => total + payer.amount, 0);
     return expenseForm.amount - totalAmount;
 });
-
-const remainingPayeeAmount = computed(() => {
-    const totalAmount = payeeFormArray.value
+const remainingReceiverAmount = computed(() => {
+    const totalAmount = receiverFormArray.value
         .filter((f) => f.isSelected)
-        .reduce((total, payee) => total + payee.amount, 0);
+        .reduce((total, receiver) => total + receiver.amount, 0);
     return expenseForm.amount - totalAmount;
 });
 
@@ -168,7 +185,40 @@ const onDistributeExpenseToSelectedUsersEquallyClicked = (selectedForms) => {
         }
     });
 };
+
+const onSaveExpenseClicked = () => {
+    setIsLoading(true);
+    expenseForm
+        .transform((data) => ({
+            ...data,
+            category: selectedCategory.value,
+            currency_key: selectedCurrency.value.key,
+            group_id: currentGroup.value.id,
+            payer_details: selectedPayerForms.value.map((v) => mapExpenseDetailToFormData(v)),
+            receiver_details: selectedReceiverForms.value.map((v) => mapExpenseDetailToFormData(v)),
+        }))
+        .post(route("expenses.add"), {
+            onSuccess: (s) => {
+                expenseForm.reset();
+                payerFormArray.value.forEach((f) => f.reset());
+                receiverFormArray.value.forEach((f) => f.reset());
+                router.reload();
+                showToastIfNeeded(toast, s.props.flash);
+            },
+            onFinish: () => {
+                setIsLoading(false);
+            },
+        });
+};
 // #endregion Expense Form
+
+// #region Category
+const selectedCategory = ref(null);
+const setSelectedCategory = (key) => {
+    selectedCategory.value = key;
+    setIsDialogOpen(false);
+};
+// #endregion Category
 
 // #region Currency
 const getSelectedCurrencyFromSessionStorage = () => {
@@ -221,9 +271,11 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
             <button
                 type="button"
                 class="btn btn-link px-0 text-gray-600 no-underline dark:text-gray-200"
-                @click="onClick"
+                :disabled="isLoading"
+                @click="onSaveExpenseClicked"
             >
-                Save
+                <span v-if="isLoading" class="loading loading-spinner"></span>
+                <span v-else>Save</span>
             </button>
         </div>
         <div class="mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:px-8 dark:text-gray-200">
@@ -246,7 +298,7 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
 
                 <div class="flex flex-col items-start gap-1">
                     <span>Date of expense</span>
-                    <DatePicker v-model="expenseForm.date_of_expense" :input-debounce="500" :popover="popover">
+                    <DatePicker v-model="expenseForm.date" :input-debounce="500" :popover="popover">
                         <template #default="{ inputValue, inputEvents }">
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 z-10 flex items-center pl-3">
@@ -268,13 +320,17 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                 <div class="flex flex-row gap-2">
                     <button
                         class="btn btn-square btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                        @click="setDialogMode('selectCategory')"
                     >
-                        <ListBulletIcon class="h-6 w-6" />
+                        <ListBulletIcon class="h-6 w-6" v-if="!selectedCategory" />
+                        <CategoryIcon v-else :category="selectedCategory" />
                     </button>
                     <input
                         type="text"
                         placeholder="Enter a description"
                         class="input input-bordered w-full dark:border-0 dark:bg-gray-900 dark:text-gray-50"
+                        :maxlength="30"
+                        v-model="expenseForm.description"
                     />
                 </div>
 
@@ -444,8 +500,8 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                         <input
                                             type="checkbox"
                                             class="checkbox checkbox-xs dark:bg-gray-600"
-                                            :checked="allPayeesSelected"
-                                            @change="toggleAllUsers(payeeFormArray, allPayeesSelected)"
+                                            :checked="allReceiversSelected"
+                                            @change="toggleAllUsers(receiverFormArray, allReceiversSelected)"
                                         />
                                         <span class="label-text text-xs dark:text-gray-50">Select All</span>
                                     </label>
@@ -456,16 +512,16 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                 </div>
                             </div>
 
-                            <div class="w-full gap-2 px-4 py-4" v-if="selectedPayeeForms.length > 0">
+                            <div class="w-full gap-2 px-4 py-4" v-if="selectedReceiverForms.length > 0">
                                 <button
                                     type="button"
                                     class="btn btn-xs"
-                                    @click="onDistributeExpenseToSelectedUsersEquallyClicked(selectedPayeeForms)"
+                                    @click="onDistributeExpenseToSelectedUsersEquallyClicked(selectedReceiverForms)"
                                 >
                                     Divide equally between selected
                                 </button>
                             </div>
-                            <template v-for="form in payeeFormArray" :key="form.user_id">
+                            <template v-for="form in receiverFormArray" :key="form.user_id">
                                 <div
                                     class="flex flex-row items-center justify-between gap-3 p-4 hover:bg-gray-200 dark:hover:bg-gray-700"
                                 >
@@ -506,9 +562,9 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
 
                             <div class="flex flex-row justify-end border-t-[1px] p-4 text-xs dark:border-gray-700">
                                 <span>Remaining:&nbsp;</span
-                                ><span :class="remainingPayeeAmount !== 0 && 'text-error'"
-                                    >{{ remainingPayeeAmount < 0 ? "-" : "" }}{{ selectedCurrency.symbol ?? "$"
-                                    }}{{ to2DecimalPlacesIfValid(Math.abs(remainingPayeeAmount)) ?? "0.00" }}</span
+                                ><span :class="remainingReceiverAmount !== 0 && 'text-error'"
+                                    >{{ remainingReceiverAmount < 0 ? "-" : "" }}{{ selectedCurrency.symbol ?? "$"
+                                    }}{{ to2DecimalPlacesIfValid(Math.abs(remainingReceiverAmount)) ?? "0.00" }}</span
                                 >
                             </div>
                         </div>
@@ -574,7 +630,29 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                             :hide-owed-amounts="true"
                                             @group-clicked="onGroupClicked"
                                         />
-                                        <div class="flex flex-col gap-2" v-else>
+                                        <div class="flex flex-col gap-2" v-if="dialogMode === 'selectCategory'">
+                                            <div class="flex flex-col gap-2">
+                                                <template v-for="(c, i) in categories" :key="i">
+                                                    <button
+                                                        type="button"
+                                                        class="flex flex-row items-center justify-between gap-4 px-6 py-2 text-start hover:bg-gray-100"
+                                                        @click="setSelectedCategory(c.key)"
+                                                    >
+                                                        <div class="flex flex-row items-center gap-2">
+                                                            <CategoryIcon :category="c.key" size="h-5 w-5" />
+                                                            <span :class="selectedCategory === c.key && 'font-bold'">{{
+                                                                c.value
+                                                            }}</span>
+                                                        </div>
+                                                        <CheckCircleIcon
+                                                            v-if="selectedCategory === c.key"
+                                                            class="h-6 w-6 text-success"
+                                                        />
+                                                    </button>
+                                                </template>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col gap-2" v-if="dialogMode === 'selectCurrency'">
                                             <div class="flex flex-col px-6 py-2">
                                                 <label
                                                     class="input input-sm input-bordered flex items-center gap-2 border-0 outline-0"
@@ -593,9 +671,16 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                                     <button
                                                         type="button"
                                                         class="flex flex-row items-center justify-between px-6 py-2 text-start hover:bg-gray-100"
+                                                        :class="selectedCurrency.key === c.key && 'font-bold'"
                                                         @click="setSelectedCurrency(c.key)"
                                                     >
-                                                        <span>{{ `${c.value} - ${c.key}` }}</span>
+                                                        <div class="flex flex-row gap-2">
+                                                            <CheckCircleIcon
+                                                                v-if="selectedCurrency.key === c.key"
+                                                                class="h-6 w-6 text-success"
+                                                            />
+                                                            <span>{{ `${c.value} - ${c.key}` }}</span>
+                                                        </div>
                                                         <span>({{ c.symbol }})</span>
                                                     </button>
                                                 </template>

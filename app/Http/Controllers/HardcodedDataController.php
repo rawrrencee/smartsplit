@@ -21,6 +21,74 @@ class HardcodedDataController extends Controller
         return 'Y-m-d H:i:s';
     }
 
+    public function getCategories()
+    {
+        $categories = array(
+            array(
+                'key' => 'food',
+                'value' => 'Food'
+            ),
+            array(
+                'key' => 'transport',
+                'value' => 'Transport'
+            ),
+            array(
+                'key' => 'entertainment',
+                'value' => 'Entertainment'
+            ),
+            array(
+                'key' => 'utilities',
+                'value' => 'Utilities'
+            ),
+            array(
+                'key' => 'groceries',
+                'value' => 'Groceries'
+            ),
+            array(
+                'key' => 'shopping',
+                'value' => 'Shopping'
+            ),
+            array(
+                'key' => 'restaurants',
+                'value' => 'Restaurants'
+            ),
+            array(
+                'key' => 'travel',
+                'value' => 'Travel'
+            ),
+            array(
+                'key' => 'rent',
+                'value' => 'Rent'
+            ),
+            array(
+                'key' => 'healthcare',
+                'value' => 'Healthcare'
+            ),
+            array(
+                'key' => 'gifts',
+                'value' => 'Gifts'
+            ),
+            array(
+                'key' => 'electronics',
+                'value' => 'Electronics'
+            ),
+            array(
+                'key' => 'insurance',
+                'value' => 'Insurance'
+            ),
+            array(
+                'key' => 'fuel',
+                'value' => 'Fuel'
+            ),
+            array(
+                'key' => 'education',
+                'value' => 'Education'
+            )
+        );
+
+        return $categories;
+    }
+
     public function getCurrencies()
     {
         $currencies = array(
