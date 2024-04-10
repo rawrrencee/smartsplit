@@ -109,6 +109,7 @@ class ExpenseController extends Controller
                         'receiver_id' => $receiver['user_id'],
                         'currency_key' => $expense->currency_key,
                         'amount' => -$receiver['amount'],
+                        'is_settlement' => $isSettlement,
                     ];
 
                     ExpenseDetail::create($data);

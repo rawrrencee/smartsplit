@@ -91,6 +91,7 @@ const mapExpenseDetailToFormData = (expenseDetail) => {
     return {
         user_id: expenseDetail.user_id,
         amount: expenseDetail.amount,
+        is_settlement: false,
     };
 };
 
