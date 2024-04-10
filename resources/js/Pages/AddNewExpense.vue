@@ -23,7 +23,7 @@ import { toast } from "vue-sonner";
 
 // #region Configs
 onMounted(() => {
-    setSelectedGroup(getSelectedGroupIdFromSessionStorage());
+    setSelectedGroupId(getSelectedGroupIdFromSessionStorage());
 });
 
 const props = defineProps({
@@ -62,14 +62,6 @@ const dialogTitle = computed(() => {
         default:
             return "";
     }
-});
-
-const onGroupClicked = (groupId) => {
-    setSelectedGroup(groupId);
-    setIsDialogOpen(false);
-};
-const currentGroup = computed(() => {
-    return props.groups.find((group) => `${group.id}` === selectedGroupId.value);
 });
 
 // #region Expense Form
@@ -159,12 +151,18 @@ const remainingReceiverAmount = computed(() => {
 
 const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(kDefaultExpenseGroupKey);
 const selectedGroupId = ref(getSelectedGroupIdFromSessionStorage());
-const setSelectedGroup = (groupId) => {
+const setSelectedGroupId = (groupId) => {
     sessionStorage.setItem(kDefaultExpenseGroupKey, groupId);
     selectedGroupId.value = getSelectedGroupIdFromSessionStorage();
     updatePayerFormArray();
 };
-
+const onGroupClicked = (groupId) => {
+    setSelectedGroupId(groupId);
+    setIsDialogOpen(false);
+};
+const currentGroup = computed(() => {
+    return props.groups.find((group) => `${group.id}` === selectedGroupId.value);
+});
 const setPayerAsSelfAndDistributeExpense = () => {
     payerFormArray.value.forEach((f) => {
         f.isSelected = f.user_id === props.auth.user.id;
@@ -270,14 +268,15 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
             class="top-0 z-10 flex w-full flex-row items-center justify-between p-4 pt-2 sm:px-6 lg:px-8 dark:text-gray-200"
         >
             <span class="text-lg font-bold">Add an expense</span>
+            <span v-if="isLoading" class="loading loading-spinner"></span>
             <button
+                v-else
                 type="button"
                 class="btn btn-link px-0 text-gray-600 no-underline dark:text-gray-200"
                 :disabled="isLoading"
                 @click="onSaveExpenseClicked"
             >
-                <span v-if="isLoading" class="loading loading-spinner"></span>
-                <span v-else>Save</span>
+                <span>Save</span>
             </button>
         </div>
         <div class="mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:px-8 dark:text-gray-200">

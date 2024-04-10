@@ -6,21 +6,22 @@ use App\Enums\GroupMemberStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Models\ExpenseDetail;
-use App\Models\Group;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Validator;
 
 class ExpenseController extends Controller
 {
-    protected $CommonController, $HardcodedDataController, $GroupController, $UserController;
+    protected $CommonController, $HardcodedDataController, $GroupController, $UserController, $ExpenseDetailController;
 
-    public function __construct(CommonController $CommonController, HardcodedDataController $HardcodedDataController, GroupController $GroupController, UserController $UserController)
+    public function __construct(CommonController $CommonController, HardcodedDataController $HardcodedDataController, GroupController $GroupController, UserController $UserController, ExpenseDetailController $ExpenseDetailController)
     {
         $this->CommonController = $CommonController;
         $this->HardcodedDataController = $HardcodedDataController;
         $this->GroupController = $GroupController;
         $this->UserController = $UserController;
+        $this->ExpenseDetailController = $ExpenseDetailController;
     }
 
     public function addExpensePage(Request $request)
@@ -32,9 +33,22 @@ class ExpenseController extends Controller
         ]);
     }
 
+    public function settleUpPage(Request $request)
+    {
+        if ($request['id']) {
+            $userOwes = $this->ExpenseDetailController->getAmountUserOwesToEachGroupMember(auth()->user()->id, $request['id']);
+        }
+        return Inertia::render('SettleUp', [
+            'currencies' => $this->HardcodedDataController->getCurrencies(),
+            'categories' => $this->HardcodedDataController->getCategories(),
+            'groups' => $this->GroupController->getGroupsByMemberUserIdOrEmail($request->user()->id, null, GroupMemberStatusEnum::ACCEPTED, false, true),
+            'userOwes' => $userOwes ?? [],
+        ]);
+    }
+
     public function saveNewExpense(Request $request)
     {
-        $this->validateCreateExpenseRequest($request);
+        Validator::make($request->all(), $this->validateCreateExpenseRequestRules($request['is_settlement']))->validate();
 
         try {
             DB::beginTransaction();
@@ -62,6 +76,9 @@ class ExpenseController extends Controller
                 if (isset($receiver)) {
                     $request['receiver_name'] = $receiver->name;
                 }
+
+                $currencySymbol = $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $request['currency_key'], 'key', 'symbol');
+                $request['description'] = $payer->name . ' paid ' . $receiver->name . ' ' . $currencySymbol . $request['amount'] . '.';
             }
 
             // Update date format
@@ -100,11 +117,13 @@ class ExpenseController extends Controller
 
             DB::commit();
 
+            $message = $isSettlement ? "Settle up amount added successfully." : "Expense created successfully.";
+
             return redirect()->back()
                 ->with('show', true)
                 ->with('type', 'default')
                 ->with('status', 'success')
-                ->with('message', 'Expense created successfully.');
+                ->with('message', $message);
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -116,22 +135,29 @@ class ExpenseController extends Controller
         }
     }
 
-    public function validateCreateExpenseRequest(Request $request)
+    private function validateCreateExpenseRequestRules(bool $isSettlement)
     {
-        $request->validate([
+        $rules = [
             'group_id' => 'required|exists:groups,id',
             'date' => 'required|date',
             'category' => 'nullable|string',
-            'description' => 'required|string|max:30',
             'currency_key' => 'required|string',
             'amount' => 'required|numeric|min:0',
             'is_settlement' => 'required|boolean',
             'payer_details' => 'required|array',
-            'receiver_details' => 'required|array',
             'payer_details.*.user_id' => 'required|exists:users,id',
             'payer_details.*.amount' => 'required|numeric|min:0.01',
-            'receiver_details.*.user_id' => 'required|exists:users,id',
-            'receiver_details.*.amount' => 'required|numeric|min:0.01',
-        ]);
+        ];
+
+        if (!$isSettlement) {
+            $rules['receiver_details'] = 'required|array';
+            $rules['receiver_details.*.user_id'] = 'required|exists:users,id';
+            $rules['receiver_details.*.amount'] = 'required|numeric|min:0.01';
+            $rules['description'] = 'required|string|max:30';
+        } else {
+            $rules['payer_details.*.receiver_id'] = 'required|exists:users,id';
+        }
+
+        return $rules;
     }
 }

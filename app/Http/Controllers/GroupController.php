@@ -16,13 +16,14 @@ use Illuminate\Validation\ValidationException;
 
 class GroupController extends Controller
 {
-    protected $CommonController, $UserController, $HardcodedDataController;
+    protected $CommonController, $UserController, $HardcodedDataController, $ExpenseDetailController;
 
-    public function __construct(CommonController $CommonController, UserController $UserController, HardcodedDataController $HardcodedDataController)
+    public function __construct(CommonController $CommonController, UserController $UserController, HardcodedDataController $HardcodedDataController, ExpenseDetailController $ExpenseDetailController)
     {
         $this->CommonController = $CommonController;
         $this->UserController = $UserController;
         $this->HardcodedDataController = $HardcodedDataController;
+        $this->ExpenseDetailController = $ExpenseDetailController;
     }
 
     public function getGroupsByOwnerId($userId)
@@ -112,69 +113,6 @@ class GroupController extends Controller
         }
 
         return false;
-    }
-
-    public function getOverallExpenseDeltaForUserInGroup($userId, $groupId)
-    {
-        $positiveAmounts = ExpenseDetail::where('payer_id', $userId)
-            ->where('group_id', $groupId)
-            ->groupBy('currency_key')
-            ->selectRaw('currency_key, SUM(amount) as total_amount')
-            ->pluck('total_amount', 'currency_key')
-            ->toArray();
-
-        $negativeAmounts = ExpenseDetail::where('receiver_id', $userId)
-            ->where('group_id', $groupId)
-            ->groupBy('currency_key')
-            ->selectRaw('currency_key, SUM(amount) as total_amount')
-            ->pluck('total_amount', 'currency_key')
-            ->toArray();
-
-        $mergedAmounts = [];
-
-        // Merge positive and negative amounts for each currency
-        foreach (array_merge(array_keys($positiveAmounts), array_keys($negativeAmounts)) as $currencyKey) {
-            $positiveAmount = $positiveAmounts[$currencyKey] ?? 0;
-            $negativeAmount = $negativeAmounts[$currencyKey] ?? 0;
-            $mergedAmounts[$currencyKey]['amount'] = $positiveAmount + $negativeAmount;
-            $mergedAmounts[$currencyKey]['symbol'] = $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $currencyKey, 'key', 'symbol');
-        }
-
-        return $mergedAmounts;
-    }
-
-    public function getAmountUserOwesToEachGroupMember($userId, $groupId)
-    {
-        $membersOwedAmounts = [];
-
-        $groupMembers = $this->getGroupMembersByGroupId($groupId, true);
-
-        $overallDeltaForReceiver = $this->getOverallExpenseDeltaForUserInGroup($userId, $groupId);
-
-        foreach ($groupMembers as $member) {
-            if ($member->user_id == $userId) {
-                continue;
-            }
-
-            $overallDeltaForGroupMember = $this->getOverallExpenseDeltaForUserInGroup($member->user_id, $groupId);
-            $intersectCurrencies = array_intersect_key($overallDeltaForGroupMember, $overallDeltaForReceiver);
-
-            if (count($intersectCurrencies) > 0) {
-                foreach ($intersectCurrencies as $key => $value) {
-                    if ($overallDeltaForReceiver[$key]['amount'] < 0 && $overallDeltaForGroupMember[$key]['amount'] > 0) {
-                        if (abs($overallDeltaForReceiver[$key]['amount']) >= $overallDeltaForGroupMember[$key]['amount']) {
-                            $overallDeltaForReceiver[$key]['amount'] += $overallDeltaForGroupMember[$key]['amount'];
-                            $membersOwedAmounts[$member->user_id]['amount'] = $overallDeltaForGroupMember[$key]['amount'];
-                            $membersOwedAmounts[$member->user_id]['symbol'] = $overallDeltaForGroupMember[$key]['symbol'];
-                        } else {
-                            $overallDeltaForReceiver[$key]['amount'] = 0;
-                        }
-                    }
-                }
-            }
-        }
-
-        return $membersOwedAmounts;
     }
 
     public function getExpenseDetailsByGroupForUserId($groupId, $userId)
@@ -271,8 +209,8 @@ class GroupController extends Controller
         return Inertia::render('ViewGroup', [
             'group' => $group,
             'groupMembers' => $groupMembers,
-            'userAmounts' => $this->getOverallExpenseDeltaForUserInGroup(auth()->user()->id, $id),
-            'userOwes' => $this->getAmountUserOwesToEachGroupMember(auth()->user()->id, $id),
+            'userAmounts' => $this->ExpenseDetailController->getOverallExpenseDeltaForUserInGroup(auth()->user()->id, $id),
+            'userOwes' => $this->ExpenseDetailController->getAmountUserOwesToEachGroupMember(auth()->user()->id, $id),
             'expenses' => $this->getExpenseDetailsByGroupForUserId($id, auth()->user()->id),
         ]);
     }

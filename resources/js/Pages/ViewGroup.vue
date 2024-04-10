@@ -28,14 +28,12 @@ const props = defineProps({
     groupMembers: Array,
     userAmounts: Object,
     userOwes: Object,
-    expenses: Array,
+    expenses: Object,
 });
 
 const back = () => {
     router.visit(route("groups"));
 };
-
-console.log(props.expenses);
 
 const rememberRecentGroup = ref(getRememberRecentGroup());
 const setRememberRecentGroupIfNeeded = () => {
@@ -166,140 +164,6 @@ const expenseDetails = computed(() => {
         };
     });
 });
-const mockGroupPaymentSections = [
-    {
-        date: new Date(2023, 1, 1),
-        payments: [
-            {
-                settlementId: 6,
-                date: new Date(2023, 1, 1),
-                title: "You paid Ying R. ₩0.01.",
-                expenseId: null,
-                imageUrl: null,
-                payerName: null,
-                amount: null,
-                currency: null,
-                currentUserBorrowed: null,
-                amountBorrowedOrLent: null,
-                currencyBorrowedOrLent: null,
-            },
-        ],
-    },
-    {
-        date: new Date(2023, 0, 1),
-        payments: [
-            {
-                settlementId: 5,
-                date: new Date(2023, 0, 14),
-                title: 'Joel paid you $912.32 for "Paid via Bank Trf".',
-                expenseId: null,
-                imageUrl: null,
-                payerName: null,
-                amount: null,
-                currency: null,
-                currentUserBorrowed: null,
-                amountBorrowedOrLent: null,
-                currencyBorrowedOrLent: null,
-            },
-            {
-                settlementId: 4,
-                date: new Date(2023, 0, 14),
-                title: "Gordo paid Joel $0.01.",
-                expenseId: null,
-                imageUrl: null,
-                payerName: null,
-                amount: null,
-                currency: null,
-                currentUserBorrowed: null,
-                amountBorrowedOrLent: null,
-                currencyBorrowedOrLent: null,
-            },
-            {
-                settlementId: 3,
-                date: new Date(2023, 0, 14),
-                title: "Jun Heng C. paid Gordo $497.91.",
-                expenseId: null,
-                imageUrl: null,
-                payerName: null,
-                amount: null,
-                currency: null,
-                currentUserBorrowed: null,
-                amountBorrowedOrLent: null,
-                currencyBorrowedOrLent: null,
-            },
-            {
-                settlementId: 2,
-                date: new Date(2023, 0, 10),
-                title: 'Joel paid you ₩71,898.35 for "PAID VIA GPAY (970)".',
-                expenseId: null,
-                imageUrl: null,
-                payerName: null,
-                amount: null,
-                currency: null,
-                currentUserBorrowed: null,
-                amountBorrowedOrLent: null,
-                currencyBorrowedOrLent: null,
-            },
-        ],
-    },
-    {
-        date: new Date(2022, 11, 1),
-        payments: [
-            {
-                settlementId: 1,
-                date: new Date(2022, 11, 27, 12, 30),
-                title: 'Joel paid you ₩71,898.35 for "PAID VIA GPAY (970)".',
-                expenseId: null,
-                imageUrl: null,
-                payerName: null,
-                amount: null,
-                currency: null,
-                currentUserBorrowed: null,
-                amountBorrowedOrLent: null,
-                currencyBorrowedOrLent: null,
-            },
-            {
-                settlementId: null,
-                date: new Date(2022, 11, 27, 13, 30),
-                title: "travelodge",
-                expenseId: 3,
-                imageUrl: "https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg",
-                payerName: "You",
-                amount: "1,165.50",
-                currency: "$",
-                currentUserBorrowed: false,
-                amountBorrowedOrLent: "901.50",
-                currencyBorrowedOrLent: "$",
-            },
-            {
-                settlementId: null,
-                date: new Date(2022, 11, 26, 1, 0),
-                title: "airport last meal",
-                expenseId: 2,
-                imageUrl: "https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg",
-                payerName: "Ying R.",
-                amount: "56,300.00",
-                currency: "₩",
-                currentUserBorrowed: true,
-                amountBorrowedOrLent: "14,075.00",
-                currencyBorrowedOrLent: "₩",
-            },
-            {
-                settlementId: null,
-                date: new Date(2022, 11, 26, 0, 0),
-                title: "the climb gangnam",
-                expenseId: 1,
-                imageUrl: "https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg",
-                payerName: "You",
-                amount: "22,000.00",
-                currency: "₩",
-                currentUserBorrowed: false,
-                amountBorrowedOrLent: "22,000.00",
-                currencyBorrowedOrLent: "₩",
-            },
-        ],
-    },
-];
 </script>
 
 <template>
@@ -417,8 +281,8 @@ const mockGroupPaymentSections = [
                             </div>
                             <div class="w-full min-w-10 pr-4 sm:pr-6 lg:pr-8">
                                 <div v-if="expense.is_settlement" class="flex flex-row items-center gap-2">
-                                    <CurrencyDollarIcon class="h-8 w-8 flex-shrink-0 text-success" />
-                                    <span class="break-word text-sm">{{ expense.description }}</span>
+                                    <CurrencyDollarIcon class="h-6 w-6 flex-shrink-0 text-success" />
+                                    <span class="break-word text-xs">{{ expense.description }}</span>
                                 </div>
                                 <div v-else class="flex min-w-0 flex-grow flex-row items-center justify-between gap-2">
                                     <CategoryIcon :category="expense.category" />

@@ -19,6 +19,7 @@ class ExpenseDetail extends Model
         'receiver_id',
         'currency_key',
         'amount',
+        'is_settlement'
     ];
 
     public function group()
