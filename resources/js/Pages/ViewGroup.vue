@@ -1,5 +1,5 @@
 <script setup>
-import { getRememberRecentGroup, setRememberRecentGroup, showToastIfNeeded } from "@/Common";
+import { getRememberRecentGroup, setRememberRecentGroup, showToastIfNeeded, to2DecimalPlacesIfValid } from "@/Common";
 import CategoryIcon from "@/Components/CategoryIcon.vue";
 import DialogAnimated from "@/Components/DialogAnimated.vue";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
@@ -242,13 +242,15 @@ const expenseDetails = computed(() => {
             <div class="text-sm font-bold text-success" v-if="positiveCurrencies.length">
                 <span>You are owed&nbsp;</span>
                 <template v-for="(c, i) in positiveCurrencies">
-                    <span v-if="i > 0">&nbsp;&plus;&nbsp;</span><span>{{ c.symbol }}{{ c.amount }}</span>
+                    <span v-if="i > 0">&nbsp;&plus;&nbsp;</span
+                    ><span>{{ c.symbol }}{{ to2DecimalPlacesIfValid(c.amount) }}</span>
                 </template>
             </div>
             <div class="text-sm font-bold text-error" v-if="negativeCurrencies.length">
                 <span>You owe&nbsp;</span>
                 <template v-for="(c, i) in negativeCurrencies">
-                    <span v-if="i > 0">&nbsp;&plus;&nbsp;</span><span>{{ c.symbol }}{{ Math.abs(c.amount) }}</span>
+                    <span v-if="i > 0">&nbsp;&plus;&nbsp;</span
+                    ><span>{{ c.symbol }}{{ to2DecimalPlacesIfValid(Math.abs(c.amount)) }}</span>
                 </template>
             </div>
             <div class="flex flex-col gap-1 pl-4 text-xs" v-if="Object.keys(userOwes).length">
@@ -257,7 +259,7 @@ const expenseDetails = computed(() => {
                         >You owe&nbsp;<span
                             >{{ groupMembers?.find((m) => `${m.user_id}` === userId)?.user?.name }}&nbsp;</span
                         ><span class="text-error"
-                            >{{ userOwes[userId].symbol }}{{ userOwes[userId].amount }}</span
+                            >{{ userOwes[userId].symbol }}{{ to2DecimalPlacesIfValid(userOwes[userId].amount) }}</span
                         ></span
                     >
                 </template>
@@ -291,7 +293,7 @@ const expenseDetails = computed(() => {
                                         <span class="break-words text-gray-500 dark:text-gray-300"
                                             >{{ expense.num_payers > 1 ? `${expense.num_payers}&nbsp;` : ""
                                             }}{{ expense.payer_name }} paid {{ expense.symbol
-                                            }}{{ expense.amount }}</span
+                                            }}{{ to2DecimalPlacesIfValid(expense.amount) }}</span
                                         >
                                     </div>
                                     <div
@@ -299,7 +301,10 @@ const expenseDetails = computed(() => {
                                         :class="expense.net_amount < 0 ? 'text-error' : 'text-success'"
                                     >
                                         <span>you {{ expense.net_amount < 0 ? "borrowed" : "lent" }}</span>
-                                        <span>{{ expense.symbol }}{{ Math.abs(expense.net_amount) }}</span>
+                                        <span
+                                            >{{ expense.symbol
+                                            }}{{ to2DecimalPlacesIfValid(Math.abs(expense.net_amount)) }}</span
+                                        >
                                     </div>
                                 </div>
                             </div>
