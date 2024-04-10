@@ -11,6 +11,12 @@
 -   MySQL
 -   Docker
 
+### To observe PHP logs
+
+1.  Use `docker compose ps` to get a list of services
+2.  Run `sail logs -f laravel.test` to view the logs
+3.  Use `error_log(...)` to output to the console
+
 ### Setting Up on Windows
 
 1.  Install WSL2 via `wsl --install` on Command Prompt
