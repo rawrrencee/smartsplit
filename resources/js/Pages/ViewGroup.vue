@@ -1,5 +1,5 @@
 <script setup>
-import { showToastIfNeeded } from "@/Common";
+import { getRememberRecentGroup, setRememberRecentGroup, showToastIfNeeded } from "@/Common";
 import DialogAnimated from "@/Components/DialogAnimated.vue";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
 import ServerImage from "@/Components/Image/ServerImage.vue";
@@ -14,8 +14,10 @@ import {
     PaperAirplaneIcon,
     PencilIcon,
     PlusIcon,
+    StarIcon,
     XMarkIcon,
 } from "@heroicons/vue/24/outline";
+import { StarIcon as StarIconFilled } from "@heroicons/vue/24/solid";
 import { router, useForm } from "@inertiajs/vue3";
 import { formatDate } from "@vueuse/shared";
 import { computed, ref } from "vue";
@@ -28,6 +30,16 @@ const props = defineProps({
 
 const back = () => {
     router.visit(route("groups"));
+};
+
+const rememberRecentGroup = ref(getRememberRecentGroup());
+const setRememberRecentGroupIfNeeded = () => {
+    if (getRememberRecentGroup().id === `${props.group.id}`) {
+        setRememberRecentGroup(null);
+    } else {
+        setRememberRecentGroup(props.group.id, props.group.group_title);
+    }
+    rememberRecentGroup.value = getRememberRecentGroup();
 };
 
 const isLoading = ref(false);
@@ -263,6 +275,15 @@ const mockGroupPaymentSections = [
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
         >
             <NavigationBarButton :icon="ArrowLeftIcon" :on-click="back" />
+            <button
+                type="button"
+                class="btn btn-outline btn-xs flex min-w-0 flex-row flex-wrap items-center gap-2"
+                @click="setRememberRecentGroupIfNeeded"
+            >
+                <StarIcon v-if="rememberRecentGroup.id !== `${group.id}`" class="h-4 w-4" />
+                <StarIconFilled v-else class="h-4 w-4 text-yellow-500" />
+                <span class="text-xs font-medium">Default</span>
+            </button>
             <NavigationBarButton
                 :icon="PencilIcon"
                 :on-click="() => router.get(route('groups.edit'), { id: group.id })"

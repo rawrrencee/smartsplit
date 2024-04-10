@@ -1,5 +1,10 @@
 <script setup>
-import { showToastIfNeeded, to2DecimalPlacesIfValid } from "@/Common.js";
+import {
+    kDefaultExpenseCurrencyKey,
+    kDefaultExpenseGroupKey,
+    showToastIfNeeded,
+    to2DecimalPlacesIfValid,
+} from "@/Common.js";
 import CategoryIcon from "@/Components/CategoryIcon.vue";
 import GroupList from "@/Components/GroupList.vue";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
@@ -17,9 +22,6 @@ import { computed, onMounted, ref } from "vue";
 import { toast } from "vue-sonner";
 
 // #region Configs
-const defaultExpenseGroupKey = "addExpenseDefaultGroupId";
-const defaultExpenseCurrencyKey = "addExpenseDefaultCurrency";
-
 onMounted(() => {
     setSelectedGroup(getSelectedGroupIdFromSessionStorage());
 });
@@ -155,10 +157,10 @@ const remainingReceiverAmount = computed(() => {
     return expenseForm.amount - totalAmount;
 });
 
-const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(defaultExpenseGroupKey);
+const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(kDefaultExpenseGroupKey);
 const selectedGroupId = ref(getSelectedGroupIdFromSessionStorage());
 const setSelectedGroup = (groupId) => {
-    sessionStorage.setItem(defaultExpenseGroupKey, groupId);
+    sessionStorage.setItem(kDefaultExpenseGroupKey, groupId);
     selectedGroupId.value = getSelectedGroupIdFromSessionStorage();
     updatePayerFormArray();
 };
@@ -222,12 +224,12 @@ const setSelectedCategory = (key) => {
 
 // #region Currency
 const getSelectedCurrencyFromSessionStorage = () => {
-    return props.currencies?.find((c) => c.key === sessionStorage.getItem(defaultExpenseCurrencyKey));
+    return props.currencies?.find((c) => c.key === sessionStorage.getItem(kDefaultExpenseCurrencyKey));
 };
 const selectedCurrency = ref(getSelectedCurrencyFromSessionStorage() ?? props.currencies?.[0]);
 const currencyQuery = ref("");
 const setSelectedCurrency = (key) => {
-    sessionStorage.setItem(defaultExpenseCurrencyKey, key);
+    sessionStorage.setItem(kDefaultExpenseCurrencyKey, key);
     selectedCurrency.value = getSelectedCurrencyFromSessionStorage();
     setIsDialogOpen(false);
     currencyQuery.value = "";

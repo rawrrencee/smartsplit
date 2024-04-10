@@ -17,6 +17,27 @@ import {
     WrenchIcon,
 } from "@heroicons/vue/24/outline";
 
+export const kDefaultExpenseGroupKey = "addExpenseDefaultGroupId";
+export const kDefaultExpenseCurrencyKey = "addExpenseDefaultCurrency";
+export const kRememberRecentGroupKey = "recentGroup";
+export const kRememberRecentGroupNameKey = "recentGroupName";
+
+export const setRememberRecentGroup = (groupId, groupName) => {
+    if (groupId) {
+        localStorage.setItem(kRememberRecentGroupKey, groupId);
+        localStorage.setItem(kRememberRecentGroupNameKey, groupName);
+    } else {
+        localStorage.removeItem(kRememberRecentGroupKey);
+        localStorage.removeItem(kRememberRecentGroupNameKey);
+    }
+};
+export const getRememberRecentGroup = () => {
+    return {
+        id: localStorage.getItem(kRememberRecentGroupKey),
+        name: localStorage.getItem(kRememberRecentGroupNameKey),
+    };
+};
+
 export const getImgSrcFromPath = (path) => {
     return route("photo") + `?img_path=${path}`;
 };
