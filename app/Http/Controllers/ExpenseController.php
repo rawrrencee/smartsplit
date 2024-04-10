@@ -94,6 +94,7 @@ class ExpenseController extends Controller
                         'payer_id' => $payer['user_id'],
                         'currency_key' => $expense->currency_key,
                         'amount' => $payer['amount'],
+                        'is_settlement' => $isSettlement,
                     ];
                     if ($isSettlement) {
                         $data['receiver_id'] = $payer['receiver_id'];
