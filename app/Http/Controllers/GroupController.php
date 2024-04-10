@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\GroupMemberStatusEnum;
 use App\Http\Controllers\Controller;
+use App\Models\Expense;
 use App\Models\ExpenseDetail;
 use App\Models\Group;
 use App\Models\GroupMember;
@@ -176,6 +177,69 @@ class GroupController extends Controller
         return $membersOwedAmounts;
     }
 
+    public function getExpenseDetailsByGroupForUserId($groupId, $userId)
+    {
+        $expensesByMonth = Expense::select(
+            DB::raw('YEAR(date) as year'),
+            DB::raw('MONTH(date) as month'),
+            DB::raw('DAY(date) as day'),
+            'id',
+            'date',
+            'category',
+            'description',
+            'currency_key',
+            'amount',
+            'num_payers',
+            'payer_name',
+            'receiver_name',
+            'is_settlement'
+        )
+            ->where('group_id', $groupId)
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $expenseIds = $expensesByMonth->pluck('id')->toArray();
+        $expenseDetails = ExpenseDetail::whereIn('expense_id', $expenseIds)->get();
+
+        $results = [];
+        foreach ($expensesByMonth as $expense) {
+            $year = $expense->year;
+            $shortMonth = date('M', mktime(0, 0, 0, $expense->month, 1));
+            $month = date('F', mktime(0, 0, 0, $expense->month, 1));
+            $currencySymbol = $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $expense->currency_key, 'key', 'symbol');
+
+            $expenseDetailsInvolvingUser = $expenseDetails->filter(function ($detail) use ($userId, $expense) {
+                return $detail->expense_id == $expense->id && ($detail->payer_id == $userId || $detail->receiver_id == $userId);
+            });
+            $netAmount = $expenseDetailsInvolvingUser->sum(function ($detail) {
+                return $detail->amount;
+            });
+
+            $results[$year][$month][] = [
+                'id' => $expense->id,
+                'year' => $year,
+                'shortMonth' => $shortMonth,
+                'month' => $month,
+                'day' => $expense->day,
+                'date' => $expense->date,
+                'category' => $expense->category,
+                'description' => $expense->description,
+                'currency_key' => $expense->currency_key,
+                'symbol' => $currencySymbol,
+                'amount' => $expense->amount,
+                'num_payers' => $expense->num_payers,
+                'payer_name' => $expense->payer_name,
+                'receiver_name' => $expense->receiver_name,
+                'is_settlement' => $expense->is_settlement,
+                'net_amount' => $netAmount
+            ];
+        }
+
+        return $results;
+    }
+
     public function index(Request $request)
     {
         return Inertia::render('Groups', [
@@ -209,6 +273,7 @@ class GroupController extends Controller
             'groupMembers' => $groupMembers,
             'userAmounts' => $this->getOverallExpenseDeltaForUserInGroup(auth()->user()->id, $id),
             'userOwes' => $this->getAmountUserOwesToEachGroupMember(auth()->user()->id, $id),
+            'expenses' => $this->getExpenseDetailsByGroupForUserId($id, auth()->user()->id),
         ]);
     }
 

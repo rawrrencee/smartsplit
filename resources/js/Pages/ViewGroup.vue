@@ -1,5 +1,6 @@
 <script setup>
 import { getRememberRecentGroup, setRememberRecentGroup, showToastIfNeeded } from "@/Common";
+import CategoryIcon from "@/Components/CategoryIcon.vue";
 import DialogAnimated from "@/Components/DialogAnimated.vue";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
 import ServerImage from "@/Components/Image/ServerImage.vue";
@@ -19,7 +20,6 @@ import {
 } from "@heroicons/vue/24/outline";
 import { StarIcon as StarIconFilled } from "@heroicons/vue/24/solid";
 import { router, useForm } from "@inertiajs/vue3";
-import { formatDate } from "@vueuse/shared";
 import { computed, ref } from "vue";
 import { toast } from "vue-sonner";
 
@@ -28,14 +28,14 @@ const props = defineProps({
     groupMembers: Array,
     userAmounts: Object,
     userOwes: Object,
+    expenses: Array,
 });
 
 const back = () => {
     router.visit(route("groups"));
 };
 
-console.log(props.userOwes);
-console.log(props.groupMembers);
+console.log(props.expenses);
 
 const rememberRecentGroup = ref(getRememberRecentGroup());
 const setRememberRecentGroupIfNeeded = () => {
@@ -155,6 +155,17 @@ const onRestoreDeletedGroupMemberClicked = (member) => {
     onAddMemberClicked();
 };
 
+const expenseDetails = computed(() => {
+    return Object.keys(props.expenses).map((key) => {
+        const monthExpenses = props.expenses[key];
+        const monthName = Object.keys(monthExpenses)?.[0];
+        const groupByTitle = `${monthName} ${key}`;
+        return {
+            groupByTitle,
+            monthExpenses: monthExpenses[monthName],
+        };
+    });
+});
 const mockGroupPaymentSections = [
     {
         date: new Date(2023, 1, 1),
@@ -389,51 +400,42 @@ const mockGroupPaymentSections = [
             </div>
         </div>
         <div class="mx-auto flex max-w-7xl flex-col gap-4 pt-6">
-            <div v-for="section in mockGroupPaymentSections" class="flex flex-col gap-2">
+            <div v-for="d in expenseDetails" class="flex flex-col gap-2">
                 <div class="px-4 sm:px-6 lg:px-8">
-                    <span class="font-semibold dark:text-gray-200">{{ formatDate(section.date, "MMMM YYYY") }}</span>
+                    <span class="font-semibold dark:text-gray-200">{{ d.groupByTitle }}</span>
                 </div>
                 <div class="flex flex-col dark:text-gray-200">
-                    <template v-for="payment in section.payments">
+                    <template v-for="expense in d.monthExpenses">
                         <button
                             type="button"
                             class="flex flex-row items-center gap-2 py-1 text-left hover:rounded-xl hover:bg-gray-200 dark:hover:bg-gray-900"
                             @click="router.visit(route('expense-details'))"
                         >
                             <div class="flex flex-col items-center pl-4 sm:pl-6 lg:pl-8">
-                                <span class="text-xs">{{ formatDate(payment.date, "MMM") }}</span>
-                                <span>{{ formatDate(payment.date, "DD") }}</span>
+                                <span class="text-xs">{{ expense.shortMonth }}</span>
+                                <span>{{ expense.day }}</span>
                             </div>
                             <div class="w-full min-w-10 pr-4 sm:pr-6 lg:pr-8">
-                                <div
-                                    v-if="!!payment.settlementId && payment.settlementId >= 0"
-                                    class="flex flex-row items-center gap-2"
-                                >
+                                <div v-if="expense.is_settlement" class="flex flex-row items-center gap-2">
                                     <CurrencyDollarIcon class="h-8 w-8 flex-shrink-0 text-success" />
-                                    <span class="break-word text-sm">{{ payment.title }}</span>
+                                    <span class="break-word text-sm">{{ expense.description }}</span>
                                 </div>
                                 <div v-else class="flex min-w-0 flex-grow flex-row items-center justify-between gap-2">
-                                    <div class="avatar flex-shrink-0">
-                                        <div class="h-8 w-8 rounded">
-                                            <img :src="payment.imageUrl" />
-                                        </div>
-                                    </div>
+                                    <CategoryIcon :category="expense.category" />
                                     <div class="flex min-w-0 flex-grow flex-col text-xs">
-                                        <span class="dark:text-gray-200">{{ payment.title }}</span>
+                                        <span class="dark:text-gray-200">{{ expense.description }}</span>
                                         <span class="break-words text-gray-500 dark:text-gray-300"
-                                            >{{ payment.payerName }} paid {{ payment.currency
-                                            }}{{ payment.amount }}</span
+                                            >{{ expense.num_payers > 1 ? `${expense.num_payers}&nbsp;` : ""
+                                            }}{{ expense.payer_name }} paid {{ expense.symbol
+                                            }}{{ expense.amount }}</span
                                         >
                                     </div>
                                     <div
                                         class="flex min-w-0 flex-shrink-0 flex-col break-words text-right text-xs"
-                                        :class="payment.currentUserBorrowed ? 'text-error' : 'text-success'"
+                                        :class="expense.net_amount < 0 ? 'text-error' : 'text-success'"
                                     >
-                                        <span>you {{ payment.currentUserBorrowed ? "borrowed" : "lent" }}</span>
-                                        <span
-                                            >{{ payment.currencyBorrowedOrLent
-                                            }}{{ payment.amountBorrowedOrLent }}</span
-                                        >
+                                        <span>you {{ expense.net_amount < 0 ? "borrowed" : "lent" }}</span>
+                                        <span>{{ expense.symbol }}{{ Math.abs(expense.net_amount) }}</span>
                                     </div>
                                 </div>
                             </div>
