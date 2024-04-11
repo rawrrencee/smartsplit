@@ -1,5 +1,6 @@
 <script setup>
 import { kDefaultExpenseCurrencyKey, kDefaultExpenseGroupKey, showToastIfNeeded } from "@/Common.js";
+import YouOweLabel from "@/Components/Expense/YouOweLabel.vue";
 import GroupList from "@/Components/GroupList.vue";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
 import ProfilePhotoImage from "@/Components/Image/ProfilePhotoImage.vue";
@@ -12,26 +13,10 @@ import { router, useForm } from "@inertiajs/vue3";
 import InputNumber from "primevue/inputnumber";
 import { DatePicker } from "v-calendar";
 import "v-calendar/style.css";
-import { computed, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
 import { toast } from "vue-sonner";
 
 // #region Configs
-onMounted(() => {
-    setSelectedGroupId(getSelectedGroupIdFromSessionStorage());
-    reloadWithGroupId();
-});
-const reloadWithGroupId = () => {
-    if (selectedGroupId.value && route().params.id !== selectedGroupId.value) {
-        router.get(
-            route("settle-up"),
-            { id: selectedGroupId.value },
-            {
-                only: ["userOwes"],
-            },
-        );
-    }
-};
-
 const props = defineProps({
     groups: Array,
     categories: Array,
@@ -238,13 +223,19 @@ const filteredCurrencies = computed(() =>
                                 :image-url="selectedGroupMember.user.profile_photo_url"
                             />
                             <PlaceholderImage v-else :size="6" />
-                            <span class="place-self-center truncate py-2">
-                                {{ selectedGroupMember?.user?.name ?? "Select a group member"
-                                }}<span v-if="userOwes?.[selectedGroupMember?.user_id]" class="text-xs"
-                                    >&nbsp;(you owe {{ userOwes?.[selectedGroupMember?.user_id].symbol
-                                    }}{{ userOwes?.[selectedGroupMember?.user_id].amount }})</span
-                                >
-                            </span>
+                            <div class="flex min-w-0 flex-col gap-1 text-start">
+                                <span class="truncate text-sm">
+                                    {{ selectedGroupMember?.user?.name ?? "Select a group member" }}
+                                </span>
+                                <template v-if="userOwes?.[selectedGroupMember?.user_id]">
+                                    <YouOweLabel
+                                        :userOwes
+                                        :userId="selectedGroupMember.user_id"
+                                        :shouldTruncate="true"
+                                        v-if="userOwes?.[selectedGroupMember?.user_id]?.length > 0"
+                                    />
+                                </template>
+                            </div>
                         </div>
                     </button>
                 </div>
@@ -347,11 +338,16 @@ const filteredCurrencies = computed(() =>
                                                             :image-url="m.user.profile_photo_url"
                                                         />
                                                         <PlaceholderImage :size="6" v-else />
-                                                        <span class="text-sm">{{ m.user?.name }}</span>
-                                                        <span v-if="userOwes[m.user_id]" class="text-xs text-error"
-                                                            >(you owe {{ userOwes[m.user_id].symbol
-                                                            }}{{ userOwes[m.user_id].amount }})</span
-                                                        >
+                                                        <div class="flex min-w-0 flex-col gap-1 py-2 text-start">
+                                                            <span class="truncate text-sm font-medium">
+                                                                {{ m.user?.name }}
+                                                            </span>
+                                                            <YouOweLabel
+                                                                :userOwes
+                                                                :userId="m.user_id"
+                                                                v-if="userOwes?.[m.user_id]?.length > 0"
+                                                            />
+                                                        </div>
                                                     </div>
                                                     <CheckCircleIcon
                                                         class="h-6 w-6 text-success"

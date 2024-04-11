@@ -38,12 +38,12 @@ class ExpenseDetailController extends Controller
                 foreach ($intersectCurrencies as $key => $value) {
                     if ($overallDeltaForReceiver[$key]['amount'] < 0 && $overallDeltaForGroupMember[$key]['amount'] > 0) {
                         if (abs($overallDeltaForReceiver[$key]['amount']) >= $overallDeltaForGroupMember[$key]['amount']) {
-                            $overallDeltaForReceiver[$key]['amount'] += $overallDeltaForGroupMember[$key]['amount'];
-                            $membersOwedAmounts[$member->user_id]['amount'] = $overallDeltaForGroupMember[$key]['amount'];
-                            $membersOwedAmounts[$member->user_id]['symbol'] = $overallDeltaForGroupMember[$key]['symbol'];
+                            $owedAmount = $overallDeltaForGroupMember[$key]['amount'];
+                            $membersOwedAmounts[$member->user_id][] = (object) array('amount' => $owedAmount, 'symbol' => $overallDeltaForGroupMember[$key]['symbol'], 'key' => $key);
+                            $overallDeltaForReceiver[$key]['amount'] += $owedAmount;
                         } else if (abs($overallDeltaForReceiver[$key]['amount']) <= $overallDeltaForGroupMember[$key]['amount']) {
-                            $membersOwedAmounts[$member->user_id]['amount'] = abs($overallDeltaForReceiver[$key]['amount']);
-                            $membersOwedAmounts[$member->user_id]['symbol'] = $overallDeltaForGroupMember[$key]['symbol'];
+                            $owedAmount = abs($overallDeltaForReceiver[$key]['amount']);
+                            $membersOwedAmounts[$member->user_id][] = (object) array('amount' => $owedAmount, 'symbol' => $overallDeltaForGroupMember[$key]['symbol'], 'key' => $key);
                             $overallDeltaForReceiver[$key]['amount'] = 0;
                         } else {
                             $overallDeltaForReceiver[$key]['amount'] = 0;

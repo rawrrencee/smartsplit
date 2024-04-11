@@ -255,13 +255,15 @@ const expenseDetails = computed(() => {
             </div>
             <div class="flex flex-col gap-1 pl-4 text-xs" v-if="Object.keys(userOwes).length">
                 <template v-for="userId in Object.keys(userOwes)">
-                    <span
-                        >You owe&nbsp;<span
-                            >{{ groupMembers?.find((m) => `${m.user_id}` === userId)?.user?.name }}&nbsp;</span
-                        ><span class="text-error"
-                            >{{ userOwes[userId].symbol }}{{ to2DecimalPlacesIfValid(userOwes[userId].amount) }}</span
-                        ></span
-                    >
+                    <template v-for="currency in userOwes[userId]">
+                        <span
+                            >You owe&nbsp;<span
+                                >{{ groupMembers?.find((m) => `${m.user_id}` === userId)?.user?.name }}&nbsp;</span
+                            ><span class="text-error"
+                                >{{ currency.symbol }}{{ to2DecimalPlacesIfValid(currency.amount) }}</span
+                            ></span
+                        >
+                    </template>
                 </template>
             </div>
         </div>
