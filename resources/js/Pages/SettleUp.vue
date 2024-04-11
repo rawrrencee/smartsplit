@@ -89,8 +89,21 @@ const setSelectedGroupId = (groupId) => {
     if (groupId) {
         sessionStorage.setItem(kDefaultExpenseGroupKey, groupId);
         selectedGroupId.value = getSelectedGroupIdFromSessionStorage();
+        setTimeout(() => {
+            reloadWithGroupId();
+        }, 200);
     }
-    reloadWithGroupId();
+};
+const reloadWithGroupId = () => {
+    if (selectedGroupId.value && route().params.id !== selectedGroupId.value) {
+        router.get(
+            route("settle-up"),
+            { id: selectedGroupId.value },
+            {
+                only: ["userOwes"],
+            },
+        );
+    }
 };
 const onGroupClicked = (groupId) => {
     setSelectedGroupId(groupId);

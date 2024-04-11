@@ -1,9 +1,10 @@
 <script setup>
-import { showToastIfNeeded } from "@/Common";
+import { getRememberRecentGroup, setRememberRecentGroup, showToastIfNeeded } from "@/Common";
 import CreateOrEditGroup from "@/Components/Group/CreateOrEditGroup.vue";
 import NavigationBarButton from "@/Components/NavigationBarButton.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { ArrowLeftIcon } from "@heroicons/vue/24/outline";
+import { ArrowLeftIcon, StarIcon } from "@heroicons/vue/24/outline";
+import { StarIcon as StarIconFilled } from "@heroicons/vue/24/solid";
 import { router, useForm } from "@inertiajs/vue3";
 import { ref } from "vue";
 import { toast } from "vue-sonner";
@@ -39,6 +40,16 @@ const updateGroup = () => {
             setIsLoading(false);
         },
     });
+};
+const rememberRecentGroup = ref(getRememberRecentGroup());
+const setRememberRecentGroupIfNeeded = () => {
+    if (getRememberRecentGroup().id === `${props.group.id}`) {
+        setRememberRecentGroup(null);
+    } else {
+        setRememberRecentGroup(props.group.id, props.group.group_title);
+    }
+    rememberRecentGroup.value = getRememberRecentGroup();
+    location.reload();
 };
 const onDeletePhotoClicked = () => {
     if (!confirm("Are you sure you want to delete this group photo?")) return;
@@ -82,7 +93,36 @@ const onDeletePhotoClicked = () => {
                 :isLoading
                 :isEditing="true"
                 @delete-photo-clicked="onDeletePhotoClicked"
-            />
+            >
+                <template v-slot:afterName>
+                    <label class="flex cursor-pointer flex-row items-center gap-2 px-6">
+                        <button
+                            type="button"
+                            class="btn btn-xs flex min-w-0 flex-row flex-wrap items-center gap-2"
+                            :class="rememberRecentGroup.id !== `${group.id}` ? 'btn-outline' : 'btn-neutral'"
+                            @click="setRememberRecentGroupIfNeeded"
+                        >
+                            <StarIcon v-if="rememberRecentGroup.id !== `${group.id}`" class="h-4 w-4" />
+                            <StarIconFilled v-else class="h-4 w-4 text-yellow-500" />
+                            <span class="text-xs font-bold">Default</span>
+                        </button>
+                        <div class="flex flex-col gap-1">
+                            <template v-if="rememberRecentGroup.id !== `${group.id}`">
+                                <span class="text-sm font-medium">Make this the default group</span>
+                                <span class="text-xs"
+                                    >This group will replace the
+                                    {{
+                                        rememberRecentGroup.id > 0 ? "current default group" : "current Groups tab"
+                                    }}</span
+                                >
+                            </template>
+                            <template v-else>
+                                <span class="text-xs font-semibold">This is currently the default group.</span>
+                            </template>
+                        </div>
+                    </label>
+                </template>
+            </CreateOrEditGroup>
         </div>
     </AppLayout>
 </template>

@@ -1,5 +1,5 @@
 <script setup>
-import { getRememberRecentGroup, setRememberRecentGroup, showToastIfNeeded, to2DecimalPlacesIfValid } from "@/Common";
+import { showToastIfNeeded, to2DecimalPlacesIfValid } from "@/Common";
 import CategoryIcon from "@/Components/CategoryIcon.vue";
 import DialogAnimated from "@/Components/DialogAnimated.vue";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
@@ -15,10 +15,8 @@ import {
     PaperAirplaneIcon,
     PencilIcon,
     PlusIcon,
-    StarIcon,
     XMarkIcon,
 } from "@heroicons/vue/24/outline";
-import { StarIcon as StarIconFilled } from "@heroicons/vue/24/solid";
 import { router, useForm } from "@inertiajs/vue3";
 import { computed, ref } from "vue";
 import { toast } from "vue-sonner";
@@ -33,16 +31,6 @@ const props = defineProps({
 
 const back = () => {
     router.visit(route("groups"));
-};
-
-const rememberRecentGroup = ref(getRememberRecentGroup());
-const setRememberRecentGroupIfNeeded = () => {
-    if (getRememberRecentGroup().id === `${props.group.id}`) {
-        setRememberRecentGroup(null);
-    } else {
-        setRememberRecentGroup(props.group.id, props.group.group_title);
-    }
-    rememberRecentGroup.value = getRememberRecentGroup();
 };
 
 const isLoading = ref(false);
@@ -172,73 +160,60 @@ const expenseDetails = computed(() => {
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
         >
             <NavigationBarButton :icon="ArrowLeftIcon" :on-click="back" />
-            <button
-                type="button"
-                class="btn btn-outline btn-xs flex min-w-0 flex-row flex-wrap items-center gap-2"
-                @click="setRememberRecentGroupIfNeeded"
-            >
-                <StarIcon v-if="rememberRecentGroup.id !== `${group.id}`" class="h-4 w-4" />
-                <StarIconFilled v-else class="h-4 w-4 text-yellow-500" />
-                <span class="text-xs font-medium">Default</span>
-            </button>
             <NavigationBarButton
                 :icon="PencilIcon"
                 :on-click="() => router.get(route('groups.edit'), { id: group.id })"
             />
         </div>
-        <div class="mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col gap-5">
-                <div class="flex flex-row items-center gap-4">
-                    <ServerImage
-                        :size="12"
-                        v-if="group?.img_path"
-                        :image-url="group.img_path"
-                        :preview-enabled="true"
-                    />
-                    <PlaceholderImage v-else :size="12" />
-                    <span class="min-w-0 break-words text-2xl font-medium dark:text-gray-100">{{
-                        group?.group_title
-                    }}</span>
-                </div>
-                <button type="button" class="flex flex-row items-center" @click="setIsDialogOpen(true)">
-                    <div class="avatar-group -space-x-4 rtl:space-x-reverse">
-                        <template v-for="(member, index) in featuredGroupMemberProfiles" :key="index">
-                            <div class="avatar" v-if="member?.user?.profile_photo_url">
-                                <div class="w-8">
-                                    <img :src="member?.user?.profile_photo_url" />
-                                </div>
-                            </div>
-                            <PlaceholderImage type="circle" :size="8" v-else />
-                        </template>
-
-                        <div
-                            class="avatar placeholder"
-                            v-if="activeGroupMembers?.length - featuredGroupMemberProfiles?.length > 0"
-                        >
-                            <div class="w-8 bg-neutral text-xs text-neutral-content">
-                                <span>+{{ activeGroupMembers.length - featuredGroupMemberProfiles.length }}</span>
-                            </div>
-                        </div>
-
-                        <div class="avatar placeholder" v-if="activeGroupMembers?.length === 0">
-                            <div class="w-8 bg-neutral text-xs text-neutral-content">
-                                <span>0</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div
-                        class="rounded-md p-2 text-xs text-gray-500 hover:bg-gray-300 dark:text-gray-400 dark:hover:bg-gray-900"
-                    >
-                        <span
-                            >{{ activeGroupMembers.length > 0 ? activeGroupMembers.length : "" }} member{{
-                                activeGroupMembers?.length === 1 ? "" : "s"
-                            }}</span
-                        >
-                    </div>
-                </button>
+        <div class="mx-auto flex flex-col gap-5 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-row items-center gap-4">
+                <ServerImage :size="12" v-if="group?.img_path" :image-url="group.img_path" :preview-enabled="true" />
+                <PlaceholderImage v-else :size="12" />
+                <span class="min-w-0 break-words text-2xl font-medium dark:text-gray-100">{{
+                    group?.group_title
+                }}</span>
             </div>
+            <button type="button" class="flex flex-row items-center self-start" @click="setIsDialogOpen(true)">
+                <div class="avatar-group -space-x-4 rtl:space-x-reverse">
+                    <template v-for="(member, index) in featuredGroupMemberProfiles" :key="index">
+                        <div class="avatar" v-if="member?.user?.profile_photo_url">
+                            <div class="w-8">
+                                <img :src="member?.user?.profile_photo_url" />
+                            </div>
+                        </div>
+                        <PlaceholderImage type="circle" :size="8" v-else />
+                    </template>
+
+                    <div
+                        class="avatar placeholder"
+                        v-if="activeGroupMembers?.length - featuredGroupMemberProfiles?.length > 0"
+                    >
+                        <div class="w-8 bg-neutral text-xs text-neutral-content">
+                            <span>+{{ activeGroupMembers.length - featuredGroupMemberProfiles.length }}</span>
+                        </div>
+                    </div>
+
+                    <div class="avatar placeholder" v-if="activeGroupMembers?.length === 0">
+                        <div class="w-8 bg-neutral text-xs text-neutral-content">
+                            <span>0</span>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="rounded-md p-2 text-xs text-gray-500 hover:bg-gray-300 dark:text-gray-400 dark:hover:bg-gray-900"
+                >
+                    <span
+                        >{{ activeGroupMembers.length > 0 ? activeGroupMembers.length : "" }} member{{
+                            activeGroupMembers?.length === 1 ? "" : "s"
+                        }}</span
+                    >
+                </div>
+            </button>
         </div>
-        <div class="flex w-full flex-col gap-1 px-4 pt-6" v-if="positiveCurrencies.length || negativeCurrencies.length">
+        <div
+            class="mx-auto flex flex-col gap-1 px-4 pt-6 sm:px-6 lg:px-8"
+            v-if="positiveCurrencies.length || negativeCurrencies.length"
+        >
             <div class="text-sm font-bold text-success" v-if="positiveCurrencies.length">
                 <span>You are owed&nbsp;</span>
                 <template v-for="(c, i) in positiveCurrencies">
@@ -246,7 +221,7 @@ const expenseDetails = computed(() => {
                     ><span>{{ c.symbol }}{{ to2DecimalPlacesIfValid(c.amount) }}</span>
                 </template>
             </div>
-            <div class="text-sm font-bold text-error" v-if="negativeCurrencies.length">
+            <div class="text-sm font-semibold text-error" v-if="negativeCurrencies.length">
                 <span>You owe&nbsp;</span>
                 <template v-for="(c, i) in negativeCurrencies">
                     <span v-if="i > 0">&nbsp;&plus;&nbsp;</span
@@ -259,7 +234,7 @@ const expenseDetails = computed(() => {
                         <span
                             >You owe&nbsp;<span
                                 >{{ groupMembers?.find((m) => `${m.user_id}` === userId)?.user?.name }}&nbsp;</span
-                            ><span class="text-error"
+                            ><span class="font-semibold text-error"
                                 >{{ currency.symbol }}{{ to2DecimalPlacesIfValid(currency.amount) }}</span
                             ></span
                         >
@@ -267,7 +242,7 @@ const expenseDetails = computed(() => {
                 </template>
             </div>
         </div>
-        <div class="mx-auto flex max-w-7xl flex-col gap-4 pt-6">
+        <div class="mx-auto flex flex-col gap-4 pt-6">
             <div v-for="d in expenseDetails" class="flex flex-col gap-2">
                 <div class="px-4 sm:px-6 lg:px-8">
                     <span class="font-semibold dark:text-gray-200">{{ d.groupByTitle }}</span>

@@ -43,11 +43,11 @@ const onRemovePhotoClicked = () => {
     <form class="flex h-full flex-col">
         <div class="flex-1">
             <div class="flex flex-col gap-4">
-                <div class="space-y-2 px-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
+                <div class="space-y-2 px-6">
                     <label for="group_title" class="block text-sm font-medium leading-6 sm:mt-1.5 dark:text-gray-50"
                         >Name</label
                     >
-                    <div class="flex flex-col gap-1 sm:col-span-2">
+                    <div class="flex flex-col gap-1">
                         <input
                             type="text"
                             name="group_title"
@@ -64,6 +64,7 @@ const onRemovePhotoClicked = () => {
                         </span>
                     </div>
                 </div>
+                <slot name="afterName" />
 
                 <div class="flex flex-col gap-2 px-6">
                     <span class="text-sm font-medium dark:text-gray-50">Image</span>

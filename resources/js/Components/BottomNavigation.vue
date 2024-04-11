@@ -1,5 +1,5 @@
 <script setup>
-import { getRememberRecentGroup } from "@/Common.js";
+import { getRememberRecentGroup, kDefaultExpenseGroupKey } from "@/Common.js";
 import { Link, router } from "@inertiajs/vue3";
 import { ref } from "vue";
 
@@ -9,13 +9,10 @@ defineProps({
 
 const recentGroup = ref(getRememberRecentGroup());
 const onClick = (name) => {
-    if (name === "groups") {
-        const recentGroup = getRememberRecentGroup();
-        if (recentGroup.id) {
-            router.get(route("groups.view"), { id: recentGroup.id });
-        } else {
-            router.visit(route(name));
-        }
+    if (name === "groups" && getRememberRecentGroup()?.id) {
+        router.get(route("groups.view"), { id: getRememberRecentGroup().id });
+    } else if (name === "settle-up" && sessionStorage.getItem(kDefaultExpenseGroupKey)) {
+        router.get(route("settle-up"), { id: sessionStorage.getItem(kDefaultExpenseGroupKey) });
     } else {
         router.visit(route(name));
     }
