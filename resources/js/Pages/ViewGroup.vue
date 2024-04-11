@@ -142,15 +142,20 @@ const onRestoreDeletedGroupMemberClicked = (member) => {
 };
 
 const expenseDetails = computed(() => {
-    return Object.keys(props.expenses).map((key) => {
-        const monthExpenses = props.expenses[key];
-        const monthName = Object.keys(monthExpenses)?.[0];
-        const groupByTitle = `${monthName} ${key}`;
-        return {
-            groupByTitle,
-            monthExpenses: monthExpenses[monthName],
-        };
-    });
+    let expenses = [];
+    const years = Object.keys(props.expenses);
+    for (const year of years) {
+        const months = Object.keys(props.expenses[year]);
+        for (const month of months) {
+            const monthExpenses = props.expenses[year][month];
+            const groupByTitle = `${month} ${year}`;
+            expenses.push({
+                groupByTitle,
+                monthExpenses,
+            });
+        }
+    }
+    return expenses;
 });
 </script>
 

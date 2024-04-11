@@ -526,7 +526,7 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                 <div
                                     class="flex flex-row items-center justify-between gap-3 p-4 hover:bg-gray-200 dark:hover:bg-gray-700"
                                 >
-                                    <div class="flex flex-row items-center gap-4">
+                                    <div class="flex min-w-0 flex-row items-center gap-4">
                                         <label class="label flex cursor-pointer flex-row items-center gap-2 p-0">
                                             <input
                                                 type="checkbox"
@@ -538,7 +538,7 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                             <span class="break-all text-sm">{{ form.user.name }}</span>
                                         </label>
                                     </div>
-                                    <div class="w-24 flex-shrink" v-if="form.isSelected">
+                                    <div class="w-24 flex-shrink-0" v-if="form.isSelected">
                                         <InputNumber
                                             :unstyled="true"
                                             :pt="{
