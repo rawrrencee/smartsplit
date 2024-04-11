@@ -61,14 +61,9 @@ Route::middleware([
     Route::prefix('expenses')->group(function () {
         Route::get('/', [ExpenseController::class, 'addExpensePage'])->name('expenses');
         Route::post('/add', [ExpenseController::class, 'saveNewExpense'])->name('expenses.add');
+        Route::get('/view', [ExpenseController::class, 'expenseDetailsPage'])->name('expense.view');
     });
     Route::prefix('settle-up')->group(function () {
         Route::get('/', [ExpenseController::class, 'settleUpPage'])->name('settle-up');
     });
-
-
-
-    Route::get('/expense-details', function () {
-        return Inertia::render('ExpenseDetails');
-    })->name('expense-details');
 });

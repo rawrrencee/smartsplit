@@ -46,6 +46,20 @@ class ExpenseController extends Controller
         ]);
     }
 
+    public function expenseDetailsPage(Request $request)
+    {
+        $id = intval($request['id']);
+        if ($id === 0) {
+            return redirect()->route('404');
+        }
+
+        $expense = Expense::where('id', $request['id'])->with('expenseDetails.payer')->with('expenseDetails.receiver')->first();
+
+        return Inertia::render('ExpenseDetails', [
+            'expense' => $expense
+        ]);
+    }
+
     public function saveNewExpense(Request $request)
     {
         Validator::make($request->all(), $this->validateCreateExpenseRequestRules($request['is_settlement']))->validate();

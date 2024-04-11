@@ -257,7 +257,7 @@ const expenseDetails = computed(() => {
                         <button
                             type="button"
                             class="flex flex-row items-center gap-2 py-1 text-left hover:rounded-xl hover:bg-gray-200 dark:hover:bg-gray-900"
-                            @click="router.visit(route('expense-details'))"
+                            @click="router.visit(route('expense.view', { id: expense.id }))"
                         >
                             <div class="flex flex-col items-center pl-4 sm:pl-6 lg:pl-8">
                                 <span class="text-xs">{{ expense.shortMonth }}</span>
