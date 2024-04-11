@@ -52,7 +52,11 @@ class GroupController extends Controller
             }
         });
 
-        $mainQuery->with(['groupMembers' => function ($query) use ($withUser) {
+        $mainQuery->with(['groupMembers' => function ($query) use ($status, $withUser) {
+            if (isset($status)) {
+                $query->whereNotNull('user_id');
+            }
+
             $query->select('id', 'group_id', 'user_id', 'status');
             if ($withUser) {
                 $query->with(['user' => function ($query) {
