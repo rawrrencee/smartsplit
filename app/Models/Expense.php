@@ -27,6 +27,17 @@ class Expense extends Model
         'updated_by'
     ];
 
+    // Set up cascading delete
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($expense) {
+            // Cascade delete the associated expenseDetails
+            $expense->expenseDetails()->delete();
+        });
+    }
+
     public function expenseDetails()
     {
         return $this->hasMany(ExpenseDetail::class);

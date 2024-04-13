@@ -1,29 +1,54 @@
 <script setup>
-import { to2DecimalPlacesIfValid } from "@/Common";
+import { showToastIfNeeded, to2DecimalPlacesIfValid } from "@/Common";
 import CategoryIcon from "@/Components/CategoryIcon.vue";
 import ExpenseComments from "@/Components/Expense/ExpenseComments.vue";
 import ProfilePhotoImage from "@/Components/Image/ProfilePhotoImage.vue";
 import NavigationBarButton from "@/Components/NavigationBarButton.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { ArrowLeftIcon, CurrencyDollarIcon, PencilIcon, TrashIcon } from "@heroicons/vue/24/outline";
-import { computed } from "vue";
+import { router } from "@inertiajs/vue3";
+import { computed, ref } from "vue";
+import { toast } from "vue-sonner";
 
 const back = () => {
     window.history.back();
 };
-
 const props = defineProps({
     expense: Object,
 });
+const isLoading = ref(false);
+const setIsLoading = (value) => {
+    isLoading.value = value;
+};
 
-console.log(props.expense);
-
+// #region Computed properties
 const payers = computed(() => {
     return props.expense.expense_details?.filter((d) => d.payer_id && !d.receiver_id) ?? [];
 });
 const receivers = computed(() => {
     return props.expense.expense_details.filter((d) => d.receiver_id && !d.payer_id);
 });
+// #endregion Computed properties
+
+// #region Event Handlers
+const onDeleteClicked = () => {
+    if (!confirm("Are you sure you want to delete this transaction?")) return;
+    setIsLoading(true);
+    router.post(
+        route("expense.delete"),
+        { id: props.expense.id },
+        {
+            onSuccess: (s) => {
+                router.reload();
+                showToastIfNeeded(toast, s.props.flash);
+            },
+            onFinish: () => {
+                setIsLoading(false);
+            },
+        },
+    );
+};
+// #endregion Event Handlers
 </script>
 
 <template>
@@ -33,7 +58,7 @@ const receivers = computed(() => {
         >
             <NavigationBarButton :icon="ArrowLeftIcon" :on-click="back" />
             <div class="flex flex-row gap-4">
-                <NavigationBarButton :icon="TrashIcon" :on-click="back" />
+                <NavigationBarButton :icon="TrashIcon" :on-click="onDeleteClicked" />
                 <NavigationBarButton :icon="PencilIcon" :on-click="back" />
             </div>
         </div>

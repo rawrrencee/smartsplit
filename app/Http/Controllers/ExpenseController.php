@@ -82,6 +82,15 @@ class ExpenseController extends Controller
         ]);
     }
 
+    public function editExpensePage(Request $request)
+    {
+        return Inertia::render('EditExpense', [
+            'currencies' => filter_var($request['withCurrencies'], FILTER_VALIDATE_BOOLEAN) ? $this->HardcodedDataController->getCurrencies() : [],
+            'categories' => $this->HardcodedDataController->getCategories(),
+            'groups' => $this->GroupController->getGroupsByMemberUserIdOrEmail($request->user()->id, null, GroupMemberStatusEnum::ACCEPTED, false, true)
+        ]);
+    }
+
     public function saveNewExpense(Request $request)
     {
         Validator::make($request->all(), $this->validateCreateExpenseRequestRules($request['is_settlement']))->validate();
@@ -172,6 +181,36 @@ class ExpenseController extends Controller
                 ->with('type', 'default')
                 ->with('status', 'error')
                 ->with('message', 'Failed to update record: ' . $this->CommonController->formatException($e));
+        }
+    }
+
+    public function updateExpense(Request $request)
+    {
+    }
+
+    public function deleteExpense(Request $request)
+    {
+        $request->validate([
+            'id' => 'exists:expenses,id',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $groupId = Expense::where('id', $request['id'])->first()->group_id;
+            Expense::destroy($request['id']);
+
+            DB::commit();
+
+            return redirect()->route('groups.view', ['id' => $groupId])
+                ->with('show', true)
+                ->with('type', 'default')
+                ->with('status', 'success')
+                ->with('message', 'Expense deleted successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return $this->CommonController->handleException($e, 'default', 'delete');
         }
     }
 
