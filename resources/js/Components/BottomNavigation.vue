@@ -14,9 +14,10 @@ const onClick = (name) => {
     isLoadingForRoute.value = name;
     if (name === "groups" && getRememberRecentGroup()?.id) {
         router.get(route("groups.view"), { id: getRememberRecentGroup().id });
-    } else if (name === "settle-up" && sessionStorage.getItem(kDefaultExpenseGroupKey)) {
+    } else if (name === "settle-up") {
+        const groupId = sessionStorage.getItem(kDefaultExpenseGroupKey);
         router.get(route("settle-up"), {
-            id: sessionStorage.getItem(kDefaultExpenseGroupKey),
+            ...(!isNaN(parseInt(groupId)) && { id: parseInt(groupId) }),
             withCurrencies: getAllCurrencies().length === 0,
         });
     } else if (name === "expenses") {

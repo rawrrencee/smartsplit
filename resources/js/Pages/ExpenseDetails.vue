@@ -2,7 +2,7 @@
 import { to2DecimalPlacesIfValid } from "@/Common";
 import NavigationBarButton from "@/Components/NavigationBarButton.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { ArrowLeftIcon, PencilIcon, PlusIcon, TrashIcon } from "@heroicons/vue/24/outline";
+import { ArrowLeftIcon, CurrencyDollarIcon, PencilIcon, PlusIcon, TrashIcon } from "@heroicons/vue/24/outline";
 
 const back = () => {
     window.history.back();
@@ -11,6 +11,8 @@ const back = () => {
 const props = defineProps({
     expense: Object,
 });
+
+console.log(props.expense);
 </script>
 
 <template>
@@ -24,6 +26,17 @@ const props = defineProps({
                 <NavigationBarButton :icon="PencilIcon" :on-click="back" />
             </div>
         </div>
+        <div class="mx-auto flex max-w-xl flex-col gap-6 px-4 sm:px-6 lg:px-8 dark:text-gray-200">
+            <div class="flex flex-col gap-2" v-if="expense.is_settlement">
+                <div class="flex flex-col place-items-center gap-6 pt-12">
+                    <CurrencyDollarIcon class="h-24 w-24 flex-shrink-0 text-success" />
+                    <span class="text-center">{{ expense.description }}</span>
+                </div>
+            </div>
+
+            <div v-else>Non-settlement</div>
+        </div>
+
         <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 sm:px-6 lg:px-8 dark:text-gray-200">
             <div class="flex flex-col gap-1">
                 <span class="text-lg">{{ expense.description }}</span>

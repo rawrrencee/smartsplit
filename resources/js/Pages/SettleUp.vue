@@ -1,5 +1,11 @@
 <script setup>
-import { getAllCurrencies, kDefaultExpenseCurrencyKey, kDefaultExpenseGroupKey, showToastIfNeeded } from "@/Common.js";
+import {
+    getAllCurrencies,
+    kDefaultExpenseCurrencyKey,
+    kDefaultExpenseGroupKey,
+    setAllCurrencies,
+    showToastIfNeeded,
+} from "@/Common.js";
 import YouOweLabel from "@/Components/Expense/YouOweLabel.vue";
 import GroupList from "@/Components/GroupList.vue";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
@@ -96,6 +102,7 @@ const currencies = computed(() => {
     if (currenciesFromStorage.length > 0) {
         return currenciesFromStorage;
     } else {
+        setAllCurrencies(props.currencies);
         return props.currencies;
     }
 });
@@ -296,7 +303,7 @@ const filteredCurrencies = computed(() =>
                                     </span>
                                     <template
                                         v-if="
-                                            selectedPayer.user_id === $props.auth.user.id &&
+                                            selectedPayer?.user_id === $props.auth.user.id &&
                                             userOwes?.[selectedReceiver?.user_id]
                                         "
                                     >
@@ -407,7 +414,7 @@ const filteredCurrencies = computed(() =>
                                             class="flex flex-col gap-2"
                                             v-if="['selectPayer', 'selectReceiver'].includes(dialogMode)"
                                         >
-                                            <template v-for="m in currentGroup.group_members">
+                                            <template v-for="m in currentGroup?.group_members">
                                                 <button
                                                     type="button"
                                                     class="flex flex-row items-center justify-between gap-2 px-6 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"

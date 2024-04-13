@@ -22,11 +22,18 @@ class Expense extends Model
         'num_payers',
         'payer_name',
         'receiver_name',
-        'is_settlement'
+        'is_settlement',
+        'created_by',
+        'updated_by'
     ];
 
     public function expenseDetails()
     {
         return $this->hasMany(ExpenseDetail::class);
+    }
+
+    public function createdBy()
+    {
+        return $this->hasOne(User::class);
     }
 }

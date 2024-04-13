@@ -417,8 +417,8 @@ watch(expenseForm, () => {
                             class="btn btn-sm min-w-0 flex-shrink"
                             :class="[
                                 isPaidBySelectionShown
-                                    ? 'btn-neutral dark:bg-gray-200 dark:text-gray-900'
-                                    : 'btn-outline text-gray-900 dark:text-gray-200',
+                                    ? 'btn-neutral dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-gray-400 dark:hover:text-gray-800'
+                                    : 'btn-outline text-gray-900 dark:text-gray-200 dark:hover:bg-gray-400 dark:hover:text-gray-800',
                             ]"
                             @click="updateExpenseConfigurationState('paidBy')"
                         >
@@ -432,8 +432,8 @@ watch(expenseForm, () => {
                             class="btn btn-sm min-w-0 flex-shrink"
                             :class="[
                                 isSelectSplitModeShown
-                                    ? 'btn-neutral dark:bg-gray-200 dark:text-gray-900'
-                                    : 'btn-outline text-gray-900 dark:text-gray-200',
+                                    ? 'btn-neutral dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-gray-400 dark:hover:text-gray-800'
+                                    : 'btn-outline text-gray-900 dark:text-gray-200 dark:hover:bg-gray-400 dark:hover:text-gray-800',
                             ]"
                             @click="updateExpenseConfigurationState('splitMode')"
                         >

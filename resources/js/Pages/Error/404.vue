@@ -1,5 +1,8 @@
 <script setup>
 import { Link } from "@inertiajs/vue3";
+
+localStorage.clear();
+sessionStorage.clear();
 </script>
 
 <template>

@@ -219,14 +219,14 @@ const expenseDetails = computed(() => {
             class="mx-auto flex flex-col gap-1 px-4 pt-6 sm:px-6 lg:px-8"
             v-if="positiveCurrencies.length || negativeCurrencies.length"
         >
-            <div class="text-sm font-bold text-success" v-if="positiveCurrencies.length">
+            <div class="text-sm font-bold text-success dark:text-green-300" v-if="positiveCurrencies.length">
                 <span>You are owed&nbsp;</span>
                 <template v-for="(c, i) in positiveCurrencies">
                     <span v-if="i > 0">&nbsp;&plus;&nbsp;</span
                     ><span>{{ c.symbol }}{{ to2DecimalPlacesIfValid(c.amount) }}</span>
                 </template>
             </div>
-            <div class="text-sm font-semibold text-error" v-if="negativeCurrencies.length">
+            <div class="text-sm font-semibold text-error dark:text-red-400" v-if="negativeCurrencies.length">
                 <span>You owe&nbsp;</span>
                 <template v-for="(c, i) in negativeCurrencies">
                     <span v-if="i > 0">&nbsp;&plus;&nbsp;</span
@@ -236,12 +236,12 @@ const expenseDetails = computed(() => {
             <ul class="list-none pl-4 text-xs" v-if="Object.keys(userOwes).length">
                 <template v-for="userId in Object.keys(userOwes)">
                     <template v-for="currency in userOwes[userId]">
-                        <li>
+                        <li class="dark:text-gray-200">
                             <span class="font-medium"
                                 >{{ groupMembers?.find((m) => `${m.user_id}` === userId)?.user?.name }}&nbsp;</span
-                            ><span class="font-semibold text-error"
+                            >gets back&nbsp;<span class="font-semibold text-error dark:text-red-400"
                                 >{{ currency.symbol }}{{ to2DecimalPlacesIfValid(currency.amount) }}</span
-                            >
+                            >&period;
                         </li>
                     </template>
                 </template>

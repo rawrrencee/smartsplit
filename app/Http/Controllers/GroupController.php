@@ -202,7 +202,7 @@ class GroupController extends Controller
             ->first();
 
         if (!isset($group)) {
-            return redirect()->route('home');
+            return redirect()->route('404');
         }
 
         $groupMembers = GroupMember::withTrashed()

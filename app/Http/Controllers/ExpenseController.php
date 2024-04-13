@@ -27,7 +27,7 @@ class ExpenseController extends Controller
     public function addExpensePage(Request $request)
     {
         return Inertia::render('AddNewExpense', [
-            'currencies' => intval($request['withCurrencies']) ? $this->HardcodedDataController->getCurrencies() : [],
+            'currencies' => filter_var($request['withCurrencies'], FILTER_VALIDATE_BOOLEAN) ? $this->HardcodedDataController->getCurrencies() : [],
             'categories' => $this->HardcodedDataController->getCategories(),
             'groups' => $this->GroupController->getGroupsByMemberUserIdOrEmail($request->user()->id, null, GroupMemberStatusEnum::ACCEPTED, false, true)
         ]);
@@ -39,7 +39,7 @@ class ExpenseController extends Controller
             $userOwes = $this->ExpenseDetailController->getAmountUserOwesToEachGroupMember(auth()->user()->id, $request['id']);
         }
         return Inertia::render('SettleUp', [
-            'currencies' => intval($request['withCurrencies']) ? $this->HardcodedDataController->getCurrencies() : [],
+            'currencies' => filter_var($request['withCurrencies'], FILTER_VALIDATE_BOOLEAN) ? $this->HardcodedDataController->getCurrencies() : [],
             'categories' => $this->HardcodedDataController->getCategories(),
             'groups' => $this->GroupController->getGroupsByMemberUserIdOrEmail($request->user()->id, null, GroupMemberStatusEnum::ACCEPTED, false, true),
             'userOwes' => $userOwes ?? [],
@@ -54,6 +54,10 @@ class ExpenseController extends Controller
         }
 
         $expense = Expense::where('id', $request['id'])->with('expenseDetails.payer')->with('expenseDetails.receiver')->first();
+
+        if (!isset($expense)) {
+            return redirect()->route('404');
+        }
 
         return Inertia::render('ExpenseDetails', [
             'expense' => $expense
@@ -97,8 +101,10 @@ class ExpenseController extends Controller
 
             // Update date format
             $request['date'] = $this->CommonController->formatUtcDateToSingaporeDate($request['date']);
+            $request['created_by'] = auth()->user()->id;
+            $request['updated_by'] = auth()->user()->id;
 
-            $expense = Expense::create($request->only(['group_id', 'date', 'category', 'description', 'currency_key', 'amount', 'num_payers', 'payer_name', 'receiver_name', 'is_settlement']));
+            $expense = Expense::create($request->only(['group_id', 'date', 'category', 'description', 'currency_key', 'amount', 'num_payers', 'payer_name', 'receiver_name', 'is_settlement', 'created_by', 'updated_by']));
 
             if (isset($expense)) {
                 foreach ($request['payer_details'] as $payer) {

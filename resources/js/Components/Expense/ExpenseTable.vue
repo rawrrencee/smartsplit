@@ -21,9 +21,6 @@ const remainingAmount = computed(() => {
 const setShouldDistributeEqually = (value) => {
     emit("setShouldDistributeEqually", value);
 };
-const allUsersSelected = computed(() => {
-    return formArray.every((f) => f.isSelected);
-});
 const toggleAllUsers = () => {
     emit("toggleAllUsers");
 };
@@ -41,10 +38,16 @@ const onSelectUser = (form) => {
             <div class="flex flex-row items-center justify-between gap-2">
                 <label class="label flex cursor-pointer flex-row items-center gap-2 p-0">
                     <input
+                        :id="isPayer ? 'payerSelectAllCheckbox' : 'receiverSelectAllCheckbox'"
                         type="checkbox"
                         class="checkbox checkbox-xs dark:bg-gray-600"
-                        :checked="allUsersSelected"
-                        @change="toggleAllUsers(true, allUsersSelected)"
+                        :checked="formArray.every((f) => f.isSelected)"
+                        @change="
+                            toggleAllUsers(
+                                true,
+                                formArray.every((f) => f.isSelected),
+                            )
+                        "
                     />
                     <span class="label-text text-xs dark:text-gray-50">Select All</span>
                 </label>
@@ -56,10 +59,19 @@ const onSelectUser = (form) => {
         </div>
 
         <div class="flex w-full flex-row flex-wrap gap-2 px-4 py-4">
-            <button v-if="isPayer" type="button" class="btn btn-xs" @click="setPayerAsSelfAndDistributeExpense">
+            <button
+                v-if="isPayer"
+                type="button"
+                class="btn btn-xs dark:btn-primary dark:bg-gray-700"
+                @click="setPayerAsSelfAndDistributeExpense"
+            >
                 Myself
             </button>
-            <button type="button" class="btn btn-xs" @click="setShouldDistributeEqually(!shouldDistributeEqually)">
+            <button
+                type="button"
+                class="btn btn-xs dark:btn-primary dark:bg-gray-700"
+                @click="setShouldDistributeEqually(!shouldDistributeEqually)"
+            >
                 <div class="flex flex-row items-center justify-between gap-1">
                     <CheckCircleIcon v-if="shouldDistributeEqually" class="h-4 w-4 text-success" />
                     <span>Divide equally</span>
