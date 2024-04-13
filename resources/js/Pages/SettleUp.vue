@@ -58,6 +58,13 @@ const dialogTitle = computed(() => {
 });
 
 // #region Expense Form
+const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(kDefaultExpenseGroupKey);
+const selectedGroupId = ref(getSelectedGroupIdFromSessionStorage());
+const currentGroup = computed(() => {
+    return props.groups.find((group) => `${group.id}` === selectedGroupId.value);
+});
+const selectedPayer = ref(currentGroup?.value?.group_members?.find((m) => m.user_id === props.auth.user.id));
+const selectedReceiver = ref(null);
 const expenseForm = useForm({
     group_id: null,
     date: new Date(),
@@ -76,7 +83,7 @@ const generateExpenseDetail = (payerId, receiverId) => {
         amount: null,
     });
 };
-const payerFormArray = ref([generateExpenseDetail()]);
+const payerFormArray = ref([generateExpenseDetail(selectedPayer.value?.user_id, selectedReceiver.value?.user_id)]);
 const mapExpenseDetailToFormData = (amount, expenseDetail) => {
     return {
         user_id: expenseDetail.user_id,
@@ -92,8 +99,6 @@ const currencies = computed(() => {
         return props.currencies;
     }
 });
-const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(kDefaultExpenseGroupKey);
-const selectedGroupId = ref(getSelectedGroupIdFromSessionStorage());
 const setSelectedGroupId = (groupId) => {
     if (groupId) {
         sessionStorage.setItem(kDefaultExpenseGroupKey, groupId);
@@ -118,11 +123,7 @@ const onGroupClicked = (groupId) => {
     setSelectedGroupId(groupId);
     setIsDialogOpen(false);
 };
-const currentGroup = computed(() => {
-    return props.groups.find((group) => `${group.id}` === selectedGroupId.value);
-});
-const selectedPayer = ref(currentGroup?.value?.group_members?.find((m) => m.user_id === props.auth.user.id));
-const selectedReceiver = ref(null);
+
 const setSelectedGroupMember = (groupMember) => {
     if (dialogMode.value === "selectPayer") {
         selectedPayer.value = groupMember;
@@ -133,6 +134,9 @@ const setSelectedGroupMember = (groupMember) => {
     }
     setIsDialogOpen(false);
     expenseForm.clearErrors("payer_details.0.receiver_id");
+};
+const setSelectedPayerToCurrentUser = () => {
+    selectedPayer.value = currentGroup?.value?.group_members?.find((m) => m.user_id === props.auth.user.id);
 };
 
 const onSaveExpenseClicked = () => {
@@ -149,6 +153,8 @@ const onSaveExpenseClicked = () => {
             onSuccess: (s) => {
                 expenseForm.reset();
                 payerFormArray.value.forEach((f) => f.reset());
+                setSelectedPayerToCurrentUser();
+                selectedReceiver.value = null;
                 router.reload();
                 showToastIfNeeded(toast, s.props.flash);
             },

@@ -92,7 +92,7 @@ class ExpenseController extends Controller
                 }
 
                 $currencySymbol = $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $request['currency_key'], 'key', 'symbol');
-                $request['description'] = $payer->name . ' paid ' . $receiver->name . ' ' . $currencySymbol . $request['amount'] . '.';
+                $request['description'] = $payer->name . ' paid ' . $receiver->name . ' ' . $currencySymbol . $this->CommonController->to2DecimalPlacesIfValid($request['amount']) . '.';
             }
 
             // Update date format

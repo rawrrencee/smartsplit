@@ -26,6 +26,15 @@ class CommonController extends Controller
         });
     }
 
+    public function to2DecimalPlacesIfValid($value)
+    {
+        $floatVal = floatval($value);
+        if (is_numeric($floatVal) && !is_nan($floatVal)) {
+            return number_format($floatVal, 2, '.', ',');
+        }
+        return isset($value) ? number_format(0.0, 2, '.', ',') : null;
+    }
+
     public function showPhoto(Request $request)
     {
         return response()->file(storage_path('app/private/' . $request['img_path']));

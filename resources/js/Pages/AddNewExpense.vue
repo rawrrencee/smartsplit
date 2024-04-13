@@ -8,9 +8,9 @@ import {
     to2DecimalPlacesIfValid,
 } from "@/Common.js";
 import CategoryIcon from "@/Components/CategoryIcon.vue";
+import ExpenseTable from "@/Components/Expense/ExpenseTable.vue";
 import GroupList from "@/Components/GroupList.vue";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
-import ProfilePhotoImage from "@/Components/Image/ProfilePhotoImage.vue";
 import ServerImage from "@/Components/Image/ServerImage.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
@@ -147,20 +147,6 @@ const toggleAllUsers = (isPayer, allSelected) => {
         onDistributeExpenseToSelectedUsersEquallyClicked(receiverFormArray.value);
     }
 };
-
-const remainingPayerAmount = computed(() => {
-    const totalAmount = payerFormArray.value
-        .filter((f) => f.isSelected)
-        .reduce((total, payer) => total + payer.amount, 0);
-    return expenseForm.amount - totalAmount;
-});
-const remainingReceiverAmount = computed(() => {
-    const totalAmount = receiverFormArray.value
-        .filter((f) => f.isSelected)
-        .reduce((total, receiver) => total + receiver.amount, 0);
-    return expenseForm.amount - totalAmount;
-});
-
 const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(kDefaultExpenseGroupKey);
 const selectedGroupId = ref(getSelectedGroupIdFromSessionStorage());
 const setSelectedGroupId = (groupId) => {
@@ -465,101 +451,17 @@ watch(expenseForm, () => {
                         leave-from="opacity-100"
                         leave-to="opacity-0"
                     >
-                        <div
-                            class="flex flex-col rounded-xl bg-gray-50 transition-opacity dark:bg-gray-900 dark:text-gray-50"
-                        >
-                            <div class="flex flex-col gap-2 border-b-[1px] p-4 dark:border-gray-700">
-                                <div class="flex flex-row items-center justify-between gap-2">
-                                    <label class="label flex cursor-pointer flex-row items-center gap-2 p-0">
-                                        <input
-                                            type="checkbox"
-                                            class="checkbox checkbox-xs dark:bg-gray-600"
-                                            :checked="allPayersSelected"
-                                            @change="toggleAllUsers(true, allPayersSelected)"
-                                        />
-                                        <span class="label-text text-xs dark:text-gray-50">Select All</span>
-                                    </label>
-                                    <span class="text-right text-xs"
-                                        >Total paid: {{ selectedCurrency.symbol ?? "$"
-                                        }}{{ to2DecimalPlacesIfValid(expenseForm.amount) ?? "0.00" }}</span
-                                    >
-                                </div>
-                            </div>
-
-                            <div class="flex w-full flex-row flex-wrap gap-2 px-4 py-4">
-                                <button type="button" class="btn btn-xs" @click="setPayerAsSelfAndDistributeExpense">
-                                    Myself
-                                </button>
-                                <button
-                                    type="button"
-                                    class="btn btn-xs"
-                                    @click="setShouldDistributePayersEqually(!shouldDistributePayersEqually)"
-                                >
-                                    <div class="flex flex-row items-center justify-between gap-1">
-                                        <CheckCircleIcon
-                                            v-if="shouldDistributePayersEqually"
-                                            class="h-4 w-4 text-success"
-                                        />
-                                        <span>Divide equally</span>
-                                    </div>
-                                </button>
-                            </div>
-                            <template v-for="form in payerFormArray" :key="form.user_id">
-                                <div
-                                    class="flex flex-row items-center justify-between gap-3 p-4 hover:bg-gray-200 dark:hover:bg-gray-700"
-                                >
-                                    <div class="flex flex-row items-center gap-4">
-                                        <label class="label flex cursor-pointer flex-row items-center gap-2 p-0">
-                                            <input
-                                                type="checkbox"
-                                                :checked="form.isSelected"
-                                                class="checkbox checkbox-xs dark:bg-gray-600"
-                                                @change="onSelectUser(true, form)"
-                                            />
-                                            <ProfilePhotoImage :image-url="form.user.profile_photo_url" />
-                                            <span class="break-all text-sm">{{ form.user.name }}</span>
-                                        </label>
-                                    </div>
-                                    <div
-                                        class="w-24 flex-shrink-0"
-                                        v-if="form.isSelected && !shouldDistributePayersEqually"
-                                    >
-                                        <InputNumber
-                                            :unstyled="true"
-                                            :pt="{
-                                                root: {
-                                                    class: ['w-full'],
-                                                },
-                                                input: {
-                                                    root: {
-                                                        class: [
-                                                            'input input-bordered input-sm w-full dark:bg-gray-700',
-                                                        ],
-                                                    },
-                                                },
-                                            }"
-                                            placeholder="0.00"
-                                            v-model="form.amount"
-                                            :inputId="`minmaxfraction-${form.user_id}`"
-                                            :minFractionDigits="2"
-                                            :maxFractionDigits="2"
-                                        />
-                                    </div>
-                                    <span v-else class="text-xs font-bold"
-                                        >{{ selectedCurrency.symbol ?? "$"
-                                        }}{{ to2DecimalPlacesIfValid(form.amount) }}</span
-                                    >
-                                </div>
-                            </template>
-
-                            <div class="flex flex-row justify-end border-t-[1px] p-4 text-xs dark:border-gray-700">
-                                <span>Remaining:&nbsp;</span
-                                ><span :class="remainingPayerAmount !== 0 && 'text-error'"
-                                    >{{ remainingPayerAmount < 0 ? "-" : "" }}{{ selectedCurrency.symbol ?? "$"
-                                    }}{{ to2DecimalPlacesIfValid(Math.abs(remainingPayerAmount)) ?? "0.00" }}</span
-                                >
-                            </div>
-                        </div>
+                        <ExpenseTable
+                            :expenseForm
+                            :selectedCurrency
+                            :isPayer="true"
+                            :formArray="payerFormArray"
+                            :shouldDistributeEqually="shouldDistributePayersEqually"
+                            @toggle-all-users="toggleAllUsers(true, allPayersSelected)"
+                            @set-should-distribute-equally="setShouldDistributePayersEqually"
+                            @user-selected="(form) => onSelectUser(true, form)"
+                            @set-payer-as-self="setPayerAsSelfAndDistributeExpense"
+                        />
                     </TransitionChild>
                 </TransitionRoot>
 
@@ -573,98 +475,16 @@ watch(expenseForm, () => {
                         leave-from="opacity-100"
                         leave-to="opacity-0"
                     >
-                        <div
-                            class="flex flex-col rounded-xl bg-gray-50 transition-opacity dark:bg-gray-900 dark:text-gray-50"
-                        >
-                            <div class="flex flex-col gap-2 border-b-[1px] p-4 dark:border-gray-700">
-                                <div class="flex flex-row items-center justify-between gap-2">
-                                    <label class="label flex cursor-pointer flex-row items-center gap-2 p-0">
-                                        <input
-                                            type="checkbox"
-                                            class="checkbox checkbox-xs dark:bg-gray-600"
-                                            :checked="allReceiversSelected"
-                                            @change="toggleAllUsers(false, allReceiversSelected)"
-                                        />
-                                        <span class="label-text text-xs dark:text-gray-50">Select All</span>
-                                    </label>
-                                    <span class="text-right text-xs"
-                                        >Total paid: {{ selectedCurrency.symbol ?? "$"
-                                        }}{{ to2DecimalPlacesIfValid(expenseForm.amount) ?? "0.00" }}</span
-                                    >
-                                </div>
-                            </div>
-
-                            <div class="w-full gap-2 px-4 py-4" v-if="selectedReceiverForms.length > 0">
-                                <button
-                                    type="button"
-                                    class="btn btn-xs"
-                                    @click="setShouldDistributeReceiversEqually(!shouldDistributeReceiversEqually)"
-                                >
-                                    <div class="flex flex-row items-center justify-between gap-1">
-                                        <CheckCircleIcon
-                                            v-if="shouldDistributeReceiversEqually"
-                                            class="h-4 w-4 text-success"
-                                        />
-                                        <span>Divide equally</span>
-                                    </div>
-                                </button>
-                            </div>
-                            <template v-for="form in receiverFormArray" :key="form.user_id">
-                                <div
-                                    class="flex flex-row items-center justify-between gap-3 p-4 hover:bg-gray-200 dark:hover:bg-gray-700"
-                                >
-                                    <div class="flex min-w-0 flex-row items-center gap-4">
-                                        <label class="label flex cursor-pointer flex-row items-center gap-2 p-0">
-                                            <input
-                                                type="checkbox"
-                                                :checked="form.isSelected"
-                                                class="checkbox checkbox-xs dark:bg-gray-600"
-                                                @change="onSelectUser(false, form)"
-                                            />
-                                            <ProfilePhotoImage :image-url="form.user.profile_photo_url" />
-                                            <span class="break-all text-sm">{{ form.user.name }}</span>
-                                        </label>
-                                    </div>
-                                    <div
-                                        class="w-24 flex-shrink-0"
-                                        v-if="form.isSelected && !shouldDistributeReceiversEqually"
-                                    >
-                                        <InputNumber
-                                            :unstyled="true"
-                                            :pt="{
-                                                root: {
-                                                    class: ['w-full'],
-                                                },
-                                                input: {
-                                                    root: {
-                                                        class: [
-                                                            'input input-bordered input-sm w-full dark:bg-gray-700',
-                                                        ],
-                                                    },
-                                                },
-                                            }"
-                                            placeholder="0.00"
-                                            v-model="form.amount"
-                                            :inputId="`minmaxfraction-${form.user_id}`"
-                                            :minFractionDigits="2"
-                                            :maxFractionDigits="2"
-                                        />
-                                    </div>
-                                    <span v-else class="text-xs font-bold"
-                                        >{{ selectedCurrency.symbol ?? "$"
-                                        }}{{ to2DecimalPlacesIfValid(form.amount) }}</span
-                                    >
-                                </div>
-                            </template>
-
-                            <div class="flex flex-row justify-end border-t-[1px] p-4 text-xs dark:border-gray-700">
-                                <span>Remaining:&nbsp;</span
-                                ><span :class="remainingReceiverAmount !== 0 && 'text-error'"
-                                    >{{ remainingReceiverAmount < 0 ? "-" : "" }}{{ selectedCurrency.symbol ?? "$"
-                                    }}{{ to2DecimalPlacesIfValid(Math.abs(remainingReceiverAmount)) ?? "0.00" }}</span
-                                >
-                            </div>
-                        </div>
+                        <ExpenseTable
+                            :expenseForm
+                            :selectedCurrency
+                            :isPayer="false"
+                            :formArray="receiverFormArray"
+                            :shouldDistributeEqually="shouldDistributeReceiversEqually"
+                            @toggle-all-users="toggleAllUsers(false, allReceiversSelected)"
+                            @set-should-distribute-equally="setShouldDistributeReceiversEqually"
+                            @user-selected="(form) => onSelectUser(false, form)"
+                        />
                     </TransitionChild>
                 </TransitionRoot>
             </div>
