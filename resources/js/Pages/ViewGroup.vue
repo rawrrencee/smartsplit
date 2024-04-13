@@ -165,10 +165,10 @@ const expenseDetails = computed(() => {
         <div
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
         >
-            <NavigationBarButton :icon="ArrowLeftIcon" :on-click="back" />
+            <NavigationBarButton :icon="ArrowLeftIcon" @on-click="back" />
             <NavigationBarButton
                 :icon="PencilIcon"
-                :on-click="() => router.get(route('groups.edit'), { id: group.id })"
+                @on-click="() => router.get(route('groups.edit'), { id: group.id })"
             />
         </div>
         <div class="mx-auto flex flex-col gap-5 px-4 sm:px-6 lg:px-8">
@@ -265,7 +265,7 @@ const expenseDetails = computed(() => {
                         <button
                             type="button"
                             class="flex flex-row items-center gap-2 py-1 text-left hover:rounded-xl hover:bg-gray-200 dark:hover:bg-gray-900"
-                            @click="router.visit(route('expense.view', { id: expense.id }))"
+                            @click="router.visit(route('expenses.view', { id: expense.id }))"
                         >
                             <div class="flex flex-col items-center pl-4 sm:pl-6 lg:pl-8">
                                 <span class="text-xs">{{ expense.shortMonth }}</span>

@@ -61,10 +61,10 @@ Route::middleware([
     Route::prefix('expenses')->group(function () {
         Route::get('/', [ExpenseController::class, 'addExpensePage'])->name('expenses');
         Route::post('/add', [ExpenseController::class, 'saveNewExpense'])->name('expenses.add');
-        Route::get('/view', [ExpenseController::class, 'expenseDetailsPage'])->name('expense.view');
-        Route::get('/edit', [ExpenseController::class, 'editExpensePage'])->name('expense.edit');
-        Route::post('/update', [ExpenseController::class, 'updateExpense'])->name('expense.update');
-        Route::post('/delete', [ExpenseController::class, 'deleteExpense'])->name('expense.delete');
+        Route::get('/view', [ExpenseController::class, 'expenseDetailsPage'])->name('expenses.view');
+        Route::get('/edit', [ExpenseController::class, 'editExpensePage'])->name('expenses.edit');
+        Route::post('/update', [ExpenseController::class, 'updateExpense'])->name('expenses.update');
+        Route::post('/delete', [ExpenseController::class, 'deleteExpense'])->name('expenses.delete');
     });
     Route::prefix('settle-up')->group(function () {
         Route::get('/', [ExpenseController::class, 'settleUpPage'])->name('settle-up');

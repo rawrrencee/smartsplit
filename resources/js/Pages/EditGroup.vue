@@ -77,7 +77,7 @@ const onDeletePhotoClicked = () => {
         <div
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
         >
-            <NavigationBarButton :icon="ArrowLeftIcon" :on-click="back" />
+            <NavigationBarButton :icon="ArrowLeftIcon" @on-click="back" />
             <button
                 type="button"
                 class="btn btn-link pr-0 text-gray-600 no-underline dark:text-gray-200"

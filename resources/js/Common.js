@@ -41,14 +41,16 @@ export const getRememberRecentGroup = () => {
 
 export const getAllCurrencies = () => {
     const allCurrencies = localStorage.getItem(kAllCurrenciesKey);
-    if (allCurrencies) {
+    if (Array.isArray(allCurrencies)) {
         return JSON.parse(allCurrencies);
     } else {
         return [];
     }
 };
 export const setAllCurrencies = (currencies) => {
-    localStorage.setItem(kAllCurrenciesKey, JSON.stringify(currencies));
+    if (currencies) {
+        localStorage.setItem(kAllCurrenciesKey, JSON.stringify(currencies));
+    }
 };
 
 export const getImgSrcFromPath = (path) => {

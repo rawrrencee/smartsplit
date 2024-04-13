@@ -10,8 +10,8 @@ import { router } from "@inertiajs/vue3";
 import { computed, ref } from "vue";
 import { toast } from "vue-sonner";
 
-const back = () => {
-    window.history.back();
+const navigateToRoute = (route, data) => {
+    router.visit(route, data);
 };
 const props = defineProps({
     expense: Object,
@@ -35,7 +35,7 @@ const onDeleteClicked = () => {
     if (!confirm("Are you sure you want to delete this transaction?")) return;
     setIsLoading(true);
     router.post(
-        route("expense.delete"),
+        route("expenses.delete"),
         { id: props.expense.id },
         {
             onSuccess: (s) => {
@@ -56,10 +56,16 @@ const onDeleteClicked = () => {
         <div
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
         >
-            <NavigationBarButton :icon="ArrowLeftIcon" :on-click="back" />
+            <NavigationBarButton
+                :icon="ArrowLeftIcon"
+                @on-click="navigateToRoute(route('groups.view', { id: expense.group_id }))"
+            />
             <div class="flex flex-row gap-4">
-                <NavigationBarButton :icon="TrashIcon" :on-click="onDeleteClicked" />
-                <NavigationBarButton :icon="PencilIcon" :on-click="back" />
+                <NavigationBarButton :icon="TrashIcon" @on-click="onDeleteClicked" />
+                <NavigationBarButton
+                    :icon="PencilIcon"
+                    @on-click="navigateToRoute(route('expenses.edit', { id: expense.id }))"
+                />
             </div>
         </div>
         <div class="mx-auto flex max-w-xl flex-col gap-6 dark:text-gray-200">

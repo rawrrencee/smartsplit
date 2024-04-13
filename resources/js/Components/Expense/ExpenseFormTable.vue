@@ -20,9 +20,6 @@ const setShouldDistributeEqually = (value) => {
 const toggleAllUsers = () => {
     emit("toggleAllUsers");
 };
-const setPayerAsSelfAndDistributeExpense = () => {
-    emit("setPayerAsSelf");
-};
 const onSelectUser = (form) => {
     emit("userSelected", form);
 };
@@ -48,7 +45,7 @@ const onSelectUser = (form) => {
                     <span class="label-text text-xs dark:text-gray-50">Select All</span>
                 </label>
                 <span class="text-right text-xs"
-                    >Total paid: {{ selectedCurrency.symbol ?? "$"
+                    >Total paid: {{ selectedCurrency?.symbol ?? "$"
                     }}{{ to2DecimalPlacesIfValid(expenseForm?.amount) ?? "0.00" }}</span
                 >
             </div>
@@ -59,7 +56,7 @@ const onSelectUser = (form) => {
                 v-if="isPayer"
                 type="button"
                 class="btn btn-xs dark:btn-primary dark:bg-gray-700"
-                @click="setPayerAsSelfAndDistributeExpense"
+                @click="$emit('setPayerAsSelf')"
             >
                 Myself
             </button>
@@ -109,7 +106,7 @@ const onSelectUser = (form) => {
                     />
                 </div>
                 <span v-else class="text-xs font-bold"
-                    >{{ selectedCurrency.symbol ?? "$" }}{{ to2DecimalPlacesIfValid(form.amount) }}</span
+                    >{{ selectedCurrency?.symbol ?? "$" }}{{ to2DecimalPlacesIfValid(form.amount) }}</span
                 >
             </div>
         </template>
@@ -117,7 +114,7 @@ const onSelectUser = (form) => {
         <div class="flex flex-row justify-end border-t-[1px] p-4 text-xs dark:border-gray-700">
             <span>Remaining:&nbsp;</span
             ><span :class="remainingAmount !== 0 && 'text-error'"
-                >{{ remainingAmount < 0 ? "-" : "" }}{{ selectedCurrency.symbol ?? "$"
+                >{{ remainingAmount < 0 ? "-" : "" }}{{ selectedCurrency?.symbol ?? "$"
                 }}{{ to2DecimalPlacesIfValid(Math.abs(remainingAmount)) ?? "0.00" }}</span
             >
         </div>

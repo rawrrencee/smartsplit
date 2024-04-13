@@ -8,7 +8,7 @@ import {
     to2DecimalPlacesIfValid,
 } from "@/Common.js";
 import CategoryIcon from "@/Components/CategoryIcon.vue";
-import ExpenseTable from "@/Components/Expense/ExpenseTable.vue";
+import ExpenseFormTable from "@/Components/Expense/ExpenseFormTable.vue";
 import GroupList from "@/Components/GroupList.vue";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
 import ServerImage from "@/Components/Image/ServerImage.vue";
@@ -96,7 +96,7 @@ const mapExpenseDetailToFormData = (expenseDetail) => {
         is_settlement: false,
     };
 };
-const currencies = computed(() => {
+const currenciesFromSource = computed(() => {
     const currenciesFromStorage = getAllCurrencies();
     if (currenciesFromStorage.length > 0) {
         return currenciesFromStorage;
@@ -269,9 +269,9 @@ const setSelectedCategory = (key) => {
 
 // #region Currency
 const getSelectedCurrencyFromSessionStorage = () => {
-    return currencies.value?.find((c) => c.key === sessionStorage.getItem(kDefaultExpenseCurrencyKey));
+    return currenciesFromSource.value?.find((c) => c.key === sessionStorage.getItem(kDefaultExpenseCurrencyKey));
 };
-const selectedCurrency = ref(getSelectedCurrencyFromSessionStorage() ?? currencies.value?.[0]);
+const selectedCurrency = ref(getSelectedCurrencyFromSessionStorage() ?? currenciesFromSource.value?.[0]);
 const currencyQuery = ref("");
 const setSelectedCurrency = (key) => {
     sessionStorage.setItem(kDefaultExpenseCurrencyKey, key);
@@ -281,8 +281,8 @@ const setSelectedCurrency = (key) => {
 };
 const filteredCurrencies = computed(() =>
     currencyQuery.value === ""
-        ? currencies.value
-        : currencies.value.filter((c) => {
+        ? currenciesFromSource.value
+        : currenciesFromSource.value.filter((c) => {
               const searchQuery = currencyQuery.value.toLowerCase().replace(/\s+/g, "");
               const value = c.value.toLowerCase().replace(/\s+/g, "");
               const key = c.key.toLowerCase().replace(/\s+/g, "");
@@ -464,7 +464,7 @@ watch(expenseForm, () => {
                         leave-from="opacity-100"
                         leave-to="opacity-0"
                     >
-                        <ExpenseTable
+                        <ExpenseFormTable
                             :expenseForm
                             :selectedCurrency
                             :isPayer="true"
@@ -489,7 +489,7 @@ watch(expenseForm, () => {
                         leave-from="opacity-100"
                         leave-to="opacity-0"
                     >
-                        <ExpenseTable
+                        <ExpenseFormTable
                             :expenseForm
                             :selectedCurrency
                             :isPayer="false"
