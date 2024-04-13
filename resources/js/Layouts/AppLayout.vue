@@ -57,7 +57,7 @@ const navigationItems = [
             <NavigationBar v-if="route().current('home')" :isLightMode />
 
             <!-- Page Heading -->
-            <header v-if="$slots.header" class="bg-white shadow">
+            <header v-if="$slots.header" class="bg-gray-50 shadow dark:bg-gray-900">
                 <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                     <slot name="header" />
                 </div>

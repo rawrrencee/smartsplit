@@ -90,8 +90,8 @@ const handlePendingRequestStatusChange = (groupId, status) => {
         <div
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 backdrop-blur sm:px-6 lg:px-8"
         >
-            <div class="flex w-full flex-row items-center justify-between py-2">
-                <button type="button" class="btn btn-link px-0 text-gray-600 dark:text-gray-200">
+            <div class="flex w-full flex-row items-center justify-end py-2">
+                <button type="button" class="btn btn-link px-0 text-gray-600 dark:text-gray-200" v-if="false">
                     <MagnifyingGlassIcon class="h-5 w-5" />
                 </button>
 

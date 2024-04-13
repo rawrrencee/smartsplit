@@ -13,6 +13,6 @@ const props = defineProps({
 
 <template>
     <AppLayout title="Edit Expense">
-        <ExpenseForm :groups :categories :currencies :auth :expense :isEdit="true" />
+        <ExpenseForm v-if="!expense?.is_settlement" :groups :categories :currencies :auth :expense :isEdit="true" />
     </AppLayout>
 </template>

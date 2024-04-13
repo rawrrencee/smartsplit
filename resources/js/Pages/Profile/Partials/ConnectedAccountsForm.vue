@@ -61,7 +61,9 @@ const closeModal = () => {
         <template #description> Connect your social media accounts to enable Sign In with OAuth. </template>
 
         <template #content>
-            <div class="rounded border-l-4 border-red-600 bg-red-500/10 p-4 text-sm font-medium text-red-500">
+            <div
+                class="rounded border-l-4 border-red-600 bg-red-500/10 p-4 text-sm font-medium text-red-500 dark:text-red-400"
+            >
                 If you feel any of your connected accounts have been compromised, you should disconnect them immediately
                 and change your password.
             </div>
@@ -71,14 +73,14 @@ const closeModal = () => {
                     <ConnectedAccount :provider="provider" :created-at="getAccountForProvider(provider)?.created_at">
                         <template #action>
                             <template v-if="getAccountForProvider(provider)">
-                                <div class="flex items-center space-x-6">
+                                <div class="flex flex-row items-center space-x-6">
                                     <button
                                         v-if="
                                             $page.props.jetstream.managesProfilePhotos &&
                                             getAccountForProvider(provider).avatar_path
                                         "
                                         @click="setProfilePhoto(getAccountForProvider(provider).id)"
-                                        class="ms-6 cursor-pointer text-sm text-gray-500 hover:text-gray-700 focus:outline-none"
+                                        class="btn btn-outline btn-md min-w-0 flex-shrink dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
                                     >
                                         Use Avatar as Profile Photo
                                     </button>

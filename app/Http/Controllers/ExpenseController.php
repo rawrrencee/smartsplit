@@ -285,7 +285,7 @@ class ExpenseController extends Controller
 
             $message = $isSettlement ? "Settle up amount updated successfully." : "Expense update successfully.";
 
-            return redirect()->back()
+            return redirect()->route('expenses.view', ['id' => $expense->id])
                 ->with('show', true)
                 ->with('type', 'default')
                 ->with('status', 'success')

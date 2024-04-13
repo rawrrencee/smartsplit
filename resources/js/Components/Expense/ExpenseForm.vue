@@ -185,7 +185,13 @@ const toggleAllUsers = (isPayer, allSelected) => {
     }
 };
 const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(kDefaultExpenseGroupKey);
-const selectedGroupId = ref(getSelectedGroupIdFromSessionStorage());
+const getSelectedGroupId = () => {
+    if (props.isEdit) {
+        return props.expense?.group_id;
+    }
+    return getSelectedGroupIdFromSessionStorage();
+};
+const selectedGroupId = ref(getSelectedGroupId());
 const setSelectedGroupId = (groupId) => {
     sessionStorage.setItem(kDefaultExpenseGroupKey, groupId);
     selectedGroupId.value = getSelectedGroupIdFromSessionStorage();
@@ -307,7 +313,13 @@ const setSelectedCategory = (key) => {
 const getSelectedCurrencyFromSessionStorage = () => {
     return currenciesFromSource.value?.find((c) => c.key === sessionStorage.getItem(kDefaultExpenseCurrencyKey));
 };
-const selectedCurrency = ref(getSelectedCurrencyFromSessionStorage() ?? currenciesFromSource.value?.[0]);
+const getSelectedCurrency = () => {
+    if (props.isEdit) {
+        return currenciesFromSource.value?.find((c) => c.key === props.expense?.currency_key);
+    }
+    return getSelectedCurrencyFromSessionStorage();
+};
+const selectedCurrency = ref(getSelectedCurrency() ?? currenciesFromSource.value?.[0]);
 const currencyQuery = ref("");
 const setSelectedCurrency = (key) => {
     sessionStorage.setItem(kDefaultExpenseCurrencyKey, key);
@@ -382,10 +394,7 @@ watch(expenseForm, () => {
     <div class="mx-auto flex max-w-xl flex-col gap-6 px-4 sm:px-6 lg:px-8 dark:text-gray-200">
         <div class="flex flex-col gap-2">
             <div class="flex flex-col gap-1">
-                <span
-                    >{{ expense?.is_settlement ? "Settle up in " : "Expense to "
-                    }}{{ isEdit ? "" : "selected" }} group</span
-                >
+                <span>Expense to {{ isEdit ? "" : "selected" }} group</span>
                 <button
                     v-if="!isEdit"
                     class="btn btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -409,7 +418,7 @@ watch(expenseForm, () => {
             </div>
 
             <div class="flex flex-col items-start gap-1">
-                <span>Date of {{ expense?.is_settlement ? "settle up" : "expense" }}</span>
+                <span>Date of expense</span>
                 <DatePicker v-model="expenseForm.date" :input-debounce="500" :popover="popover">
                     <template #default="{ inputValue, inputEvents }">
                         <div class="relative w-full">
@@ -428,8 +437,8 @@ watch(expenseForm, () => {
         </div>
 
         <div class="flex flex-col gap-2">
-            <span class="font-semibold">{{ expense?.is_settlement ? "Settle Up" : "Expense" }} Details</span>
-            <div class="flex flex-row gap-2" v-if="!expense?.is_settlement">
+            <span class="font-semibold">Expense Details</span>
+            <div class="flex flex-row gap-2">
                 <button
                     class="btn btn-square btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
                     @click="setDialogMode('selectCategory')"
