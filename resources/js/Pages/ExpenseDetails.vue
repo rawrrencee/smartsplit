@@ -1,5 +1,5 @@
 <script setup>
-import { showToastIfNeeded, to2DecimalPlacesIfValid } from "@/Common";
+import { getAllCurrencies, showToastIfNeeded, to2DecimalPlacesIfValid } from "@/Common";
 import CategoryIcon from "@/Components/CategoryIcon.vue";
 import ExpenseComments from "@/Components/Expense/ExpenseComments.vue";
 import ProfilePhotoImage from "@/Components/Image/ProfilePhotoImage.vue";
@@ -64,7 +64,11 @@ const onDeleteClicked = () => {
                 <NavigationBarButton :icon="TrashIcon" @on-click="onDeleteClicked" />
                 <NavigationBarButton
                     :icon="PencilIcon"
-                    @on-click="navigateToRoute(route('expenses.edit', { id: expense.id }))"
+                    @on-click="
+                        navigateToRoute(
+                            route('expenses.edit', { id: expense.id, withCurrencies: getAllCurrencies().length === 0 }),
+                        )
+                    "
                 />
             </div>
         </div>

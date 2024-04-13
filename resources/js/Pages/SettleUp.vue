@@ -156,7 +156,7 @@ const onSaveExpenseClicked = () => {
             payer_details: payerFormArray.value.map((v) => mapExpenseDetailToFormData(data.amount, v)),
             receiver_details: [],
         }))
-        .post(route("expenses.add"), {
+        .post(route("expenses.save"), {
             onSuccess: (s) => {
                 expenseForm.reset();
                 payerFormArray.value.forEach((f) => f.reset());

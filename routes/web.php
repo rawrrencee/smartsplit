@@ -59,8 +59,8 @@ Route::middleware([
     });
 
     Route::prefix('expenses')->group(function () {
-        Route::get('/', [ExpenseController::class, 'addExpensePage'])->name('expenses');
-        Route::post('/add', [ExpenseController::class, 'saveNewExpense'])->name('expenses.add');
+        Route::get('/add', [ExpenseController::class, 'addExpensePage'])->name('expenses.add');
+        Route::post('/save', [ExpenseController::class, 'saveNewExpense'])->name('expenses.save');
         Route::get('/view', [ExpenseController::class, 'expenseDetailsPage'])->name('expenses.view');
         Route::get('/edit', [ExpenseController::class, 'editExpensePage'])->name('expenses.edit');
         Route::post('/update', [ExpenseController::class, 'updateExpense'])->name('expenses.update');

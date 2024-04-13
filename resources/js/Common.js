@@ -41,7 +41,7 @@ export const getRememberRecentGroup = () => {
 
 export const getAllCurrencies = () => {
     const allCurrencies = localStorage.getItem(kAllCurrenciesKey);
-    if (Array.isArray(allCurrencies)) {
+    if (allCurrencies) {
         return JSON.parse(allCurrencies);
     } else {
         return [];

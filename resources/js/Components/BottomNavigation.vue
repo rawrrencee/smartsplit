@@ -20,7 +20,8 @@ const onClick = (name) => {
             ...(!isNaN(parseInt(groupId)) && { id: parseInt(groupId) }),
             withCurrencies: getAllCurrencies().length === 0,
         });
-    } else if (name === "expenses") {
+    } else if (name === "expenses.add") {
+        console.log(getAllCurrencies().length);
         router.get(route(name), {
             withCurrencies: getAllCurrencies().length === 0,
         });
