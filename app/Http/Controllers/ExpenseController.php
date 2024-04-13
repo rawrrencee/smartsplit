@@ -53,10 +53,28 @@ class ExpenseController extends Controller
             return redirect()->route('404');
         }
 
-        $expense = Expense::where('id', $request['id'])->with('expenseDetails.payer')->with('expenseDetails.receiver')->first();
+        $expense = Expense::where('id', $request['id'])->with([
+            'expenseDetails.payer' => function ($query) {
+                $query->select('id', 'name');
+            }, 'expenseDetails.receiver' => function ($query) {
+                $query->select('id', 'name');
+            }, 'createdBy' => function ($query) {
+                $query->select('id', 'name');
+            }, 'updatedBy' => function ($query) {
+                $query->select('id', 'name');
+            }
+        ])->first();
 
         if (!isset($expense)) {
             return redirect()->route('404');
+        }
+
+        $currencyKey = $expense->currency_key;
+        $currencySymbol = $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $currencyKey, 'key', 'symbol');
+        $expense->currency_symbol = $currencySymbol;
+
+        foreach ($expense->expenseDetails as $expenseDetail) {
+            $expenseDetail->currency_symbol = $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $expenseDetail->currency_key, 'key', 'symbol');
         }
 
         return Inertia::render('ExpenseDetails', [
@@ -175,7 +193,7 @@ class ExpenseController extends Controller
             $rules['receiver_details'] = 'required|array';
             $rules['receiver_details.*.user_id'] = 'required|exists:users,id';
             $rules['receiver_details.*.amount'] = 'required|numeric|min:0.01';
-            $rules['description'] = 'required|string|max:30';
+            $rules['description'] = 'required|string|max:50';
         } else {
             $rules['payer_details.*.receiver_id'] = 'required|exists:users,id';
         }

@@ -494,14 +494,14 @@ class HardcodedDataController extends Controller
             ),
 
             array(
-                'key' => 'KPW',
+                'key' => 'KRW',
                 'countryName' => 'North Korea',
                 'value' => 'North Korean won',
                 'symbol' => '&#8361;'
             ),
 
             array(
-                'key' => 'KPW',
+                'key' => 'KRW',
                 'countryName' => 'South Korea',
                 'value' => 'South Korean won',
                 'symbol' => '&#8361;'

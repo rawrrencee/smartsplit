@@ -12,6 +12,7 @@ import {
     ArrowLeftIcon,
     CurrencyDollarIcon,
     ExclamationCircleIcon,
+    FaceSmileIcon,
     PaperAirplaneIcon,
     PencilIcon,
     PlusIcon,
@@ -248,6 +249,13 @@ const expenseDetails = computed(() => {
             </ul>
         </div>
         <div class="mx-auto flex flex-col gap-4 pt-6">
+            <div
+                class="flex flex-col items-center px-4 pt-10 text-center text-gray-300 sm:px-6 lg:px-8 dark:text-gray-600"
+                v-if="expenseDetails.length === 0"
+            >
+                <FaceSmileIcon class="h-12 w-12" />
+                <span>Add some expenses to get started</span>
+            </div>
             <div v-for="d in expenseDetails" class="flex flex-col gap-2">
                 <div class="px-4 sm:px-6 lg:px-8">
                     <span class="font-semibold dark:text-gray-200">{{ d.groupByTitle }}</span>
@@ -278,9 +286,15 @@ const expenseDetails = computed(() => {
                                             }}{{ to2DecimalPlacesIfValid(expense.amount) }}</span
                                         >
                                     </div>
+                                    <template v-if="expense.net_amount === 0">
+                                        <span class="text-xs text-gray-400">not involved</span>
+                                    </template>
                                     <div
+                                        v-else
                                         class="flex min-w-0 flex-shrink-0 flex-col break-words text-right text-xs"
-                                        :class="expense.net_amount < 0 ? 'text-error' : 'text-success'"
+                                        :class="
+                                            expense.net_amount < 0 ? 'text-error dark:text-red-400' : 'text-success'
+                                        "
                                     >
                                         <span>you {{ expense.net_amount < 0 ? "borrowed" : "lent" }}</span>
                                         <span

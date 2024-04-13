@@ -81,11 +81,11 @@ const expenseForm = useForm({
     payer_details: [],
     receiver_details: [],
 });
-const generateExpenseDetail = (user, shouldSelectAll = false) => {
+const generateExpenseDetail = (user, shouldSelectAll = false, selectedUserIds) => {
     return useForm({
         user_id: user.id,
         amount: null,
-        isSelected: shouldSelectAll,
+        isSelected: shouldSelectAll || selectedUserIds?.includes(user.id),
         user,
     });
 };
@@ -106,7 +106,8 @@ const currencies = computed(() => {
     }
 });
 const updatePayerFormArray = () => {
-    payerFormArray.value = currentGroup.value?.group_members?.map((m) => generateExpenseDetail(m.user)) ?? [];
+    payerFormArray.value =
+        currentGroup.value?.group_members?.map((m) => generateExpenseDetail(m.user, false, [props.auth.user.id])) ?? [];
     receiverFormArray.value = currentGroup.value?.group_members?.map((m) => generateExpenseDetail(m.user, true)) ?? [];
 };
 const allPayersSelected = computed(() => {
@@ -209,6 +210,18 @@ const onSelectUser = (isPayer, form) => {
         onDistributeExpenseToSelectedUsersEquallyClicked(receiverFormArray.value);
     }
 };
+const remainingPayerAmount = computed(() => {
+    const totalAmount = payerFormArray.value
+        .filter((f) => f.isSelected)
+        .reduce((total, payer) => total + payer.amount, 0);
+    return expenseForm?.amount - totalAmount;
+});
+const remainingReceiverAmount = computed(() => {
+    const totalAmount = receiverFormArray.value
+        .filter((f) => f.isSelected)
+        .reduce((total, payer) => total + payer.amount, 0);
+    return expenseForm?.amount - totalAmount;
+});
 const isAmountBalanced = computed(() => {
     const expenseAmount = expenseForm.amount;
     const payerAmounts = payerFormArray.value.reduce((total, p) => total + p.amount, 0);
@@ -375,7 +388,7 @@ watch(expenseForm, () => {
                         type="text"
                         placeholder="Enter a description"
                         class="input input-bordered w-full dark:border-0 dark:bg-gray-900 dark:text-gray-50"
-                        :maxlength="30"
+                        :maxlength="50"
                         v-model="expenseForm.description"
                     />
                 </div>
@@ -457,6 +470,7 @@ watch(expenseForm, () => {
                             :isPayer="true"
                             :formArray="payerFormArray"
                             :shouldDistributeEqually="shouldDistributePayersEqually"
+                            :remainingAmount="remainingPayerAmount"
                             @toggle-all-users="toggleAllUsers(true, allPayersSelected)"
                             @set-should-distribute-equally="setShouldDistributePayersEqually"
                             @user-selected="(form) => onSelectUser(true, form)"
@@ -481,6 +495,7 @@ watch(expenseForm, () => {
                             :isPayer="false"
                             :formArray="receiverFormArray"
                             :shouldDistributeEqually="shouldDistributeReceiversEqually"
+                            :remainingAmount="remainingReceiverAmount"
                             @toggle-all-users="toggleAllUsers(false, allReceiversSelected)"
                             @set-should-distribute-equally="setShouldDistributeReceiversEqually"
                             @user-selected="(form) => onSelectUser(false, form)"

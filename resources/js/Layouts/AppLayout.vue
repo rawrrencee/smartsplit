@@ -47,7 +47,7 @@ const navigationItems = [
 </script>
 
 <template>
-    <div data-theme="splitsmartLight" :class="!isLightMode && 'dark'">
+    <div class="h-full" data-theme="splitsmartLight" :class="!isLightMode && 'dark'">
         <Toaster richColors position="top-center" class="z-10" />
         <Head :title="title" />
 

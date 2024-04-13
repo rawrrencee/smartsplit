@@ -4,7 +4,6 @@ import ProfilePhotoImage from "@/Components/Image/ProfilePhotoImage.vue";
 import { CheckCircleIcon } from "@heroicons/vue/24/solid";
 import InputNumber from "primevue/inputnumber";
 import "v-calendar/style.css";
-import { computed } from "vue";
 
 const { expenseForm, formArray, selectedCurrency } = defineProps({
     expenseForm: Object,
@@ -12,12 +11,9 @@ const { expenseForm, formArray, selectedCurrency } = defineProps({
     selectedCurrency: Object,
     shouldDistributeEqually: Boolean,
     isPayer: Boolean,
+    remainingAmount: Number,
 });
 const emit = defineEmits(["toggleAllUsers", "setShouldDistributeEqually", "userSelected", "setPayerAsSelf"]);
-const remainingAmount = computed(() => {
-    const totalAmount = formArray.filter((f) => f.isSelected).reduce((total, payer) => total + payer.amount, 0);
-    return expenseForm?.amount - totalAmount;
-});
 const setShouldDistributeEqually = (value) => {
     emit("setShouldDistributeEqually", value);
 };
