@@ -5,7 +5,7 @@ import ExpenseComments from "@/Components/Expense/ExpenseComments.vue";
 import ProfilePhotoImage from "@/Components/Image/ProfilePhotoImage.vue";
 import NavigationBarButton from "@/Components/NavigationBarButton.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { ArrowLeftIcon, CurrencyDollarIcon, PencilIcon, TrashIcon } from "@heroicons/vue/24/outline";
+import { ArrowLeftIcon, CalendarIcon, CurrencyDollarIcon, PencilIcon, TrashIcon } from "@heroicons/vue/24/outline";
 import { router } from "@inertiajs/vue3";
 import { computed, ref } from "vue";
 import { toast } from "vue-sonner";
@@ -102,7 +102,15 @@ const onDeleteClicked = () => {
 
             <div v-else>
                 <div class="mx-auto flex max-w-7xl flex-col gap-8 dark:text-gray-200">
-                    <div class="flex flex-col gap-1 px-4">
+                    <div class="flex flex-col gap-3 px-4">
+                        <div class="badge badge-neutral badge-lg flex flex-row items-center gap-2">
+                            <CalendarIcon class="h-4 w-4" />
+                            <span class="text-sm">{{
+                                new Date(expense.date).toLocaleString("en-SG", {
+                                    dateStyle: "medium",
+                                })
+                            }}</span>
+                        </div>
                         <div class="flex flex-row items-center gap-4">
                             <CategoryIcon :category="expense.category" />
                             <div class="flex flex-col">
@@ -112,24 +120,26 @@ const onDeleteClicked = () => {
                                 >
                             </div>
                         </div>
-                        <span class="text-xs text-gray-400"
-                            >Added by {{ expense.created_by.name }} on
-                            {{
-                                new Date(expense.created_at).toLocaleString("en-SG", {
-                                    dateStyle: "medium",
-                                    timeStyle: "short",
-                                })
-                            }}</span
-                        >
-                        <span class="text-xs text-gray-400"
-                            >Updated at {{ expense.updated_by.name }} on
-                            {{
-                                new Date(expense.updated_at).toLocaleString("en-SG", {
-                                    dateStyle: "medium",
-                                    timeStyle: "short",
-                                })
-                            }}</span
-                        >
+                        <div class="flex flex-col gap-1">
+                            <span class="text-xs text-gray-400"
+                                >Added by {{ expense.created_by.name }} on
+                                {{
+                                    new Date(expense.created_at).toLocaleString("en-SG", {
+                                        dateStyle: "medium",
+                                        timeStyle: "short",
+                                    })
+                                }}</span
+                            >
+                            <span class="text-xs text-gray-400"
+                                >Updated at {{ expense.updated_by.name }} on
+                                {{
+                                    new Date(expense.updated_at).toLocaleString("en-SG", {
+                                        dateStyle: "medium",
+                                        timeStyle: "short",
+                                    })
+                                }}</span
+                            >
+                        </div>
                     </div>
                     <div class="flex flex-col gap-2 px-4">
                         <span class="font-medium">Payment Details</span>

@@ -139,6 +139,7 @@ class GroupController extends Controller
             ->where('group_id', $groupId)
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
+            ->orderBy('day', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
 

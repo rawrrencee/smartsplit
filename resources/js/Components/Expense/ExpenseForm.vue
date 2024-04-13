@@ -37,7 +37,6 @@ onMounted(() => {
     if (!props.isEdit) setSelectedGroupId(getSelectedGroupIdFromSessionStorage());
     if (props.expense?.group_id) {
         setSelectedGroupId(props.expense.group_id);
-        // selectedCurrency.value = props.currencies.find((c) => c.);
         selectedCategory.value = props.expense.category;
     }
 });
@@ -273,6 +272,7 @@ const isAmountBalanced = computed(() => {
 });
 const onSaveExpenseClicked = () => {
     if (!isAmountBalanced.value) {
+        toast.error("The expense amount is zero or has not been fully distributed.");
         return;
     }
 
@@ -433,6 +433,9 @@ watch(expenseForm, () => {
                         </div>
                     </template>
                 </DatePicker>
+                <span v-if="expenseForm.errors.date" class="text-xs text-error dark:text-red-400">{{
+                    expenseForm.errors.date
+                }}</span>
             </div>
         </div>
 
@@ -446,13 +449,20 @@ watch(expenseForm, () => {
                     <ListBulletIcon class="h-6 w-6" v-if="!selectedCategory" />
                     <CategoryIcon v-else :category="selectedCategory" />
                 </button>
-                <input
-                    type="text"
-                    placeholder="Enter a description"
-                    class="input input-bordered w-full dark:border-0 dark:bg-gray-900 dark:text-gray-50"
-                    :maxlength="50"
-                    v-model="expenseForm.description"
-                />
+                <div class="flex w-full flex-col gap-1">
+                    <input
+                        type="text"
+                        placeholder="Enter a description"
+                        class="input input-bordered w-full dark:border-0 dark:bg-gray-900 dark:text-gray-50"
+                        :class="expenseForm.errors.description ? 'input-error' : ''"
+                        :maxlength="50"
+                        v-model="expenseForm.description"
+                        @change="expenseForm.clearErrors('description')"
+                    />
+                    <span v-if="expenseForm.errors.description" class="text-xs text-error dark:text-red-400">{{
+                        expenseForm.errors.description
+                    }}</span>
+                </div>
             </div>
 
             <div class="flex flex-row gap-2">

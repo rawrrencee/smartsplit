@@ -21,7 +21,6 @@ const onClick = (name) => {
             withCurrencies: getAllCurrencies().length === 0,
         });
     } else if (name === "expenses.add") {
-        console.log(getAllCurrencies().length);
         router.get(route(name), {
             withCurrencies: getAllCurrencies().length === 0,
         });
