@@ -105,11 +105,16 @@ class ExpenseController extends Controller
             return redirect()->route('404');
         }
 
+        if ($expense->is_settlement) {
+            $userOwes = $this->ExpenseDetailController->getAmountUserOwesToEachGroupMember(auth()->user()->id, $request['id']);
+        }
+
         return Inertia::render('EditExpense', [
             'expense' => $expense,
             'currencies' => filter_var($request['withCurrencies'], FILTER_VALIDATE_BOOLEAN) ? $this->HardcodedDataController->getCurrencies() : [],
             'categories' => $this->HardcodedDataController->getCategories(),
-            'groups' => $this->GroupController->getGroupsByMemberUserIdOrEmail($request->user()->id, null, GroupMemberStatusEnum::ACCEPTED, false, true)
+            'groups' => $this->GroupController->getGroupsByMemberUserIdOrEmail($request->user()->id, null, GroupMemberStatusEnum::ACCEPTED, false, true),
+            'userOwes' => $userOwes ?? [],
         ]);
     }
 

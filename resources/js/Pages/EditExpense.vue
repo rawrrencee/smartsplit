@@ -1,5 +1,6 @@
 <script setup>
 import ExpenseForm from "@/Components/Expense/ExpenseForm.vue";
+import SettleUpForm from "@/Components/Expense/SettleUpForm.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 
 const props = defineProps({
@@ -7,6 +8,7 @@ const props = defineProps({
     categories: Array,
     currencies: Array,
     auth: Object,
+    userOwes: Object,
     expense: Object,
 });
 </script>
@@ -14,5 +16,6 @@ const props = defineProps({
 <template>
     <AppLayout title="Edit Expense">
         <ExpenseForm v-if="!expense?.is_settlement" :groups :categories :currencies :auth :expense :isEdit="true" />
+        <SettleUpForm v-else :groups :categories :currencies :auth :userOwes :expense :isEdit="true" />
     </AppLayout>
 </template>

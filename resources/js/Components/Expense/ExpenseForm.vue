@@ -427,6 +427,7 @@ watch(expenseForm, () => {
                             </div>
                             <input
                                 class="input join-item input-bordered w-full py-1.5 pl-10 text-gray-600 disabled:bg-gray-300 dark:bg-gray-900 dark:text-gray-50"
+                                :class="expenseForm.errors.date ? 'input-error' : ''"
                                 :value="inputValue"
                                 v-on="inputEvents"
                             />
@@ -472,24 +473,32 @@ watch(expenseForm, () => {
                 >
                     <span>{{ selectedCurrency?.symbol ?? "$" }}</span>
                 </button>
-                <InputNumber
-                    :unstyled="true"
-                    :pt="{
-                        root: {
-                            class: ['w-full'],
-                        },
-                        input: {
+                <div class="flex w-full flex-col gap-1">
+                    <InputNumber
+                        :unstyled="true"
+                        :pt="{
                             root: {
-                                class: ['input input-bordered w-full dark:bg-gray-900'],
+                                class: ['w-full'],
                             },
-                        },
-                    }"
-                    placeholder="0.00"
-                    v-model="expenseForm.amount"
-                    inputId="minmaxfraction"
-                    :minFractionDigits="2"
-                    :maxFractionDigits="2"
-                />
+                            input: {
+                                root: {
+                                    class: [
+                                        'input input-bordered w-full dark:bg-gray-900',
+                                        expenseForm.errors.amount ? 'input-error' : '',
+                                    ],
+                                },
+                            },
+                        }"
+                        placeholder="0.00"
+                        v-model="expenseForm.amount"
+                        inputId="minmaxfraction"
+                        :minFractionDigits="2"
+                        :maxFractionDigits="2"
+                    />
+                    <span v-if="expenseForm.errors.amount" class="text-xs text-error dark:text-red-400">{{
+                        expenseForm.errors.amount
+                    }}</span>
+                </div>
             </div>
         </div>
 
