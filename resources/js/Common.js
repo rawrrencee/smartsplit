@@ -17,6 +17,7 @@ import {
     WrenchIcon,
 } from "@heroicons/vue/24/outline";
 
+export const kAllCurrenciesKey = "allCurrencies";
 export const kDefaultExpenseGroupKey = "addExpenseDefaultGroupId";
 export const kDefaultExpenseCurrencyKey = "addExpenseDefaultCurrency";
 export const kRememberRecentGroupKey = "recentGroup";
@@ -36,6 +37,18 @@ export const getRememberRecentGroup = () => {
         id: localStorage.getItem(kRememberRecentGroupKey),
         name: localStorage.getItem(kRememberRecentGroupNameKey),
     };
+};
+
+export const getAllCurrencies = () => {
+    const allCurrencies = localStorage.getItem(kAllCurrenciesKey);
+    if (allCurrencies) {
+        return JSON.parse(allCurrencies);
+    } else {
+        return [];
+    }
+};
+export const setAllCurrencies = (currencies) => {
+    localStorage.setItem(kAllCurrenciesKey, JSON.stringify(currencies));
 };
 
 export const getImgSrcFromPath = (path) => {

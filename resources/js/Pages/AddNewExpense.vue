@@ -1,7 +1,9 @@
 <script setup>
 import {
+    getAllCurrencies,
     kDefaultExpenseCurrencyKey,
     kDefaultExpenseGroupKey,
+    setAllCurrencies,
     showToastIfNeeded,
     to2DecimalPlacesIfValid,
 } from "@/Common.js";
@@ -94,7 +96,15 @@ const mapExpenseDetailToFormData = (expenseDetail) => {
         is_settlement: false,
     };
 };
-
+const currencies = computed(() => {
+    const currenciesFromStorage = getAllCurrencies();
+    if (currenciesFromStorage.length > 0) {
+        return currenciesFromStorage;
+    } else {
+        setAllCurrencies(props.currencies);
+        return props.currencies;
+    }
+});
 const updatePayerFormArray = () => {
     payerFormArray.value = currentGroup.value?.group_members?.map((m) => generateExpenseDetail(m.user)) ?? [];
     receiverFormArray.value = currentGroup.value?.group_members?.map((m) => generateExpenseDetail(m.user, true)) ?? [];
@@ -124,16 +134,17 @@ const splitEquallyString = computed(() => {
 });
 const selectedPayerForms = computed(() => payerFormArray.value.filter((f) => f.isSelected));
 const selectedReceiverForms = computed(() => receiverFormArray.value.filter((f) => f.isSelected));
-const toggleAllUsers = (formArray, allSelected) => {
-    formArray.forEach((f) => (f.amount = null));
-    if (allSelected) {
-        formArray.forEach((payer) => {
-            payer.isSelected = false;
-        });
-    } else {
-        formArray.forEach((payer) => {
-            payer.isSelected = true;
-        });
+const toggleAllUsers = (isPayer, allSelected) => {
+    (isPayer ? payerFormArray.value : receiverFormArray.value).forEach((f) => {
+        f.amount = null;
+        f.isSelected = !allSelected;
+    });
+
+    if (isPayer && shouldDistributePayersEqually.value) {
+        onDistributeExpenseToSelectedUsersEquallyClicked(payerFormArray.value);
+    }
+    if (!isPayer && shouldDistributeReceiversEqually.value) {
+        onDistributeExpenseToSelectedUsersEquallyClicked(receiverFormArray.value);
     }
 };
 
@@ -204,6 +215,7 @@ const onDistributeExpenseToSelectedUsersEquallyClicked = (forms) => {
 };
 const onSelectUser = (isPayer, form) => {
     form.isSelected = !form.isSelected;
+    form.amount = null;
     if (isPayer && shouldDistributePayersEqually.value) {
         onDistributeExpenseToSelectedUsersEquallyClicked(payerFormArray.value);
     }
@@ -211,16 +223,18 @@ const onSelectUser = (isPayer, form) => {
         onDistributeExpenseToSelectedUsersEquallyClicked(receiverFormArray.value);
     }
 };
-watch(expenseForm, () => {
-    if (shouldDistributePayersEqually.value) {
-        onDistributeExpenseToSelectedUsersEquallyClicked(payerFormArray.value);
-    }
-    if (shouldDistributeReceiversEqually.value) {
-        onDistributeExpenseToSelectedUsersEquallyClicked(receiverFormArray.value);
-    }
-});
+const isAmountBalanced = computed(() => {
+    const expenseAmount = expenseForm.amount;
+    const payerAmounts = payerFormArray.value.reduce((total, p) => total + p.amount, 0);
+    const receiverAmounts = receiverFormArray.value.reduce((total, r) => total + r.amount, 0);
 
+    return !!expenseAmount && expenseAmount === payerAmounts && expenseAmount === receiverAmounts;
+});
 const onSaveExpenseClicked = () => {
+    if (!isAmountBalanced.value) {
+        return;
+    }
+
     setIsLoading(true);
     expenseForm
         .transform((data) => ({
@@ -256,9 +270,9 @@ const setSelectedCategory = (key) => {
 
 // #region Currency
 const getSelectedCurrencyFromSessionStorage = () => {
-    return props.currencies?.find((c) => c.key === sessionStorage.getItem(kDefaultExpenseCurrencyKey));
+    return currencies.value?.find((c) => c.key === sessionStorage.getItem(kDefaultExpenseCurrencyKey));
 };
-const selectedCurrency = ref(getSelectedCurrencyFromSessionStorage() ?? props.currencies?.[0]);
+const selectedCurrency = ref(getSelectedCurrencyFromSessionStorage() ?? currencies.value?.[0]);
 const currencyQuery = ref("");
 const setSelectedCurrency = (key) => {
     sessionStorage.setItem(kDefaultExpenseCurrencyKey, key);
@@ -268,8 +282,8 @@ const setSelectedCurrency = (key) => {
 };
 const filteredCurrencies = computed(() =>
     currencyQuery.value === ""
-        ? props.currencies
-        : props.currencies.filter((c) => {
+        ? currencies.value
+        : currencies.value.filter((c) => {
               const searchQuery = currencyQuery.value.toLowerCase().replace(/\s+/g, "");
               const value = c.value.toLowerCase().replace(/\s+/g, "");
               const key = c.key.toLowerCase().replace(/\s+/g, "");
@@ -294,6 +308,17 @@ const updateExpenseConfigurationState = (buttonType) => {
 const isPaidBySelectionShown = computed(() => expenseConfigurationState.value === "paidBy");
 const isSelectSplitModeShown = computed(() => expenseConfigurationState.value === "splitMode");
 // #endregion Tabs
+
+// #region Watch
+watch(expenseForm, () => {
+    if (shouldDistributePayersEqually.value) {
+        onDistributeExpenseToSelectedUsersEquallyClicked(payerFormArray.value);
+    }
+    if (shouldDistributeReceiversEqually.value) {
+        onDistributeExpenseToSelectedUsersEquallyClicked(receiverFormArray.value);
+    }
+});
+// #endregion Watch
 </script>
 
 <template>
@@ -450,7 +475,7 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                             type="checkbox"
                                             class="checkbox checkbox-xs dark:bg-gray-600"
                                             :checked="allPayersSelected"
-                                            @change="toggleAllUsers(payerFormArray, allPayersSelected)"
+                                            @change="toggleAllUsers(true, allPayersSelected)"
                                         />
                                         <span class="label-text text-xs dark:text-gray-50">Select All</span>
                                     </label>
@@ -558,7 +583,7 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                             type="checkbox"
                                             class="checkbox checkbox-xs dark:bg-gray-600"
                                             :checked="allReceiversSelected"
-                                            @change="toggleAllUsers(receiverFormArray, allReceiversSelected)"
+                                            @change="toggleAllUsers(false, allReceiversSelected)"
                                         />
                                         <span class="label-text text-xs dark:text-gray-50">Select All</span>
                                     </label>

@@ -27,7 +27,7 @@ class ExpenseController extends Controller
     public function addExpensePage(Request $request)
     {
         return Inertia::render('AddNewExpense', [
-            'currencies' => $this->HardcodedDataController->getCurrencies(),
+            'currencies' => intval($request['withCurrencies']) ? $this->HardcodedDataController->getCurrencies() : [],
             'categories' => $this->HardcodedDataController->getCategories(),
             'groups' => $this->GroupController->getGroupsByMemberUserIdOrEmail($request->user()->id, null, GroupMemberStatusEnum::ACCEPTED, false, true)
         ]);
@@ -39,7 +39,7 @@ class ExpenseController extends Controller
             $userOwes = $this->ExpenseDetailController->getAmountUserOwesToEachGroupMember(auth()->user()->id, $request['id']);
         }
         return Inertia::render('SettleUp', [
-            'currencies' => $this->HardcodedDataController->getCurrencies(),
+            'currencies' => intval($request['withCurrencies']) ? $this->HardcodedDataController->getCurrencies() : [],
             'categories' => $this->HardcodedDataController->getCategories(),
             'groups' => $this->GroupController->getGroupsByMemberUserIdOrEmail($request->user()->id, null, GroupMemberStatusEnum::ACCEPTED, false, true),
             'userOwes' => $userOwes ?? [],

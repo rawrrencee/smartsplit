@@ -1,5 +1,5 @@
 <script setup>
-import { kDefaultExpenseCurrencyKey, kDefaultExpenseGroupKey, showToastIfNeeded } from "@/Common.js";
+import { getAllCurrencies, kDefaultExpenseCurrencyKey, kDefaultExpenseGroupKey, showToastIfNeeded } from "@/Common.js";
 import YouOweLabel from "@/Components/Expense/YouOweLabel.vue";
 import GroupList from "@/Components/GroupList.vue";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
@@ -84,6 +84,14 @@ const mapExpenseDetailToFormData = (amount, expenseDetail) => {
         amount,
     };
 };
+const currencies = computed(() => {
+    const currenciesFromStorage = getAllCurrencies();
+    if (currenciesFromStorage.length > 0) {
+        return currenciesFromStorage;
+    } else {
+        return props.currencies;
+    }
+});
 const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(kDefaultExpenseGroupKey);
 const selectedGroupId = ref(getSelectedGroupIdFromSessionStorage());
 const setSelectedGroupId = (groupId) => {
@@ -153,9 +161,9 @@ const onSaveExpenseClicked = () => {
 
 // #region Currency
 const getSelectedCurrencyFromSessionStorage = () => {
-    return props.currencies?.find((c) => c.key === sessionStorage.getItem(kDefaultExpenseCurrencyKey));
+    return currencies.value?.find((c) => c.key === sessionStorage.getItem(kDefaultExpenseCurrencyKey));
 };
-const selectedCurrency = ref(getSelectedCurrencyFromSessionStorage() ?? props.currencies?.[0]);
+const selectedCurrency = ref(getSelectedCurrencyFromSessionStorage() ?? currencies.value?.[0]);
 const currencyQuery = ref("");
 const setSelectedCurrency = (key) => {
     sessionStorage.setItem(kDefaultExpenseCurrencyKey, key);
@@ -165,8 +173,8 @@ const setSelectedCurrency = (key) => {
 };
 const filteredCurrencies = computed(() =>
     currencyQuery.value === ""
-        ? props.currencies
-        : props.currencies.filter((c) => {
+        ? currencies.value
+        : currencies.value.filter((c) => {
               const searchQuery = currencyQuery.value.toLowerCase().replace(/\s+/g, "");
               const value = c.value.toLowerCase().replace(/\s+/g, "");
               const key = c.key.toLowerCase().replace(/\s+/g, "");
