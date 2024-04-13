@@ -11,8 +11,6 @@ const back = () => {
 const props = defineProps({
     expense: Object,
 });
-
-console.log(props.expense);
 </script>
 
 <template>

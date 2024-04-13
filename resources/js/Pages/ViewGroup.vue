@@ -233,19 +233,19 @@ const expenseDetails = computed(() => {
                     ><span>{{ c.symbol }}{{ to2DecimalPlacesIfValid(Math.abs(c.amount)) }}</span>
                 </template>
             </div>
-            <div class="flex flex-col gap-1 pl-4 text-xs" v-if="Object.keys(userOwes).length">
+            <ul class="list-none pl-4 text-xs" v-if="Object.keys(userOwes).length">
                 <template v-for="userId in Object.keys(userOwes)">
                     <template v-for="currency in userOwes[userId]">
-                        <span
-                            >You owe&nbsp;<span
+                        <li>
+                            <span class="font-medium"
                                 >{{ groupMembers?.find((m) => `${m.user_id}` === userId)?.user?.name }}&nbsp;</span
                             ><span class="font-semibold text-error"
                                 >{{ currency.symbol }}{{ to2DecimalPlacesIfValid(currency.amount) }}</span
-                            ></span
-                        >
+                            >
+                        </li>
                     </template>
                 </template>
-            </div>
+            </ul>
         </div>
         <div class="mx-auto flex flex-col gap-4 pt-6">
             <div v-for="d in expenseDetails" class="flex flex-col gap-2">

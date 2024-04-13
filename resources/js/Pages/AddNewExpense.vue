@@ -18,7 +18,7 @@ import { router, useForm } from "@inertiajs/vue3";
 import InputNumber from "primevue/inputnumber";
 import { DatePicker } from "v-calendar";
 import "v-calendar/style.css";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { toast } from "vue-sonner";
 
 // #region Configs
@@ -168,24 +168,57 @@ const setPayerAsSelfAndDistributeExpense = () => {
     payerFormArray.value.forEach((f) => {
         f.isSelected = f.user_id === props.auth.user.id;
     });
-    onDistributeExpenseToSelectedUsersEquallyClicked(selectedPayerForms.value);
+    onDistributeExpenseToSelectedUsersEquallyClicked(payerFormArray.value);
 };
-const onDistributeExpenseToSelectedUsersEquallyClicked = (selectedForms) => {
-    const payerCount = selectedForms.length;
-    if (payerCount === 0) {
+const shouldDistributePayersEqually = ref(true);
+const setShouldDistributePayersEqually = (value) => {
+    shouldDistributePayersEqually.value = value;
+    if (value) {
+        onDistributeExpenseToSelectedUsersEquallyClicked(payerFormArray.value);
+    }
+};
+const shouldDistributeReceiversEqually = ref(true);
+const setShouldDistributeReceiversEqually = (value) => {
+    shouldDistributeReceiversEqually.value = value;
+    if (value) {
+        onDistributeExpenseToSelectedUsersEquallyClicked(receiverFormArray.value);
+    }
+};
+const onDistributeExpenseToSelectedUsersEquallyClicked = (forms) => {
+    forms.forEach((f) => (f.amount = 0));
+    const selectedForms = forms.filter((f) => f.isSelected);
+
+    if (selectedForms.length === 0) {
         return;
     }
     let remainder = expenseForm.amount;
-    const amountPerPayer = Number.parseFloat(to2DecimalPlacesIfValid(expenseForm.amount / payerCount));
+    const amountPerUser = Number.parseFloat(to2DecimalPlacesIfValid(expenseForm.amount / selectedForms.length, false));
     selectedForms.forEach((p, i) => {
-        if (i !== payerCount - 1) {
-            p.amount = amountPerPayer;
-            remainder -= amountPerPayer;
+        if (i !== selectedForms.length - 1) {
+            p.amount = amountPerUser;
+            remainder -= amountPerUser;
         } else {
             p.amount = remainder;
         }
     });
 };
+const onSelectUser = (isPayer, form) => {
+    form.isSelected = !form.isSelected;
+    if (isPayer && shouldDistributePayersEqually.value) {
+        onDistributeExpenseToSelectedUsersEquallyClicked(payerFormArray.value);
+    }
+    if (!isPayer && shouldDistributeReceiversEqually.value) {
+        onDistributeExpenseToSelectedUsersEquallyClicked(receiverFormArray.value);
+    }
+};
+watch(expenseForm, () => {
+    if (shouldDistributePayersEqually.value) {
+        onDistributeExpenseToSelectedUsersEquallyClicked(payerFormArray.value);
+    }
+    if (shouldDistributeReceiversEqually.value) {
+        onDistributeExpenseToSelectedUsersEquallyClicked(receiverFormArray.value);
+    }
+});
 
 const onSaveExpenseClicked = () => {
     setIsLoading(true);
@@ -351,7 +384,7 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                             },
                             input: {
                                 root: {
-                                    class: ['input input-bordered w-full'],
+                                    class: ['input input-bordered w-full dark:bg-gray-900'],
                                 },
                             },
                         }"
@@ -365,27 +398,35 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
             </div>
 
             <div class="flex flex-col gap-5" v-if="currentGroup">
-                <div class="flex flex-row flex-wrap justify-center gap-2 px-2">
-                    <div class="flex flex-row items-center justify-center gap-2">
-                        <span>Paid by</span>
+                <div class="flex min-w-0 flex-row flex-wrap justify-center gap-2 px-2">
+                    <div class="flex min-w-0 flex-row items-center justify-center gap-2">
+                        <span class="flex-shrink-0">Paid by</span>
                         <button
                             type="button"
-                            class="btn btn-sm dark:text-gray-200 dark:hover:border-gray-50"
-                            :class="[isPaidBySelectionShown ? 'btn-neutral' : 'btn-outline']"
+                            class="btn btn-sm min-w-0 flex-shrink"
+                            :class="[
+                                isPaidBySelectionShown
+                                    ? 'btn-neutral dark:bg-gray-200 dark:text-gray-900'
+                                    : 'btn-outline text-gray-900 dark:text-gray-200',
+                            ]"
                             @click="updateExpenseConfigurationState('paidBy')"
                         >
-                            <span>{{ paidByString }}</span>
+                            <div class="truncate py-1">{{ paidByString }}</div>
                         </button>
                     </div>
                     <div class="flex flex-row items-center justify-center gap-2">
-                        <span>and split</span>
+                        <span class="flex-shrink-0">and split</span>
                         <button
                             type="button"
-                            class="btn btn-sm dark:text-gray-200 dark:hover:border-gray-50"
-                            :class="[isSelectSplitModeShown ? 'btn-neutral' : 'btn-outline']"
+                            class="btn btn-sm min-w-0 flex-shrink"
+                            :class="[
+                                isSelectSplitModeShown
+                                    ? 'btn-neutral dark:bg-gray-200 dark:text-gray-900'
+                                    : 'btn-outline text-gray-900 dark:text-gray-200',
+                            ]"
                             @click="updateExpenseConfigurationState('splitMode')"
                         >
-                            <span>{{ splitEquallyString }}</span>
+                            <div class="truncate py-1">{{ splitEquallyString }}</div>
                         </button>
                     </div>
                 </div>
@@ -413,7 +454,7 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                         />
                                         <span class="label-text text-xs dark:text-gray-50">Select All</span>
                                     </label>
-                                    <span class="text-xs"
+                                    <span class="text-right text-xs"
                                         >Total paid: {{ selectedCurrency.symbol ?? "$"
                                         }}{{ to2DecimalPlacesIfValid(expenseForm.amount) ?? "0.00" }}</span
                                     >
@@ -427,9 +468,15 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                 <button
                                     type="button"
                                     class="btn btn-xs"
-                                    @click="onDistributeExpenseToSelectedUsersEquallyClicked(selectedPayerForms)"
+                                    @click="setShouldDistributePayersEqually(!shouldDistributePayersEqually)"
                                 >
-                                    Divide equally between selected
+                                    <div class="flex flex-row items-center justify-between gap-1">
+                                        <CheckCircleIcon
+                                            v-if="shouldDistributePayersEqually"
+                                            class="h-4 w-4 text-success"
+                                        />
+                                        <span>Divide equally</span>
+                                    </div>
                                 </button>
                             </div>
                             <template v-for="form in payerFormArray" :key="form.user_id">
@@ -442,13 +489,16 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                                 type="checkbox"
                                                 :checked="form.isSelected"
                                                 class="checkbox checkbox-xs dark:bg-gray-600"
-                                                @change="() => (form.isSelected = !form.isSelected)"
+                                                @change="onSelectUser(true, form)"
                                             />
                                             <ProfilePhotoImage :image-url="form.user.profile_photo_url" />
                                             <span class="break-all text-sm">{{ form.user.name }}</span>
                                         </label>
                                     </div>
-                                    <div class="w-24 flex-shrink" v-if="form.isSelected">
+                                    <div
+                                        class="w-24 flex-shrink-0"
+                                        v-if="form.isSelected && !shouldDistributePayersEqually"
+                                    >
                                         <InputNumber
                                             :unstyled="true"
                                             :pt="{
@@ -457,7 +507,9 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                                 },
                                                 input: {
                                                     root: {
-                                                        class: ['input input-bordered input-sm w-full'],
+                                                        class: [
+                                                            'input input-bordered input-sm w-full dark:bg-gray-700',
+                                                        ],
                                                     },
                                                 },
                                             }"
@@ -468,6 +520,10 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                             :maxFractionDigits="2"
                                         />
                                     </div>
+                                    <span v-else class="text-xs font-bold"
+                                        >{{ selectedCurrency.symbol ?? "$"
+                                        }}{{ to2DecimalPlacesIfValid(form.amount) }}</span
+                                    >
                                 </div>
                             </template>
 
@@ -506,7 +562,7 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                         />
                                         <span class="label-text text-xs dark:text-gray-50">Select All</span>
                                     </label>
-                                    <span class="text-xs"
+                                    <span class="text-right text-xs"
                                         >Total paid: {{ selectedCurrency.symbol ?? "$"
                                         }}{{ to2DecimalPlacesIfValid(expenseForm.amount) ?? "0.00" }}</span
                                     >
@@ -517,9 +573,15 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                 <button
                                     type="button"
                                     class="btn btn-xs"
-                                    @click="onDistributeExpenseToSelectedUsersEquallyClicked(selectedReceiverForms)"
+                                    @click="setShouldDistributeReceiversEqually(!shouldDistributeReceiversEqually)"
                                 >
-                                    Divide equally between selected
+                                    <div class="flex flex-row items-center justify-between gap-1">
+                                        <CheckCircleIcon
+                                            v-if="shouldDistributeReceiversEqually"
+                                            class="h-4 w-4 text-success"
+                                        />
+                                        <span>Divide equally</span>
+                                    </div>
                                 </button>
                             </div>
                             <template v-for="form in receiverFormArray" :key="form.user_id">
@@ -532,13 +594,16 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                                 type="checkbox"
                                                 :checked="form.isSelected"
                                                 class="checkbox checkbox-xs dark:bg-gray-600"
-                                                @change="() => (form.isSelected = !form.isSelected)"
+                                                @change="onSelectUser(false, form)"
                                             />
                                             <ProfilePhotoImage :image-url="form.user.profile_photo_url" />
                                             <span class="break-all text-sm">{{ form.user.name }}</span>
                                         </label>
                                     </div>
-                                    <div class="w-24 flex-shrink-0" v-if="form.isSelected">
+                                    <div
+                                        class="w-24 flex-shrink-0"
+                                        v-if="form.isSelected && !shouldDistributeReceiversEqually"
+                                    >
                                         <InputNumber
                                             :unstyled="true"
                                             :pt="{
@@ -547,7 +612,9 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                                 },
                                                 input: {
                                                     root: {
-                                                        class: ['input input-bordered input-sm w-full'],
+                                                        class: [
+                                                            'input input-bordered input-sm w-full dark:bg-gray-700',
+                                                        ],
                                                     },
                                                 },
                                             }"
@@ -558,6 +625,10 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                                             :maxFractionDigits="2"
                                         />
                                     </div>
+                                    <span v-else class="text-xs font-bold"
+                                        >{{ selectedCurrency.symbol ?? "$"
+                                        }}{{ to2DecimalPlacesIfValid(form.amount) }}</span
+                                    >
                                 </div>
                             </template>
 

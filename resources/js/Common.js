@@ -49,10 +49,10 @@ export const showToastIfNeeded = (toast, flash) => {
     }
 };
 
-export const to2DecimalPlacesIfValid = (value) => {
+export const to2DecimalPlacesIfValid = (value, withSeparator = true) => {
     const floatVal = Number.parseFloat(value);
     if (typeof floatVal === "number" && !isNaN(floatVal)) {
-        return floatVal.toFixed(2);
+        return withSeparator ? floatVal.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,") : floatVal.toFixed(2);
     }
     return value ?? (0.0).toFixed(2);
 };
