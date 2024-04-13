@@ -195,12 +195,12 @@ const filteredCurrencies = computed(() =>
             </button>
         </div>
         <div class="flex flex-row justify-center">
-            <div class="flex min-w-0 max-w-xs flex-grow flex-col justify-center gap-12 px-4 dark:text-gray-200">
-                <div class="flex max-w-xs flex-col gap-2">
-                    <div class="flex flex-col gap-1">
+            <div class="flex min-w-0 max-w-xl flex-grow flex-col justify-center gap-12 px-4 dark:text-gray-200">
+                <div class="flex w-full flex-col gap-2">
+                    <div class="flex w-full flex-col gap-1">
                         <span>Settle up in selected group</span>
                         <button
-                            class="btn btn-outline max-w-80 dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                            class="btn btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
                             @click="setDialogMode('selectGroup')"
                         >
                             <div class="flex w-full flex-row items-center gap-2">
@@ -226,7 +226,8 @@ const filteredCurrencies = computed(() =>
                                         <CalendarIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
                                     </div>
                                     <input
-                                        class="input join-item input-bordered input-error w-full py-1.5 pl-10 text-gray-600 disabled:bg-gray-300 dark:bg-gray-900 dark:text-gray-50"
+                                        class="input join-item input-bordered w-full py-1.5 pl-10 text-gray-600 disabled:bg-gray-300 dark:bg-gray-900 dark:text-gray-50"
+                                        :class="expenseForm.errors?.date ? 'input-error' : ''"
                                         :value="inputValue"
                                         v-on="inputEvents"
                                     />
@@ -239,11 +240,11 @@ const filteredCurrencies = computed(() =>
                     </div>
                 </div>
 
-                <div class="flex max-w-xs flex-col gap-2">
+                <div class="flex w-full flex-col gap-2">
                     <div class="flex flex-col gap-1">
                         <span>Who is settling up?</span>
                         <button
-                            class="btn btn-outline max-w-80 dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                            class="btn btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
                             @click="setDialogMode('selectPayer')"
                         >
                             <div class="flex w-full flex-row items-center gap-2">
@@ -264,7 +265,7 @@ const filteredCurrencies = computed(() =>
                     <div class="group flex flex-col gap-1">
                         <span>Settle up with</span>
                         <button
-                            class="btn btn-outline max-w-80 dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:group-hover:bg-gray-700"
+                            class="btn btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:group-hover:bg-gray-700"
                             :class="expenseForm.errors?.['payer_details.0.receiver_id'] ? 'btn-error' : ''"
                             @click="setDialogMode('selectReceiver')"
                         >

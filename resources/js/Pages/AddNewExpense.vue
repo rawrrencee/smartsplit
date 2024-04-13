@@ -313,12 +313,12 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                 <span>Save</span>
             </button>
         </div>
-        <div class="mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:px-8 dark:text-gray-200">
+        <div class="mx-auto flex max-w-xl flex-col gap-6 px-4 sm:px-6 lg:px-8 dark:text-gray-200">
             <div class="flex flex-col gap-2">
                 <div class="flex flex-col gap-1">
                     <span>Expense to selected group</span>
                     <button
-                        class="btn btn-outline max-w-80 dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                        class="btn btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
                         @click="setDialogMode('selectGroup')"
                     >
                         <div class="flex w-full flex-row items-center gap-2">
@@ -335,7 +335,7 @@ const isSelectSplitModeShown = computed(() => expenseConfigurationState.value ==
                     <span>Date of expense</span>
                     <DatePicker v-model="expenseForm.date" :input-debounce="500" :popover="popover">
                         <template #default="{ inputValue, inputEvents }">
-                            <div class="relative">
+                            <div class="relative w-full">
                                 <div class="absolute inset-y-0 left-0 z-10 flex items-center pl-3">
                                     <CalendarIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
                                 </div>
