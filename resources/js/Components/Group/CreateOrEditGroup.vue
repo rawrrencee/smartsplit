@@ -59,7 +59,7 @@ const onRemovePhotoClicked = () => {
                             :maxlength="25"
                             v-model="form.group_title"
                         />
-                        <span v-if="form.errors['group_title']" class="text-error">
+                        <span v-if="form.errors['group_title']" class="text-error dark:text-red-400">
                             {{ form.errors["group_title"] }}
                         </span>
                     </div>
@@ -74,7 +74,7 @@ const onRemovePhotoClicked = () => {
                             class="relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-md p-2 text-gray-400 dark:text-gray-50"
                             :class="
                                 !photoFile
-                                    ? 'border-2 border-dashed hover:border-gray-800 hover:bg-gray-700 hover:text-gray-50 dark:hover:border-gray-600 dark:hover:bg-gray-900'
+                                    ? 'border-2 border-dashed hover:border-gray-800 hover:bg-gray-700 hover:text-gray-50 dark:hover:border-gray-600 dark:hover:bg-gray-900/40'
                                     : 'border-0 border-none hover:border-none'
                             "
                         >

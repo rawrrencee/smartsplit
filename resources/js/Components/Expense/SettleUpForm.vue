@@ -179,6 +179,10 @@ const onSaveExpenseClicked = () => {
         toast.error("Payer and receiver cannot be the same person.");
         return;
     }
+    if (!currentGroup.value) {
+        toast.error("No group selected. Please select a group first.");
+        return;
+    }
 
     setIsLoading(true);
     expenseForm
@@ -307,7 +311,7 @@ const filteredCurrencies = computed(() =>
                             </div>
                         </template>
                     </DatePicker>
-                    <span v-if="expenseForm.errors?.date" class="text-xs text-error">{{
+                    <span v-if="expenseForm.errors?.date" class="text-xs text-error dark:text-red-400">{{
                         expenseForm.errors.date
                     }}</span>
                 </div>
@@ -339,7 +343,7 @@ const filteredCurrencies = computed(() =>
                     <span>Settle up with</span>
                     <button
                         class="group btn btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:group-hover:bg-gray-700"
-                        :class="expenseForm.errors?.['payer_details.0.receiver_id'] ? 'btn-error' : ''"
+                        :class="expenseForm.errors?.['payer_details.0.receiver_id'] ? 'btn-error dark:border' : ''"
                         @click="setDialogMode('selectReceiver')"
                     >
                         <div class="flex w-full flex-row items-center gap-2">
@@ -349,7 +353,12 @@ const filteredCurrencies = computed(() =>
                                 :image-url="selectedReceiver.user.profile_photo_url"
                             />
                             <PlaceholderImage v-else :size="6" />
-                            <div class="flex min-w-0 flex-col text-start text-xs">
+                            <div
+                                class="flex min-w-0 flex-col text-start text-xs"
+                                :class="
+                                    expenseForm.errors?.['payer_details.0.receiver_id'] ? ' dark:text-red-400/70' : ''
+                                "
+                            >
                                 <span class="truncate">
                                     {{ selectedReceiver?.user?.name ?? "Select a group member" }}
                                 </span>
@@ -364,7 +373,9 @@ const filteredCurrencies = computed(() =>
                             </div>
                         </div>
                     </button>
-                    <span v-if="expenseForm.errors?.['payer_details.0.receiver_id']" class="text-xs text-error"
+                    <span
+                        v-if="expenseForm.errors?.['payer_details.0.receiver_id']"
+                        class="text-xs text-error dark:text-red-400"
                         >Select a person to settle up with.</span
                     >
                 </div>

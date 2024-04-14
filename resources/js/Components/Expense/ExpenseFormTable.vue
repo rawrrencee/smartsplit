@@ -113,7 +113,7 @@ const onSelectUser = (form) => {
 
         <div class="flex flex-row justify-end border-t-[1px] p-4 text-xs dark:border-gray-700">
             <span>Remaining:&nbsp;</span
-            ><span :class="remainingAmount !== 0 && 'text-error'"
+            ><span :class="remainingAmount !== 0 && 'text-error dark:text-red-400'"
                 >{{ remainingAmount < 0 ? "-" : "" }}{{ selectedCurrency?.symbol ?? "$"
                 }}{{ to2DecimalPlacesIfValid(Math.abs(remainingAmount)) ?? "0.00" }}</span
             >

@@ -210,7 +210,7 @@ const expenseDetails = computed(() => {
                     </div>
                 </div>
                 <div
-                    class="rounded-md p-2 text-xs text-gray-500 hover:bg-gray-300 dark:text-gray-400 dark:hover:bg-gray-900"
+                    class="rounded-md p-2 text-xs text-gray-500 hover:bg-gray-300 dark:text-gray-400 dark:hover:bg-gray-900/40"
                 >
                     <span
                         >{{ activeGroupMembers.length > 0 ? activeGroupMembers.length : "" }} member{{
@@ -352,7 +352,7 @@ const expenseDetails = computed(() => {
                                     <XMarkIcon class="h-4 w-4" />
                                 </button>
                             </div>
-                            <span class="text-xs text-error" v-if="addMemberForm.errors['email']">{{
+                            <span class="text-xs text-error dark:text-red-400" v-if="addMemberForm.errors['email']">{{
                                 addMemberForm.errors["email"]
                             }}</span>
                             <div class="flex flex-grow flex-row justify-between gap-1">

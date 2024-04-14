@@ -13,7 +13,7 @@ defineProps({
 <template>
     <button
         type="button"
-        class="flex flex-row items-center gap-2 py-1 text-left hover:rounded-xl hover:bg-gray-200 dark:hover:bg-gray-900"
+        class="flex flex-row items-center gap-2 py-1 text-left hover:bg-gray-200 dark:hover:bg-gray-900/40"
         @click="
             router.visit(
                 route('expenses.view', {

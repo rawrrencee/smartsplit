@@ -35,7 +35,7 @@ const groupsWithDeltas = computed(() => {
         <li
             v-for="group in groupsWithDeltas"
             :key="group.id"
-            class="flex flex-row items-center justify-between gap-4 bg-gray-50 px-6 py-5 hover:cursor-pointer hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-700"
+            class="flex flex-row items-center justify-between gap-4 bg-gray-50 px-6 py-5 hover:cursor-pointer hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-700/40"
             @click="$emit('groupClicked', group.id)"
         >
             <div class="flex min-w-0 flex-row items-center gap-4">
@@ -57,7 +57,7 @@ const groupsWithDeltas = computed(() => {
                                         v-if="group?.deltas?.length > 0"
                                         class="text-xs text-gray-500 dark:text-gray-400"
                                     >
-                                        {{ group?.deltas?.length }} balances
+                                        {{ group?.deltas?.length }} balance{{ group?.deltas?.length === 1 ? "" : "s" }}
                                     </div>
                                 </template>
                             </div>
@@ -83,7 +83,7 @@ const groupsWithDeltas = computed(() => {
                         >
                     </div>
                 </div>
-                <div class="flex flex-col text-error" v-else>
+                <div class="flex flex-col text-error dark:text-red-400" v-else>
                     <span>you owe{{ group?.deltas?.length > 1 ? "*" : "" }}</span>
                     <div>
                         <span v-html="group?.deltas?.[0]?.symbol"></span>
