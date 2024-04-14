@@ -90,6 +90,7 @@ const handlePendingRequestStatusChange = (groupId, status) => {
         <div
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 backdrop-blur sm:px-6 lg:px-8"
         >
+            <div class="text-lg font-bold text-gray-700 dark:text-gray-200">Groups</div>
             <div class="flex w-full flex-row items-center justify-end py-2">
                 <button type="button" class="btn btn-link px-0 text-gray-600 dark:text-gray-200" v-if="false">
                     <MagnifyingGlassIcon class="h-5 w-5" />
@@ -132,7 +133,6 @@ const handlePendingRequestStatusChange = (groupId, status) => {
                 </div>
             </div>
             <div class="flex flex-col gap-2">
-                <span class="font-semibold">Groups</span>
                 <div class="overflow-x-hidden rounded-xl shadow-md">
                     <GroupList :groups="groups" @group-clicked="viewGroup" />
                 </div>

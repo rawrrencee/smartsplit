@@ -45,7 +45,7 @@ class Expense extends Model
 
     public function group()
     {
-        return $this->belongsTo(Group::class, 'id', 'group_id');
+        return $this->hasOne(Group::class, 'id', 'group_id');
     }
 
     public function createdBy()

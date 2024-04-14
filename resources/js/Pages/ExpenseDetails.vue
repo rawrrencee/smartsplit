@@ -10,15 +10,22 @@ import { router } from "@inertiajs/vue3";
 import { computed, ref } from "vue";
 import { toast } from "vue-sonner";
 
-const navigateToRoute = (route, data) => {
-    router.visit(route, data);
-};
 const props = defineProps({
     expense: Object,
 });
 const isLoading = ref(false);
 const setIsLoading = (value) => {
     isLoading.value = value;
+};
+const navigateToRoute = (route, data) => {
+    router.visit(route, data);
+};
+const onBackButtonClicked = () => {
+    if (route().params.returnTo === "home") {
+        navigateToRoute(route("home"));
+    } else {
+        navigateToRoute(route("groups.view", { id: props.expense.group_id }));
+    }
 };
 
 // #region Computed properties
@@ -85,10 +92,7 @@ const onDeleteClicked = () => {
         <div
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
         >
-            <NavigationBarButton
-                :icon="ArrowLeftIcon"
-                @on-click="navigateToRoute(route('groups.view', { id: expense.group_id }))"
-            />
+            <NavigationBarButton :icon="ArrowLeftIcon" @on-click="onBackButtonClicked" />
             <div class="flex flex-row gap-4">
                 <NavigationBarButton :icon="TrashIcon" @on-click="onDeleteClicked" />
                 <NavigationBarButton
@@ -103,7 +107,9 @@ const onDeleteClicked = () => {
         </div>
         <div class="mx-auto flex max-w-xl flex-col gap-4 dark:text-gray-200">
             <div class="flex w-full flex-row px-4" :class="expense.is_settlement ? 'justify-center' : ''">
-                <div class="badge badge-neutral badge-lg flex flex-row items-center gap-2">
+                <div
+                    class="badge badge-neutral badge-lg flex flex-row items-center gap-2 dark:badge-secondary dark:font-bold dark:text-gray-700"
+                >
                     <CalendarIcon class="h-4 w-4" />
                     <span class="text-sm">{{
                         new Date(expense.date).toLocaleString("en-SG", {

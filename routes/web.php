@@ -3,6 +3,7 @@
 use App\Http\Controllers\CommonController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -38,10 +39,9 @@ Route::middleware([
 ])->group(function () {
     Route::get('/photo', [CommonController::class, 'showPhoto'])->name('photo');
     Route::get('/currencies', [CommonController::class, 'getCurrencies'])->name('currencies');
+    Route::get('/photo', [CommonController::class, 'showPhoto'])->name('photo');
 
-    Route::get('/home', function () {
-        return Inertia::render('Home');
-    })->name('home');
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
 
     Route::prefix('groups')->group(function () {
         Route::get('/', [GroupController::class, 'index'])->name('groups');

@@ -91,11 +91,13 @@ class GroupController extends Controller
             return GroupMember::withTrashed()
                 ->where('group_id', $groupId)
                 ->where('user_id', $userId)
+                ->where('status', GroupMemberStatusEnum::ACCEPTED->value)
                 ->exists();
         } else {
             return GroupMember::withoutTrashed()
                 ->where('group_id', $groupId)
                 ->where('user_id', $userId)
+                ->where('status', GroupMemberStatusEnum::ACCEPTED->value)
                 ->exists();
         }
 
@@ -119,7 +121,7 @@ class GroupController extends Controller
         return false;
     }
 
-    public function getExpenseDetailsByGroupForUserId($groupId, $userId)
+    public function getExpenseDetailsByGroupForUserId($groupId, $userId, $limit = null)
     {
         $expensesByMonth = Expense::select(
             DB::raw('YEAR(date) as year'),
@@ -140,8 +142,13 @@ class GroupController extends Controller
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
             ->orderBy('day', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->orderBy('created_at', 'desc');
+
+        if (isset($limit)) {
+            $expensesByMonth = $expensesByMonth->take($limit);
+        }
+
+        $expensesByMonth = $expensesByMonth->get();
 
         $expenseIds = $expensesByMonth->pluck('id')->toArray();
         $expenseDetails = ExpenseDetail::whereIn('expense_id', $expenseIds)->get();
@@ -185,7 +192,7 @@ class GroupController extends Controller
 
     public function index(Request $request)
     {
-        $groups = $this->getGroupsByMemberUserIdOrEmail($request->user()->id, $request->user()->email);
+        $groups = $this->getGroupsByMemberUserIdOrEmail($request->user()->id, $request->user()->email, GroupMemberStatusEnum::ACCEPTED);
 
         foreach ($groups as $group) {
             $overallDeltaForGroupMember = $this->ExpenseDetailController->getOverallExpenseDeltaForUserInGroup($request->user()->id, $group->id);

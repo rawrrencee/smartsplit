@@ -68,10 +68,13 @@ const dialogTitle = computed(() => {
 // #region Expense Form
 const getSelectedGroupId = () => {
     if (!props.isEdit) {
-        return sessionStorage.getItem(kDefaultExpenseGroupKey);
+        return getSelectedGroupIdFromSessionStorage();
     } else {
         return `${props.expense?.group_id}`;
     }
+};
+const getSelectedGroupIdFromSessionStorage = () => {
+    return sessionStorage.getItem(kDefaultExpenseGroupKey);
 };
 const selectedGroupId = ref(getSelectedGroupId());
 const currentGroup = computed(() => {
@@ -159,12 +162,16 @@ const setSelectedGroupMember = (groupMember) => {
     } else {
         selectedReceiver.value = groupMember;
         payerFormArray.value[0].receiver_id = groupMember.user_id;
+        if (
+            props.userOwes?.[groupMember.user_id]?.[0]?.key &&
+            confirm("Would you like to prefill the amount you owe?")
+        ) {
+            setSelectedCurrency(props.userOwes?.[groupMember.user_id][0].key);
+            expenseForm.amount = props.userOwes?.[groupMember.user_id][0].amount;
+        }
     }
     setIsDialogOpen(false);
     expenseForm.clearErrors("payer_details.0.receiver_id");
-};
-const setSelectedPayerToCurrentUser = () => {
-    selectedPayer.value = currentGroup?.value?.group_members?.find((m) => m.user_id === props.auth.user.id);
 };
 
 const onSaveExpenseClicked = () => {
@@ -186,8 +193,6 @@ const onSaveExpenseClicked = () => {
             onSuccess: (s) => {
                 expenseForm.reset();
                 payerFormArray.value.forEach((f) => f.reset());
-                setSelectedPayerToCurrentUser();
-                selectedReceiver.value = null;
                 router.reload();
                 showToastIfNeeded(toast, s.props.flash);
             },

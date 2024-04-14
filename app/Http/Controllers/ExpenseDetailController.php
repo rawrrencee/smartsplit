@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\ExpenseDetail;
+use App\Models\Group;
 use App\Models\GroupMember;
 
 class ExpenseDetailController extends Controller
@@ -56,18 +57,24 @@ class ExpenseDetailController extends Controller
         return $membersOwedAmounts;
     }
 
-    public function getOverallExpenseDeltaForUserInGroup($userId, $groupId)
+    public function getOverallExpenseDeltaForUserInGroup($userId, $groupId = null)
     {
-        $positiveAmounts = ExpenseDetail::where('payer_id', $userId)
-            ->where('group_id', $groupId)
+        $positiveQuery = ExpenseDetail::where('payer_id', $userId);
+        if (isset($groupId)) {
+            $positiveQuery = $positiveQuery->where('group_id', $groupId);
+        }
+        $positiveAmounts = $positiveQuery
             ->groupBy('currency_key')
             ->orderBy('currency_key')
             ->selectRaw('currency_key, SUM(amount) as total_amount')
             ->pluck('total_amount', 'currency_key')
             ->toArray();
 
-        $negativeAmounts = ExpenseDetail::where('receiver_id', $userId)
-            ->where('group_id', $groupId)
+        $negativeQuery = ExpenseDetail::where('receiver_id', $userId);
+        if (isset($groupId)) {
+            $negativeQuery = $negativeQuery->where('group_id', $groupId);
+        }
+        $negativeAmounts = $negativeQuery
             ->groupBy('currency_key')
             ->orderBy('currency_key')
             ->selectRaw('currency_key, SUM(CASE WHEN is_settlement = 1 THEN -amount ELSE amount END) as total_amount')
