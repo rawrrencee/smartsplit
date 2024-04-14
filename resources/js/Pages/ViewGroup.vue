@@ -350,11 +350,16 @@ const expenseDetails = computed(() => {
                     leave-from="opacity-100"
                     leave-to="opacity-0"
                 >
-                    <div class="flex flex-col px-6 pb-4">
-                        <span class="text-xs text-gray-400">
-                            Some new members have yet to accept the invitation to this group. You can still include them
-                            in the expenses, but someone else will need to settle up on their behalf.
-                        </span>
+                    <div class="flex flex-col gap-1 px-6 pb-4 text-xs text-gray-500 dark:text-gray-400">
+                        <span> Some new members have yet to accept the invitation to this group. </span>
+                        <span
+                            >You can include <span class="font-semibold">PENDING</span> users in the expenses, but
+                            someone else will need to settle up on their behalf.</span
+                        >
+                        <span
+                            ><span class="font-semibold">UNAVAILABLE</span> users cannot be added to expenses until they
+                            create an account.</span
+                        >
                     </div>
                 </TransitionChild>
             </TransitionRoot>
@@ -430,8 +435,11 @@ const expenseDetails = computed(() => {
                                     </div>
                                     <PlaceholderImage :size="8" v-else />
                                     <div class="flex flex-col gap-1">
+                                        <span class="break-all text-sm font-medium leading-3">{{
+                                            member.user?.name
+                                        }}</span>
                                         <div class="flex flex-row flex-wrap items-center gap-2">
-                                            <span class="break-all text-sm">{{ member.email }}</span
+                                            <span class="break-all text-xs text-gray-400">{{ member.email }}</span
                                             ><span
                                                 v-if="$page.props.auth.user.id === member.user_id"
                                                 class="badge badge-sm text-xs font-semibold"
@@ -453,7 +461,8 @@ const expenseDetails = computed(() => {
                                             v-if="member.status !== GroupMemberStatusEnum.ACCEPTED"
                                         >
                                             <ExclamationCircleIcon class="h-4 w-4" />
-                                            <span class="text-xs">{{ member.status }}</span>
+                                            <span class="text-xs" v-if="member.user_id">{{ member.status }}</span>
+                                            <span class="text-xs" v-else>UNAVAILABLE</span>
                                         </div>
                                     </div>
                                 </div>
