@@ -147,7 +147,7 @@ const onDeleteClicked = () => {
             </div>
 
             <div v-else>
-                <div class="mx-auto flex max-w-7xl flex-col gap-8 dark:text-gray-200">
+                <div class="mx-auto flex max-w-xl flex-col gap-8 dark:text-gray-200">
                     <div class="flex flex-col gap-3 px-4">
                         <div class="flex flex-row items-center gap-4">
                             <CategoryIcon :category="expense.category" />

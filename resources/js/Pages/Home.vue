@@ -75,11 +75,11 @@ const recentActivityByGroup = computed(() => {
 <template>
     <AppLayout title="Home">
         <div
-            class="relative isolate mx-auto max-w-7xl overflow-hidden bg-gray-50 sm:px-6 lg:px-8 dark:bg-gray-700/65"
+            class="relative isolate mx-auto max-w-xl overflow-hidden bg-gray-50 sm:px-6 lg:px-8 dark:bg-gray-700/65"
             v-if="stats.length > 0"
         >
             <div class="border-b border-b-gray-900/10 lg:border-t lg:border-t-gray-900/5 dark:border-b-gray-400/10">
-                <dl class="mx-auto grid max-w-7xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:px-2 xl:px-0">
+                <dl class="mx-auto grid max-w-xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:px-2 xl:px-0">
                     <div
                         v-for="(stat, statIdx) in stats"
                         :key="stat.name"
@@ -108,7 +108,7 @@ const recentActivityByGroup = computed(() => {
                 </dl>
             </div>
         </div>
-        <div class="flex flex-col gap-4 px-4 pt-6">
+        <div class="mx-auto flex max-w-xl flex-col gap-4 px-4 pt-6">
             <span class="text-xl font-semibold text-gray-700 dark:text-gray-200" v-if="recentActivityByGroup.length > 0"
                 >Recent activity</span
             >

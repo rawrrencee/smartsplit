@@ -105,7 +105,7 @@ const handlePendingRequestStatusChange = (groupId, status) => {
                 </button>
             </div>
         </div>
-        <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto flex max-w-xl flex-col gap-4 px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col gap-2" v-if="pendingGroups.length > 0">
                 <div class="flex flex-row flex-wrap items-center gap-2">
                     <span class="font-semibold dark:text-gray-50">Pending Requests ({{ pendingGroups.length }})</span>
