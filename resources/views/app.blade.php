@@ -10,7 +10,7 @@
     <link rel="mask-icon" href="/img/icons/safari-pinned-tab.svg" color="#fafafa" />
     <meta name="theme-color" content="#fafafa" />
 
-    <title inertia>{{ config('app.name', 'Laravel') }}</title>
+    <title inertia>{{ config('app.name', 'Smartsplit') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
