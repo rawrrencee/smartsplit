@@ -66,8 +66,14 @@ const dialogTitle = computed(() => {
 });
 
 // #region Expense Form
-const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(kDefaultExpenseGroupKey);
-const selectedGroupId = ref(getSelectedGroupIdFromSessionStorage());
+const getSelectedGroupId = () => {
+    if (!props.isEdit) {
+        return sessionStorage.getItem(kDefaultExpenseGroupKey);
+    } else {
+        return `${props.expense?.group_id}`;
+    }
+};
+const selectedGroupId = ref(getSelectedGroupId());
 const currentGroup = computed(() => {
     return props.groups.find((group) => `${group.id}` === selectedGroupId.value);
 });
@@ -193,10 +199,22 @@ const onSaveExpenseClicked = () => {
 // #endregion Expense Form
 
 // #region Currency
+const getSelectedCurrency = () => {
+    let c;
+    if (!props.isEdit) {
+        c = getSelectedCurrencyFromSessionStorage();
+    } else {
+        c = currencies.value.find((c) => c.key === props.expense?.currency_key);
+    }
+    if (!c) {
+        return currencies.value?.[0];
+    }
+    return c;
+};
 const getSelectedCurrencyFromSessionStorage = () => {
     return currencies.value?.find((c) => c.key === sessionStorage.getItem(kDefaultExpenseCurrencyKey));
 };
-const selectedCurrency = ref(getSelectedCurrencyFromSessionStorage() ?? currencies.value?.[0]);
+const selectedCurrency = ref(getSelectedCurrency());
 const currencyQuery = ref("");
 const setSelectedCurrency = (key) => {
     sessionStorage.setItem(kDefaultExpenseCurrencyKey, key);
@@ -502,12 +520,12 @@ const filteredCurrencies = computed(() =>
                                                     <button
                                                         type="button"
                                                         class="flex flex-row items-center justify-between px-6 py-2 text-start hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                        :class="selectedCurrency.key === c.key && 'font-bold'"
+                                                        :class="selectedCurrency?.key === c.key && 'font-bold'"
                                                         @click="setSelectedCurrency(c.key)"
                                                     >
                                                         <div class="flex flex-row gap-2">
                                                             <CheckCircleIcon
-                                                                v-if="selectedCurrency.key === c.key"
+                                                                v-if="selectedCurrency?.key === c.key"
                                                                 class="h-6 w-6 text-success"
                                                             />
                                                             <span>{{ `${c.value} - ${c.key}` }}</span>

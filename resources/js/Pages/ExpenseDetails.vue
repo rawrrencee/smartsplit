@@ -31,7 +31,6 @@ const receivers = computed(() => {
 const consolidatedPaymentDetails = computed(() => {
     const userMap = new Map();
     props.expense.expense_details?.forEach((d) => {
-        const amount = !isNaN(parseFloat(d.amount)) ? parseFloat(d.amount) : 0;
         const userId = d.payer_id ?? d.receiver_id;
         const uniqueKey = `${userId}_${d.currency_key}`;
         if (userMap.get(uniqueKey)) {
@@ -102,7 +101,18 @@ const onDeleteClicked = () => {
                 />
             </div>
         </div>
-        <div class="mx-auto flex max-w-xl flex-col gap-6 dark:text-gray-200">
+        <div class="mx-auto flex max-w-xl flex-col gap-4 dark:text-gray-200">
+            <div class="flex w-full flex-row px-4" :class="expense.is_settlement ? 'justify-center' : ''">
+                <div class="badge badge-neutral badge-lg flex flex-row items-center gap-2">
+                    <CalendarIcon class="h-4 w-4" />
+                    <span class="text-sm">{{
+                        new Date(expense.date).toLocaleString("en-SG", {
+                            dateStyle: "medium",
+                        })
+                    }}</span>
+                </div>
+            </div>
+
             <div class="flex flex-1 flex-col gap-2 px-4" v-if="expense.is_settlement">
                 <div class="flex flex-col place-items-center gap-6 pt-12">
                     <CurrencyDollarIcon class="h-24 w-24 flex-shrink-0 text-success" />
@@ -133,14 +143,6 @@ const onDeleteClicked = () => {
             <div v-else>
                 <div class="mx-auto flex max-w-7xl flex-col gap-8 dark:text-gray-200">
                     <div class="flex flex-col gap-3 px-4">
-                        <div class="badge badge-neutral badge-lg flex flex-row items-center gap-2">
-                            <CalendarIcon class="h-4 w-4" />
-                            <span class="text-sm">{{
-                                new Date(expense.date).toLocaleString("en-SG", {
-                                    dateStyle: "medium",
-                                })
-                            }}</span>
-                        </div>
                         <div class="flex flex-row items-center gap-4">
                             <CategoryIcon :category="expense.category" />
                             <div class="flex flex-col">
