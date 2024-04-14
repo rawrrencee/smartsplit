@@ -13,7 +13,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <AppLayout title="Home">
+    <AppLayout title="Add Expense">
         <ExpenseForm :groups :categories :currencies :auth :isEdit="false" />
     </AppLayout>
 </template>

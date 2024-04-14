@@ -86,7 +86,7 @@ const handlePendingRequestStatusChange = (groupId, status) => {
 </script>
 
 <template>
-    <AppLayout title="Home">
+    <AppLayout title="Groups">
         <div
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 backdrop-blur sm:px-6 lg:px-8"
         >
