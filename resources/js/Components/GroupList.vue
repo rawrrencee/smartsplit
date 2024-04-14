@@ -14,17 +14,17 @@ defineEmits(["groupClicked"]);
 
 const groupsWithDeltas = computed(() => {
     return props.groups.map((g) => {
-        const delta = g.delta;
-        const currencyKeys = Object.keys(delta);
         return {
             ...g,
-            deltas:
-                currencyKeys?.map((c) => {
-                    return {
-                        symbol: delta[c].symbol,
-                        amount: delta[c].amount,
-                    };
-                }) ?? [],
+            ...(g.delta && {
+                deltas:
+                    Object.keys(g.delta)?.map((c) => {
+                        return {
+                            symbol: g.delta[c].symbol,
+                            amount: g.delta[c].amount,
+                        };
+                    }) ?? [],
+            }),
         };
     });
 });

@@ -58,8 +58,6 @@ const consolidatedPaymentDetails = computed(() => {
 const getNumberFromAmount = (amount) => {
     return !isNaN(parseFloat(amount)) ? parseFloat(amount) : 0;
 };
-
-console.log(consolidatedPaymentDetails.value);
 // #endregion Computed properties
 
 // #region Event Handlers
