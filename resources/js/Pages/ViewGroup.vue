@@ -220,14 +220,20 @@ const expenseDetails = computed(() => {
             class="mx-auto flex flex-col gap-1 px-4 pt-6 sm:px-6 lg:px-8"
             v-if="positiveCurrencies.length || negativeCurrencies.length"
         >
-            <div class="text-sm font-bold text-success dark:text-green-300" v-if="positiveCurrencies.length">
+            <div
+                class="break-words text-sm font-bold text-success dark:text-green-300"
+                v-if="positiveCurrencies.length"
+            >
                 <span>You are owed&nbsp;</span>
                 <template v-for="(c, i) in positiveCurrencies">
                     <span v-if="i > 0">&nbsp;&plus;&nbsp;</span
                     ><span>{{ c.symbol }}{{ to2DecimalPlacesIfValid(c.amount) }}</span>
                 </template>
             </div>
-            <div class="text-sm font-semibold text-error dark:text-red-400" v-if="negativeCurrencies.length">
+            <div
+                class="break-words text-sm font-semibold text-error dark:text-red-400"
+                v-if="negativeCurrencies.length"
+            >
                 <span>You owe&nbsp;</span>
                 <template v-for="(c, i) in negativeCurrencies">
                     <span v-if="i > 0">&nbsp;&plus;&nbsp;</span

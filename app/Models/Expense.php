@@ -43,6 +43,11 @@ class Expense extends Model
         return $this->hasMany(ExpenseDetail::class);
     }
 
+    public function group()
+    {
+        return $this->belongsTo(Group::class, 'id', 'group_id');
+    }
+
     public function createdBy()
     {
         return $this->hasOne(User::class, 'id', 'created_by');

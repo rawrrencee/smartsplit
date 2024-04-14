@@ -20,8 +20,26 @@ class Group extends Model
         'img_url',
     ];
 
+    // Set up cascading delete
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($group) {
+            $group->groupMembers()->delete();
+            $group->expenses()->each(function ($expense) {
+                $expense->expenseDetails()->delete();
+            });
+        });
+    }
+
     public function groupMembers()
     {
         return $this->hasMany(GroupMember::class);
+    }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
     }
 }

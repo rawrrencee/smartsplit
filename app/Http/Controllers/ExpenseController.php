@@ -288,7 +288,7 @@ class ExpenseController extends Controller
 
             DB::commit();
 
-            $message = $isSettlement ? "Settle up amount updated successfully." : "Expense update successfully.";
+            $message = $isSettlement ? "Settle up amount updated successfully." : "Expense updated successfully.";
 
             return redirect()->route('expenses.view', ['id' => $expense->id])
                 ->with('show', true)

@@ -194,7 +194,8 @@ class GroupController extends Controller
     public function view(Request $request)
     {
         $id = intval($request['id']);
-        if ($id === 0) {
+        $isGroupMember = $this->isGroupMemberWithUserIdExisting($id, auth()->user()->id, false);
+        if ($id === 0 || !$isGroupMember) {
             return redirect()->route('404');
         }
 
@@ -264,6 +265,11 @@ class GroupController extends Controller
             'group_id' => 'required|exists:groups,id',
             'email' => 'required|email|max:255'
         ]);
+
+        $isGroupMember = $this->isGroupMemberWithUserIdExisting($request['group_id'], auth()->user()->id, false);
+        if (!$isGroupMember) {
+            return redirect()->route('404');
+        }
 
         $request['status'] = GroupMemberStatusEnum::PENDING->value;
         $user = $this->UserController->getUserByEmail($request['email']);
@@ -353,6 +359,11 @@ class GroupController extends Controller
             return redirect()->route('404');
         }
 
+        $isGroupMember = $this->isGroupMemberWithUserIdExisting($id, auth()->user()->id, false);
+        if (!$isGroupMember) {
+            return redirect()->route('404');
+        }
+
         $group = Group::withTrashed()
             ->where('id', '=', $id)
             ->first();
@@ -373,6 +384,11 @@ class GroupController extends Controller
             'group_title' => 'required|max:25',
             'group_photo' => 'nullable|image',
         ]);
+
+        $isGroupMember = $this->isGroupMemberWithUserIdExisting($request['id'], auth()->user()->id, false);
+        if (!$isGroupMember) {
+            return redirect()->route('404');
+        }
 
         $group = Group::whereId($request['id'])->first();
 
@@ -457,25 +473,10 @@ class GroupController extends Controller
     {
         $group = Group::find($request['id']);
 
-        if (isset($group)) {
-            $isDeleted = $this->CommonController->deletePhoto($request['img_path']);
-            if ($isDeleted || !$isDeleted && !empty($group->img_path)) {
-                try {
-                    DB::beginTransaction();
-                    $group->update(['img_path' => null]);
-                    DB::commit();
-
-                    return redirect()->back()
-                        ->with('show', true)
-                        ->with('type', 'default')
-                        ->with('status', 'success')
-                        ->with('message', 'Photo removed successfully.');
-                } catch (\Exception $e) {
-                    DB::rollBack();
-
-                    return $this->CommonController->handleException($e);
-                }
-            }
+        try {
+            $this->deleteGroupPhoto($group, $request['img_path']);
+        } catch (\Exception $e) {
+            return $this->CommonController->handleException($e);
         }
 
         return redirect()->back()
@@ -488,29 +489,24 @@ class GroupController extends Controller
     public function destroy(Request $request)
     {
         $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:groups,id',
+            'id' => 'exists:groups,id',
         ]);
-
-        // Retrieve the ids
-        $ids = $request->get('ids');
 
         DB::beginTransaction();
 
         try {
-            // Delete the records
-            $deletedCount = Group::destroy($ids);
+            $group = Group::find($request['id']);
+            $this->deleteGroupPhoto($group, $group->img_path);
+
+            $group->destroy($request['id']);
 
             DB::commit();
 
-            $context = 'groups';
-            if ($deletedCount == 1) $context = 'group';
-
-            return redirect()->back()
+            return redirect()->route('groups')
                 ->with('show', true)
                 ->with('type', 'default')
                 ->with('status', 'success')
-                ->with('message', $deletedCount . ' ' . $context . ' deleted successfully.');
+                ->with('message', 'Group deleted successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -531,5 +527,22 @@ class GroupController extends Controller
         }
 
         return $groupMember;
+    }
+
+    private function deleteGroupPhoto($group, $img_path)
+    {
+        if (isset($group)) {
+            $isDeleted = $this->CommonController->deletePhoto($img_path);
+            if ($isDeleted || !$isDeleted && !empty($group->img_path)) {
+                try {
+                    DB::beginTransaction();
+                    $group->update(['img_path' => null]);
+                    DB::commit();
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    throw $e;
+                }
+            }
+        }
     }
 }

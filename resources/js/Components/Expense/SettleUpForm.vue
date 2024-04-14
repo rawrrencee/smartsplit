@@ -66,7 +66,6 @@ const dialogTitle = computed(() => {
 });
 
 // #region Expense Form
-console.log(props.expense);
 const getSelectedGroupIdFromSessionStorage = () => sessionStorage.getItem(kDefaultExpenseGroupKey);
 const selectedGroupId = ref(getSelectedGroupIdFromSessionStorage());
 const currentGroup = computed(() => {
@@ -313,10 +312,10 @@ const filteredCurrencies = computed(() =>
                         </div>
                     </button>
                 </div>
-                <div class="group flex flex-col gap-1">
+                <div class="flex flex-col gap-1">
                     <span>Settle up with</span>
                     <button
-                        class="btn btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:group-hover:bg-gray-700"
+                        class="group btn btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:group-hover:bg-gray-700"
                         :class="expenseForm.errors?.['payer_details.0.receiver_id'] ? 'btn-error' : ''"
                         @click="setDialogMode('selectReceiver')"
                     >

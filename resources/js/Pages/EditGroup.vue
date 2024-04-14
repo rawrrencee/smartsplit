@@ -3,7 +3,7 @@ import { getRememberRecentGroup, setRememberRecentGroup, showToastIfNeeded } fro
 import CreateOrEditGroup from "@/Components/Group/CreateOrEditGroup.vue";
 import NavigationBarButton from "@/Components/NavigationBarButton.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { ArrowLeftIcon, StarIcon } from "@heroicons/vue/24/outline";
+import { ArrowLeftIcon, StarIcon, TrashIcon } from "@heroicons/vue/24/outline";
 import { StarIcon as StarIconFilled } from "@heroicons/vue/24/solid";
 import { router, useForm } from "@inertiajs/vue3";
 import { ref } from "vue";
@@ -70,6 +70,24 @@ const onDeletePhotoClicked = () => {
         },
     );
 };
+
+const onDeleteClicked = () => {
+    if (!confirm("Are you sure you want to delete this group?")) return;
+    setIsLoading(true);
+    router.post(
+        route("groups.delete"),
+        { id: props.group.id },
+        {
+            onSuccess: (s) => {
+                router.reload();
+                showToastIfNeeded(toast, s.props.flash);
+            },
+            onFinish: () => {
+                setIsLoading(false);
+            },
+        },
+    );
+};
 </script>
 
 <template>
@@ -78,13 +96,16 @@ const onDeletePhotoClicked = () => {
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
         >
             <NavigationBarButton :icon="ArrowLeftIcon" @on-click="back" />
-            <button
-                type="button"
-                class="btn btn-link pr-0 text-gray-600 no-underline dark:text-gray-200"
-                @click="updateGroup"
-            >
-                Save
-            </button>
+            <div class="flex flex-row gap-2">
+                <NavigationBarButton :icon="TrashIcon" @on-click="onDeleteClicked" />
+                <button
+                    type="button"
+                    class="btn btn-link pr-0 text-gray-600 no-underline dark:text-gray-200"
+                    @click="updateGroup"
+                >
+                    Save
+                </button>
+            </div>
         </div>
         <div class="flex h-full flex-col overflow-y-auto">
             <CreateOrEditGroup

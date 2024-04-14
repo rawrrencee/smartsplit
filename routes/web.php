@@ -49,6 +49,7 @@ Route::middleware([
         Route::get('/view', [GroupController::class, 'view'])->name('groups.view');
         Route::get('/edit', [GroupController::class, 'edit'])->name('groups.edit');
         Route::post('/update', [GroupController::class, 'update'])->name('groups.update');
+        Route::post('/delete', [GroupController::class, 'destroy'])->name('groups.delete');
         Route::post('/delete-photo', [GroupController::class, 'deletePhoto'])->name('groups.delete-photo');
     });
 
