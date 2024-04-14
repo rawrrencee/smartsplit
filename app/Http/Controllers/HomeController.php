@@ -31,13 +31,17 @@ class HomeController extends Controller
     {
         $groups = Group::whereHas('groupMembers', function ($query) use ($userId) {
             $query->where('user_id', $userId);
+            $query->where('status', GroupMemberStatusEnum::ACCEPTED->value);
         })->select('id', 'group_title', 'img_path')->take($limit)->get();
 
         foreach ($groups as $group) {
-            $result[] = (object) array(
-                'group' => $group,
-                'expenses' => $this->GroupController->getExpenseDetailsByGroupForUserId($group->id, $userId, $limit)
-            );
+            $expenses = $this->GroupController->getExpenseDetailsByGroupForUserId($group->id, $userId, $limit);
+            if (count($expenses) > 0) {
+                $result[] = (object) array(
+                    'group' => $group,
+                    'expenses' => $expenses
+                );
+            }
         }
 
         return $result ?? [];
