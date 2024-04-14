@@ -9,7 +9,7 @@ import PrimeVue from "primevue/config";
 import { createApp, h } from "vue";
 import { ZiggyVue } from "../../vendor/tightenco/ziggy";
 
-const appName = import.meta.env.VITE_APP_NAME || "Laravel";
+const appName = import.meta.env.VITE_APP_NAME || "Smartsplit";
 
 if (!localStorage.getItem("theme")) {
     localStorage.setItem("theme", "splitsmartLight");
