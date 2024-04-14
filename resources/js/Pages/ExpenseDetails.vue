@@ -26,8 +26,40 @@ const payers = computed(() => {
     return props.expense.expense_details?.filter((d) => d.payer_id && !d.receiver_id) ?? [];
 });
 const receivers = computed(() => {
-    return props.expense.expense_details.filter((d) => d.receiver_id && !d.payer_id);
+    return props.expense.expense_details.filter((d) => d.receiver_id && !d.payer_id) ?? [];
 });
+const consolidatedPaymentDetails = computed(() => {
+    const userMap = new Map();
+    props.expense.expense_details?.forEach((d) => {
+        const amount = !isNaN(parseFloat(d.amount)) ? parseFloat(d.amount) : 0;
+        const userId = d.payer_id ?? d.receiver_id;
+        const uniqueKey = `${userId}_${d.currency_key}`;
+        if (userMap.get(uniqueKey)) {
+            const user = userMap.get(uniqueKey);
+            if (user) {
+                user.expenseDetails = [...user.expenseDetails, d];
+                userMap.set(uniqueKey, user);
+            }
+        } else {
+            const userId = d.payer_id ?? d.receiver_id;
+            const uniqueKey = `${userId}_${d.currency_key}`;
+            if (userId) {
+                userMap.set(uniqueKey, {
+                    user: d.payer ?? d.receiver,
+                    expenseDetails: [d],
+                });
+            }
+        }
+    });
+
+    const entries = Array.from(userMap.values());
+    return entries;
+});
+const getNumberFromAmount = (amount) => {
+    return !isNaN(parseFloat(amount)) ? parseFloat(amount) : 0;
+};
+
+console.log(consolidatedPaymentDetails.value);
 // #endregion Computed properties
 
 // #region Event Handlers
@@ -144,29 +176,69 @@ const onDeleteClicked = () => {
                     <div class="flex flex-col gap-2 px-4">
                         <span class="font-medium">Payment Details</span>
                         <div class="flex flex-col gap-1">
-                            <ul class="list-none space-y-1 text-sm">
-                                <li v-for="p in payers" class="flex flex-row items-center gap-2">
-                                    <ProfilePhotoImage :image-url="p.payer.profile_photo_url" :size="6" />
-                                    <span
-                                        ><span>{{ p.payer.name }}&nbsp;</span><span>paid&nbsp;</span
-                                        ><span class="text-success dark:text-green-300"
-                                            >{{ p.currency_symbol }}{{ to2DecimalPlacesIfValid(p.amount, true) }}</span
-                                        >&period;</span
+                            <template v-if="payers.length > 1">
+                                <span
+                                    >{{ expense.num_payers }} {{ expense.payer_name }} paid {{ expense.currency_symbol
+                                    }}{{ to2DecimalPlacesIfValid(expense.amount) }}</span
+                                >
+                                <ul class="list-none space-y-1 pl-4 text-sm">
+                                    <li
+                                        v-for="p in consolidatedPaymentDetails"
+                                        class="flex flex-row items-center gap-2"
                                     >
-                                </li>
-                            </ul>
-                            <ul class="list-none space-y-1 pl-4 text-sm">
-                                <li v-for="r in receivers" class="flex flex-row items-center gap-2">
-                                    <ProfilePhotoImage :image-url="r.receiver.profile_photo_url" :size="6" />
-                                    <span
-                                        ><span>{{ r.receiver.name }}&nbsp;</span><span>owes&nbsp;</span
-                                        ><span class="text-error dark:text-red-400"
-                                            >{{ r.currency_symbol
-                                            }}{{ to2DecimalPlacesIfValid(Math.abs(r.amount), true) }}</span
-                                        >&period;</span
-                                    >
-                                </li>
-                            </ul>
+                                        <ProfilePhotoImage :image-url="p.user.profile_photo_url" :size="6" />
+                                        <div>
+                                            <span>{{ p.user.name }}</span>
+                                            <template v-for="(d, i) in p.expenseDetails">
+                                                <span
+                                                    v-if="getNumberFromAmount(d.amount) > 0"
+                                                    class="text-success dark:text-green-300"
+                                                >
+                                                    paid {{ d.currency_symbol
+                                                    }}{{ to2DecimalPlacesIfValid(getNumberFromAmount(d.amount)) }}</span
+                                                >
+                                                <span v-if="p.expenseDetails.length > 1 && i === 0"> and </span>
+                                                <span
+                                                    v-if="getNumberFromAmount(d.amount) < 0"
+                                                    class="text-error dark:text-red-400"
+                                                >
+                                                    owes {{ d.currency_symbol
+                                                    }}{{
+                                                        to2DecimalPlacesIfValid(Math.abs(getNumberFromAmount(d.amount)))
+                                                    }}</span
+                                                >
+                                            </template>
+                                            <span>&period;</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </template>
+                            <template v-else>
+                                <ul class="list-none space-y-1 text-sm">
+                                    <li v-for="p in payers" class="flex flex-row items-center gap-2">
+                                        <ProfilePhotoImage :image-url="p.payer.profile_photo_url" :size="6" />
+                                        <span
+                                            ><span>{{ p.payer.name }}&nbsp;</span><span>paid&nbsp;</span
+                                            ><span class="text-success dark:text-green-300"
+                                                >{{ p.currency_symbol
+                                                }}{{ to2DecimalPlacesIfValid(p.amount, true) }}</span
+                                            >&period;</span
+                                        >
+                                    </li>
+                                </ul>
+                                <ul class="list-none space-y-1 pl-4 text-sm">
+                                    <li v-for="r in receivers" class="flex flex-row items-center gap-2">
+                                        <ProfilePhotoImage :image-url="r.receiver.profile_photo_url" :size="6" />
+                                        <span
+                                            ><span>{{ r.receiver.name }}&nbsp;</span><span>owes&nbsp;</span
+                                            ><span class="text-error dark:text-red-400"
+                                                >{{ r.currency_symbol
+                                                }}{{ to2DecimalPlacesIfValid(Math.abs(r.amount), true) }}</span
+                                            >&period;</span
+                                        >
+                                    </li>
+                                </ul>
+                            </template>
                         </div>
                     </div>
                 </div>

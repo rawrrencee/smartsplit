@@ -65,7 +65,7 @@ class GroupController extends Controller
             }
         }]);
 
-        return $mainQuery->get();
+        return $mainQuery->orderBy('created_at', 'desc')->get();
     }
 
     public function getGroupMembersByGroupId($groupId, $withTrashed = false)
@@ -185,8 +185,15 @@ class GroupController extends Controller
 
     public function index(Request $request)
     {
+        $groups = $this->getGroupsByMemberUserIdOrEmail($request->user()->id, $request->user()->email);
+
+        foreach ($groups as $group) {
+            $overallDeltaForGroupMember = $this->ExpenseDetailController->getOverallExpenseDeltaForUserInGroup($request->user()->id, $group->id);
+            $group['delta'] = $overallDeltaForGroupMember;
+        };
+
         return Inertia::render('Groups', [
-            'groups' => $this->getGroupsByMemberUserIdOrEmail($request->user()->id, $request->user()->email, GroupMemberStatusEnum::ACCEPTED),
+            'groups' => $groups,
             'pendingGroups' => $this->getGroupsByMemberUserIdOrEmail($request->user()->id, $request->user()->email, GroupMemberStatusEnum::PENDING)
         ]);
     }

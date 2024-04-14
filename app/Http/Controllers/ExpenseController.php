@@ -54,6 +54,11 @@ class ExpenseController extends Controller
         }
 
         $expense = Expense::where('id', $request['id'])->with([
+            'expenseDetails' => function ($query) {
+                $query->orderBy('amount', 'desc');
+                $query->orderBy('payer_id', 'asc');
+                $query->orderBy('receiver_id', 'asc');
+            },
             'expenseDetails.payer' => function ($query) {
                 $query->select('id', 'name');
             }, 'expenseDetails.receiver' => function ($query) {

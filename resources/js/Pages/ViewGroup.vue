@@ -234,7 +234,7 @@ const expenseDetails = computed(() => {
                 class="break-words text-sm font-semibold text-error dark:text-red-400"
                 v-if="negativeCurrencies.length"
             >
-                <span>You owe&nbsp;</span>
+                <span>You owe </span>
                 <template v-for="(c, i) in negativeCurrencies">
                     <span v-if="i > 0">&nbsp;&plus;&nbsp;</span
                     ><span>{{ c.symbol }}{{ to2DecimalPlacesIfValid(Math.abs(c.amount)) }}</span>

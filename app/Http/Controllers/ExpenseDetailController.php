@@ -61,6 +61,7 @@ class ExpenseDetailController extends Controller
         $positiveAmounts = ExpenseDetail::where('payer_id', $userId)
             ->where('group_id', $groupId)
             ->groupBy('currency_key')
+            ->orderBy('currency_key')
             ->selectRaw('currency_key, SUM(amount) as total_amount')
             ->pluck('total_amount', 'currency_key')
             ->toArray();
@@ -68,6 +69,7 @@ class ExpenseDetailController extends Controller
         $negativeAmounts = ExpenseDetail::where('receiver_id', $userId)
             ->where('group_id', $groupId)
             ->groupBy('currency_key')
+            ->orderBy('currency_key')
             ->selectRaw('currency_key, SUM(CASE WHEN is_settlement = 1 THEN -amount ELSE amount END) as total_amount')
             ->pluck('total_amount', 'currency_key')
             ->toArray();
@@ -78,8 +80,12 @@ class ExpenseDetailController extends Controller
         foreach (array_merge(array_keys($positiveAmounts), array_keys($negativeAmounts)) as $currencyKey) {
             $positiveAmount = $positiveAmounts[$currencyKey] ?? 0;
             $negativeAmount = $negativeAmounts[$currencyKey] ?? 0;
-            $mergedAmounts[$currencyKey]['amount'] = $positiveAmount + $negativeAmount;
-            $mergedAmounts[$currencyKey]['symbol'] = $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $currencyKey, 'key', 'symbol');
+
+            $delta = $positiveAmount + $negativeAmount;
+            if ($delta !== 0.0) {
+                $mergedAmounts[$currencyKey]['amount'] = $delta;
+                $mergedAmounts[$currencyKey]['symbol'] = $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $currencyKey, 'key', 'symbol');
+            }
         }
 
         return $mergedAmounts;
