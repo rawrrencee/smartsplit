@@ -42,9 +42,7 @@ defineProps({
                     >
                 </div>
                 <template v-if="expense.net_amount === 0">
-                    <span class="w-16 flex-shrink-0 text-right text-[0.65rem] text-gray-400"
-                        >not involved or no balance</span
-                    >
+                    <span class="w-16 flex-shrink-0 text-right text-[0.65rem] text-gray-400">not involved</span>
                 </template>
                 <div
                     v-else
