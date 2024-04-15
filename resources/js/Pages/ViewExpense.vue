@@ -1,22 +1,31 @@
 <script setup>
 import { getAllCurrencies, showToastIfNeeded, to2DecimalPlacesIfValid } from "@/Common";
 import CategoryIcon from "@/Components/CategoryIcon.vue";
+import DialogAnimated from "@/Components/DialogAnimated.vue";
 import ExpenseComments from "@/Components/Expense/ExpenseComments.vue";
 import ProfilePhotoImage from "@/Components/Image/ProfilePhotoImage.vue";
 import NavigationBarButton from "@/Components/NavigationBarButton.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { ArrowLeftIcon, CalendarIcon, CurrencyDollarIcon, PencilIcon, TrashIcon } from "@heroicons/vue/24/outline";
-import { router } from "@inertiajs/vue3";
+import { router, useForm } from "@inertiajs/vue3";
 import { computed, ref } from "vue";
 import { toast } from "vue-sonner";
 
 const props = defineProps({
     expense: Object,
+    auth: Object,
 });
+
+const commentForm = useForm({
+    expense_id: props.expense.id,
+    content: null,
+});
+
 const isLoading = ref(false);
 const setIsLoading = (value) => {
     isLoading.value = value;
 };
+const isDialogOpen = ref(false);
 const navigateToRoute = (route, data) => {
     router.visit(route, data);
 };
@@ -83,6 +92,25 @@ const onDeleteClicked = () => {
             },
         },
     );
+};
+
+const onAddCommentClicked = (comment) => {
+    setIsLoading(true);
+    commentForm
+        .transform((data) => ({
+            ...data,
+            content: comment,
+        }))
+        .post(route("expenses.add-comment"), {
+            onSuccess: (s) => {
+                commentForm.reset();
+                router.reload({ only: ["comments"] });
+                showToastIfNeeded(toast, s.props.flash);
+            },
+            onFinish: () => {
+                setIsLoading(false);
+            },
+        });
 };
 // #endregion Event Handlers
 </script>
@@ -250,9 +278,31 @@ const onDeleteClicked = () => {
                 </div>
             </div>
 
-            <div v-if="false">
-                <ExpenseComments />
+            <div class="flex flex-col px-4 pt-4">
+                <button
+                    type="button"
+                    class="btn btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                    @click="isDialogOpen = true"
+                >
+                    Comments ({{ expense.expense_comments?.length ?? 0 }})
+                </button>
             </div>
         </div>
     </AppLayout>
+
+    <DialogAnimated
+        :isDialogOpen
+        :dialog-title="`Comments (${expense.expense_comments?.length ?? 0})`"
+        @dialog-closed="isDialogOpen = false"
+    >
+        <template v-slot:body>
+            <ExpenseComments
+                :commentForm
+                :comments="expense.expense_comments"
+                :userId="auth.user.id"
+                @add-comment-clicked="onAddCommentClicked"
+                @clear-comment-errors="commentForm.clearErrors('content')"
+            />
+        </template>
+    </DialogAnimated>
 </template>

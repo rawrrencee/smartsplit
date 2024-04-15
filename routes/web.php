@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CommonController;
+use App\Http\Controllers\ExpenseCommentController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\HomeController;
@@ -66,7 +67,10 @@ Route::middleware([
         Route::get('/edit', [ExpenseController::class, 'editExpensePage'])->name('expenses.edit');
         Route::post('/update', [ExpenseController::class, 'updateExpense'])->name('expenses.update');
         Route::post('/delete', [ExpenseController::class, 'deleteExpense'])->name('expenses.delete');
+
+        Route::post('/add-comment', [ExpenseCommentController::class, 'addComment'])->name('expenses.add-comment');
     });
+
     Route::prefix('settle-up')->group(function () {
         Route::get('/', [ExpenseController::class, 'settleUpPage'])->name('settle-up');
     });

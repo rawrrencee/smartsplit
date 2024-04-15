@@ -6,6 +6,7 @@ use App\Enums\GroupMemberStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Models\ExpenseDetail;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -59,6 +60,12 @@ class ExpenseController extends Controller
                 $query->orderBy('payer_id', 'asc');
                 $query->orderBy('receiver_id', 'asc');
             },
+            'expenseComments' => function ($query) {
+                $query->orderBy('created_at', 'asc');
+            },
+            'expenseComments.user' => function ($query) {
+                $query->select('id', 'name');
+            },
             'expenseDetails.payer' => function ($query) {
                 $query->select('id', 'name');
             }, 'expenseDetails.receiver' => function ($query) {
@@ -71,6 +78,11 @@ class ExpenseController extends Controller
         ])->first();
 
         if (!isset($expense)) {
+            return redirect()->route('404');
+        }
+
+        $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($expense->group_id, auth()->user()->id, false);
+        if (!$isGroupMember) {
             return redirect()->route('404');
         }
 
@@ -110,6 +122,11 @@ class ExpenseController extends Controller
             return redirect()->route('404');
         }
 
+        $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($expense->group_id, auth()->user()->id, false);
+        if (!$isGroupMember) {
+            return redirect()->route('404');
+        }
+
         if ($expense->is_settlement) {
             $userOwes = $this->ExpenseDetailController->getAmountUserOwesToEachGroupMember(auth()->user()->id, $request['id']);
         }
@@ -128,6 +145,11 @@ class ExpenseController extends Controller
         Validator::make($request->all(), $this->validateCreateExpenseRequestRules($request['is_settlement']))->validate();
 
         try {
+            $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($request['group_id'], auth()->user()->id, false);
+            if (!$isGroupMember) {
+                throw new Exception("You are not a member of this group.");
+            }
+
             DB::beginTransaction();
             $isSettlement = $request['is_settlement'];
 
@@ -221,6 +243,11 @@ class ExpenseController extends Controller
         Validator::make($request->all(), $this->validateUpdateExpenseRequestRules($request['is_settlement']))->validate();
 
         try {
+            $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($request['group_id'], auth()->user()->id, false);
+            if (!$isGroupMember) {
+                throw new Exception("You are not a member of this group.");
+            }
+
             DB::beginTransaction();
             $isSettlement = $request['is_settlement'];
 
@@ -317,10 +344,15 @@ class ExpenseController extends Controller
             'id' => 'exists:expenses,id',
         ]);
 
-        DB::beginTransaction();
-
         try {
+            DB::beginTransaction();
+
             $groupId = Expense::where('id', $request['id'])->first()->group_id;
+            $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($groupId, auth()->user()->id, false);
+            if (!$isGroupMember) {
+                throw new Exception("You are not a member of this group.");
+            }
+
             Expense::destroy($request['id']);
 
             DB::commit();

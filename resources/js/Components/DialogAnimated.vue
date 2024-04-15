@@ -6,7 +6,6 @@ import { computed } from "vue";
 const props = defineProps({
     isDialogOpen: Boolean,
     dialogTitle: String,
-    paddingTop: Number,
     size: String,
 });
 
@@ -54,34 +53,34 @@ defineEmits(["dialogClosed"]);
                             leave-from="translate-y-0"
                             leave-to="translate-y-full"
                         >
-                            <DialogPanel class="pointer-events-auto w-screen">
-                                <div
-                                    class="flex h-full flex-col rounded-t-2xl bg-gray-50 shadow-xl dark:bg-gray-900 dark:text-gray-200"
-                                >
-                                    <div class="p-6">
-                                        <div class="flex items-start justify-between">
-                                            <DialogTitle as="div" class="flex flex-row flex-wrap items-start gap-2">
-                                                <span
-                                                    class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
-                                                >
-                                                    {{ dialogTitle }}
-                                                </span>
-                                                <slot name="dialogTitle" />
-                                            </DialogTitle>
-                                            <div class="ml-3 flex h-7 items-center">
-                                                <button
-                                                    type="button"
-                                                    class="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-                                                    @click="$emit('dialogClosed')"
-                                                >
-                                                    <span class="absolute -inset-2.5" />
-                                                    <span class="sr-only">Close panel</span>
-                                                    <XMarkIcon class="h-6 w-6" aria-hidden="true" />
-                                                </button>
-                                            </div>
+                            <DialogPanel
+                                class="pointer-events-auto flex w-screen flex-col rounded-t-2xl bg-gray-50 shadow-xl dark:bg-gray-900 dark:text-gray-200"
+                            >
+                                <div class="p-6">
+                                    <div class="flex items-start justify-between">
+                                        <DialogTitle as="div" class="flex flex-row flex-wrap items-start gap-2">
+                                            <span
+                                                class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
+                                            >
+                                                {{ dialogTitle }}
+                                            </span>
+                                            <slot name="dialogTitle" />
+                                        </DialogTitle>
+                                        <div class="ml-3 flex h-7 items-center">
+                                            <button
+                                                type="button"
+                                                class="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+                                                @click="$emit('dialogClosed')"
+                                            >
+                                                <span class="absolute -inset-2.5" />
+                                                <span class="sr-only">Close panel</span>
+                                                <XMarkIcon class="h-6 w-6" aria-hidden="true" />
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="flex-1 overflow-y-auto">
+                                </div>
+                                <div class="flex h-0 flex-1 flex-col items-stretch">
+                                    <div class="h-full">
                                         <slot name="body" />
                                     </div>
                                 </div>

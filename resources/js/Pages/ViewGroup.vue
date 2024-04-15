@@ -303,7 +303,6 @@ const expenseDetails = computed(() => {
     <DialogAnimated
         :is-dialog-open="isDialogOpen"
         :dialog-title="`Group Members (${activeGroupMembers.length ?? 0})`"
-        :padding-top="32"
         size="xl"
         @dialog-closed="setIsDialogOpen(false)"
     >

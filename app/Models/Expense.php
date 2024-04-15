@@ -43,6 +43,11 @@ class Expense extends Model
         return $this->hasMany(ExpenseDetail::class);
     }
 
+    public function expenseComments()
+    {
+        return $this->hasMany(ExpenseComment::class);
+    }
+
     public function group()
     {
         return $this->hasOne(Group::class, 'id', 'group_id');
