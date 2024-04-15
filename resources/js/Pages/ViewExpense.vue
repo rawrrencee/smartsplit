@@ -88,7 +88,7 @@ const onDeleteClicked = () => {
 </script>
 
 <template>
-    <AppLayout title="Expense Details">
+    <AppLayout title="View Expense">
         <div
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
         >

@@ -82,7 +82,7 @@ class ExpenseController extends Controller
             $expenseDetail->currency_symbol = $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $expenseDetail->currency_key, 'key', 'symbol');
         }
 
-        return Inertia::render('ExpenseDetails', [
+        return Inertia::render('ViewExpense', [
             'expense' => $expense
         ]);
     }
