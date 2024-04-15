@@ -5,6 +5,7 @@ import ExpenseRowItem from "@/Components/Group/ExpenseRowItem.vue";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
 import ServerImage from "@/Components/Image/ServerImage.vue";
 import NavigationBarButton from "@/Components/NavigationBarButton.vue";
+import Pagination from "@/Components/Pagination.vue";
 import { GroupMemberStatusEnum } from "@/Enums/GroupMemberStatusEnum.js";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { TransitionChild, TransitionRoot } from "@headlessui/vue";
@@ -27,6 +28,7 @@ const props = defineProps({
     userAmounts: Object,
     userOwes: Object,
     expenses: Object,
+    paginatedResults: Object,
 });
 
 const back = () => {
@@ -143,12 +145,24 @@ const onRestoreDeletedGroupMemberClicked = (member) => {
     addMemberForm.email = member.email;
     onAddMemberClicked();
 };
+const onGoToPageClicked = (data) => {
+    router.visit(props?.paginatedResults?.path, {
+        data: {
+            id: props.group.id,
+            page: data?.page ?? 1,
+            perPage: data?.perPage ?? 10,
+        },
+        only: ["paginatedResults", "expenses"],
+        replace: true,
+        preserveScroll: true,
+    });
+};
 
 const expenseDetails = computed(() => {
     let expenses = [];
     if (!props.expenses) return [];
 
-    const years = Object.keys(props.expenses);
+    const years = Object.keys(props.expenses).sort((a, b) => parseInt(b) - parseInt(a));
     for (const year of years) {
         const months = Object.keys(props.expenses[year]);
         for (const month of months) {
@@ -258,7 +272,7 @@ const expenseDetails = computed(() => {
                 </template>
             </ul>
         </div>
-        <div class="mx-auto flex flex-col gap-4 pt-6">
+        <div class="mx-auto flex-col gap-4 pt-6">
             <div
                 class="flex flex-col items-center px-4 pt-10 text-center text-gray-300 sm:px-6 lg:px-8 dark:text-gray-600"
                 v-if="expenseDetails.length === 0"
@@ -266,8 +280,8 @@ const expenseDetails = computed(() => {
                 <FaceSmileIcon class="h-12 w-12" />
                 <span>Add some expenses to get started</span>
             </div>
-            <div v-for="d in expenseDetails" class="flex flex-col gap-2">
-                <div class="px-4 sm:px-6 lg:px-8">
+            <div v-for="(d, i) in expenseDetails" class="flex flex-col gap-1">
+                <div class="px-4 sm:px-6 lg:px-8" :class="i === 0 ? '' : 'pt-3'">
                     <span class="font-semibold dark:text-gray-200">{{ d.groupByTitle }}</span>
                 </div>
                 <div class="flex flex-col dark:text-gray-200">
@@ -275,6 +289,13 @@ const expenseDetails = computed(() => {
                         <ExpenseRowItem :expense />
                     </template>
                 </div>
+            </div>
+            <div class="pb-6">
+                <Pagination
+                    :paginatedResults
+                    @go-to-page-clicked="(data) => onGoToPageClicked(data)"
+                    v-if="paginatedResults?.last_page > 1"
+                />
             </div>
         </div>
     </AppLayout>

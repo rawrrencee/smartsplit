@@ -121,9 +121,9 @@ class GroupController extends Controller
         return false;
     }
 
-    public function getExpenseDetailsByGroupForUserId($groupId, $userId, $limit = null)
+    public function getExpensesWithGroupForUser($groupId, $limit = null, $perPage)
     {
-        $expensesByMonth = Expense::select(
+        $expenseQuery = Expense::select(
             DB::raw('YEAR(date) as year'),
             DB::raw('MONTH(date) as month'),
             DB::raw('DAY(date) as day'),
@@ -145,16 +145,19 @@ class GroupController extends Controller
             ->orderBy('created_at', 'desc');
 
         if (isset($limit)) {
-            $expensesByMonth = $expensesByMonth->take($limit);
+            $expenseQuery = $expenseQuery->take($limit);
         }
 
-        $expensesByMonth = $expensesByMonth->get();
+        return $expenseQuery->paginate($perPage ?? 300);
+    }
 
-        $expenseIds = $expensesByMonth->pluck('id')->toArray();
+    public function mapExpenseDetailsByDate($expenses, $userId)
+    {
+        $expenseIds = $expenses->pluck('id')->toArray();
         $expenseDetails = ExpenseDetail::whereIn('expense_id', $expenseIds)->get();
 
         $results = [];
-        foreach ($expensesByMonth as $expense) {
+        foreach ($expenses as $expense) {
             $year = $expense->year;
             $shortMonth = date('M', mktime(0, 0, 0, $expense->month, 1));
             $month = date('F', mktime(0, 0, 0, $expense->month, 1));
@@ -226,12 +229,15 @@ class GroupController extends Controller
             ->with(['user'])
             ->get();
 
+        $expenses = $this->getExpensesWithGroupForUser($id, null, $request['perPage']);
+
         return Inertia::render('ViewGroup', [
             'group' => $group,
             'groupMembers' => $groupMembers,
             'userAmounts' => $this->ExpenseDetailController->getOverallExpenseDeltaForUserInGroup(auth()->user()->id, $id),
             'userOwes' => $this->ExpenseDetailController->getAmountUserOwesToEachGroupMember(auth()->user()->id, $id),
-            'expenses' => $this->getExpenseDetailsByGroupForUserId($id, auth()->user()->id),
+            'expenses' => $this->mapExpenseDetailsByDate($expenses, auth()->user()->id),
+            'paginatedResults' => $expenses
         ]);
     }
 

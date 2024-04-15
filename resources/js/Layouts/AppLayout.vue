@@ -64,7 +64,7 @@ const navigationItems = [
             </header>
 
             <!-- Page Content -->
-            <main class="pb-20">
+            <main class="pb-12">
                 <slot />
             </main>
         </div>
