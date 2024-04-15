@@ -20,6 +20,8 @@ const commentForm = useForm({
     expense_id: props.expense.id,
     content: null,
 });
+const editingComment = ref(null);
+const shouldClearComment = ref(false);
 
 const isLoading = ref(false);
 const setIsLoading = (value) => {
@@ -94,7 +96,8 @@ const onDeleteClicked = () => {
     );
 };
 
-const onAddCommentClicked = (comment) => {
+const onAddCommentClicked = (comment, commentsScrollableDiv) => {
+    shouldClearComment.value = false;
     setIsLoading(true);
     commentForm
         .transform((data) => ({
@@ -106,11 +109,21 @@ const onAddCommentClicked = (comment) => {
                 commentForm.reset();
                 router.reload({ only: ["comments"] });
                 showToastIfNeeded(toast, s.props.flash);
+                shouldClearComment.value = true;
+                if (commentsScrollableDiv) {
+                    commentsScrollableDiv.scrollTop = commentsScrollableDiv.scrollHeight;
+                }
             },
             onFinish: () => {
                 setIsLoading(false);
             },
         });
+};
+const onEditCommentClicked = (comment) => {
+    console.log("edit clicked", comment);
+};
+const onDeleteCommentClicked = (comment) => {
+    console.log("delete clicked", comment);
 };
 // #endregion Event Handlers
 </script>
@@ -298,9 +311,13 @@ const onAddCommentClicked = (comment) => {
         <template v-slot:body>
             <ExpenseComments
                 :commentForm
+                :editingComment
+                :shouldClearComment
                 :comments="expense.expense_comments"
                 :userId="auth.user.id"
                 @add-comment-clicked="onAddCommentClicked"
+                @edit-comment-clicked="onEditCommentClicked"
+                @delete-comment-clicked="onDeleteCommentClicked"
                 @clear-comment-errors="commentForm.clearErrors('content')"
             />
         </template>

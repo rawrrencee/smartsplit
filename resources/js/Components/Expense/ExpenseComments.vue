@@ -1,12 +1,13 @@
 <script setup>
 import { PaperAirplaneIcon, PencilIcon, TrashIcon } from "@heroicons/vue/24/outline";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import ProfilePhotoImage from "../Image/ProfilePhotoImage.vue";
 
 const props = defineProps({
     commentForm: Object,
     comments: Array,
     editingComment: String,
+    shouldClearComment: Boolean,
     userId: Number,
 });
 defineEmits(["addCommentClicked", "editCommentClicked", "deleteCommentClicked", "clearCommentErrors"]);
@@ -21,12 +22,21 @@ onMounted(async () => {
         }
     }, 200);
 });
+
+watch(
+    () => props.shouldClearComment,
+    () => {
+        if (props.shouldClearComment) {
+            commentInput.value = "";
+        }
+    },
+);
 </script>
 
 <template>
-    <div class="flex h-full flex-col justify-between gap-4">
+    <div class="flex h-full flex-col justify-between">
         <div class="flex flex-1 flex-col overflow-y-scroll bg-gray-50" ref="commentsScrollableDiv">
-            <div class="pt-4" v-if="comments.length > 0">
+            <div class="py-4" v-if="comments.length > 0">
                 <template v-for="comment in comments" :key="comment.id">
                     <div class="chat" :class="userId !== comment.user_id ? 'chat-end' : 'chat-start'">
                         <ProfilePhotoImage :imageUrl="comment?.user?.profile_photo_url" :is-chat-image="true" />
@@ -36,13 +46,21 @@ onMounted(async () => {
                                 <span>{{ comment.content }}</span>
                             </div>
                             <div class="flex flex-row items-center gap-2">
-                                <button type="button" class="btn btn-primary btn-xs">
+                                <button
+                                    type="button"
+                                    class="btn btn-primary btn-xs"
+                                    @click="$emit('editCommentClicked', comment)"
+                                >
                                     <div class="flex flex-row items-center gap-2">
                                         <PencilIcon class="h-4 w-4" />
                                         <span>Edit</span>
                                     </div>
                                 </button>
-                                <button type="button" class="btn btn-error btn-xs">
+                                <button
+                                    type="button"
+                                    class="btn btn-error btn-xs"
+                                    @click="$emit('deleteCommentClicked', comment)"
+                                >
                                     <div class="flex flex-row items-center gap-2">
                                         <TrashIcon class="h-4 w-4" />
                                     </div>
@@ -75,7 +93,7 @@ onMounted(async () => {
                     <button
                         type="button"
                         class="btn btn-square btn-neutral rounded-none p-0"
-                        @click="$emit('addCommentClicked', commentInput)"
+                        @click="$emit('addCommentClicked', commentInput, commentsScrollableDiv)"
                     >
                         <PaperAirplaneIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
                     </button>
