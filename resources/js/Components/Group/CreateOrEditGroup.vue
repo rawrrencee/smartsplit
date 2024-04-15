@@ -40,7 +40,7 @@ const onRemovePhotoClicked = () => {
 </script>
 
 <template>
-    <form class="flex h-full flex-col">
+    <form class="flex h-full flex-col overflow-y-scroll">
         <div class="flex-1">
             <div class="flex flex-col gap-4">
                 <div class="space-y-2 px-6">

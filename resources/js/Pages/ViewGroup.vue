@@ -317,178 +317,187 @@ const expenseDetails = computed(() => {
             </button>
         </template>
         <template v-slot:body>
-            <TransitionRoot
-                as="template"
-                :show="!isAddMemberInputShown && activeGroupMembers?.some((m) => m.status === 'PENDING')"
-            >
-                <TransitionChild
+            <div class="flex h-full flex-col">
+                <TransitionRoot
                     as="template"
-                    enter="ease-in-out duration-350"
-                    enter-from="opacity-0"
-                    enter-to="opacity-100"
-                    leave="ease-in-out duration-350"
-                    leave-from="opacity-100"
-                    leave-to="opacity-0"
+                    :show="!isAddMemberInputShown && activeGroupMembers?.some((m) => m.status === 'PENDING')"
                 >
-                    <div class="flex flex-col gap-1 px-6 pb-4 text-xs text-gray-500 dark:text-gray-400">
-                        <span> Some new members have yet to accept the invitation to this group. </span>
-                        <span
-                            >You can include <span class="font-semibold">PENDING</span> users in the expenses, but
-                            someone else will need to settle up on their behalf.</span
-                        >
-                        <span
-                            ><span class="font-semibold">UNAVAILABLE</span> users cannot be added to expenses until they
-                            create an account.</span
-                        >
-                    </div>
-                </TransitionChild>
-            </TransitionRoot>
-            <TransitionRoot as="template" :show="isAddMemberInputShown">
-                <TransitionChild
-                    as="template"
-                    enter="ease-in-out duration-350"
-                    enter-from="opacity-0"
-                    enter-to="opacity-100"
-                    leave="ease-in-out duration-350"
-                    leave-from="opacity-100"
-                    leave-to="opacity-0"
-                >
-                    <div class="flex flex-col gap-1 px-6 transition-opacity">
-                        <div class="flex flex-1 flex-col gap-1">
-                            <span class="text-xs text-gray-500 dark:text-gray-50">Enter an email to invite</span>
-                            <div class="flex flex-row gap-1">
-                                <input
-                                    type="text"
-                                    class="input input-sm input-bordered flex-shrink flex-grow text-xs dark:bg-gray-800"
-                                    :class="addMemberForm.errors['email'] && 'border-error'"
-                                    placeholder="Email Address"
-                                    v-model="addMemberForm.email"
-                                />
-                                <button
-                                    type="button"
-                                    class="btn btn-square btn-outline btn-sm border-gray-400 text-gray-400"
-                                    @click="onClearAddMemberFormClicked"
-                                >
-                                    <XMarkIcon class="h-4 w-4" />
-                                </button>
-                            </div>
-                            <span class="text-xs text-error dark:text-red-400" v-if="addMemberForm.errors['email']">{{
-                                addMemberForm.errors["email"]
-                            }}</span>
-                            <div class="flex flex-grow flex-row justify-between gap-1">
-                                <button
-                                    type="button"
-                                    class="btn btn-link btn-xs p-0 no-underline dark:text-gray-200"
-                                    @click="onAppendEmailDomainClicked"
-                                >
-                                    <span>@gmail.com</span>
-                                </button>
+                    <TransitionChild
+                        as="template"
+                        enter="ease-in-out duration-350"
+                        enter-from="opacity-0"
+                        enter-to="opacity-100"
+                        leave="ease-in-out duration-350"
+                        leave-from="opacity-100"
+                        leave-to="opacity-0"
+                    >
+                        <div class="flex flex-col gap-1 px-6 pb-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span> Some new members have yet to accept the invitation to this group. </span>
+                            <span
+                                >You can include <span class="font-semibold">PENDING</span> users in the expenses, but
+                                someone else will need to settle up on their behalf.</span
+                            >
+                            <span
+                                ><span class="font-semibold">UNAVAILABLE</span> users cannot be added to expenses until
+                                they create an account.</span
+                            >
+                        </div>
+                    </TransitionChild>
+                </TransitionRoot>
+                <TransitionRoot as="template" :show="isAddMemberInputShown">
+                    <TransitionChild
+                        as="template"
+                        enter="ease-in-out duration-350"
+                        enter-from="opacity-0"
+                        enter-to="opacity-100"
+                        leave="ease-in-out duration-350"
+                        leave-from="opacity-100"
+                        leave-to="opacity-0"
+                    >
+                        <div class="flex flex-col gap-1 px-6 transition-opacity">
+                            <div class="flex flex-1 flex-col gap-1">
+                                <span class="text-xs text-gray-500 dark:text-gray-50">Enter an email to invite</span>
                                 <div class="flex flex-row gap-1">
+                                    <input
+                                        type="text"
+                                        class="input input-sm input-bordered flex-shrink flex-grow text-xs dark:bg-gray-800"
+                                        :class="addMemberForm.errors['email'] && 'border-error'"
+                                        placeholder="Email Address"
+                                        v-model="addMemberForm.email"
+                                    />
                                     <button
                                         type="button"
-                                        class="btn btn-success btn-sm text-gray-50"
-                                        :disabled="isLoading"
-                                        @click="onAddMemberClicked"
+                                        class="btn btn-square btn-outline btn-sm border-gray-400 text-gray-400"
+                                        @click="onClearAddMemberFormClicked"
                                     >
-                                        <span class="loading loading-spinner loading-xs" v-if="isLoading"></span>
-                                        <PaperAirplaneIcon class="h-4 w-4" />
-                                        <span>Add</span>
+                                        <XMarkIcon class="h-4 w-4" />
+                                    </button>
+                                </div>
+                                <span
+                                    class="text-xs text-error dark:text-red-400"
+                                    v-if="addMemberForm.errors['email']"
+                                    >{{ addMemberForm.errors["email"] }}</span
+                                >
+                                <div class="flex flex-grow flex-row justify-between gap-1">
+                                    <button
+                                        type="button"
+                                        class="btn btn-link btn-xs p-0 no-underline dark:text-gray-200"
+                                        @click="onAppendEmailDomainClicked"
+                                    >
+                                        <span>@gmail.com</span>
+                                    </button>
+                                    <div class="flex flex-row gap-1">
+                                        <button
+                                            type="button"
+                                            class="btn btn-success btn-sm text-gray-50"
+                                            :disabled="isLoading"
+                                            @click="onAddMemberClicked"
+                                        >
+                                            <span class="loading loading-spinner loading-xs" v-if="isLoading"></span>
+                                            <PaperAirplaneIcon class="h-4 w-4" />
+                                            <span>Add</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </TransitionChild>
+                </TransitionRoot>
+                <div class="flex h-full flex-col overflow-y-scroll">
+                    <div class="flex flex-col gap-3 pb-4">
+                        <template v-for="member in activeGroupMembers">
+                            <div
+                                class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-3 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                                <div class="flex flex-shrink flex-col">
+                                    <div class="flex flex-row items-center gap-3">
+                                        <div class="avatar" v-if="member?.user?.profile_photo_url">
+                                            <div class="mask mask-squircle w-8">
+                                                <img :src="member?.user?.profile_photo_url" />
+                                            </div>
+                                        </div>
+                                        <PlaceholderImage :size="8" v-else />
+                                        <div class="flex flex-col gap-1">
+                                            <span class="break-all text-sm font-medium leading-3">{{
+                                                member.user?.name
+                                            }}</span>
+                                            <div class="flex flex-row flex-wrap items-center gap-2">
+                                                <span class="break-all text-xs text-gray-400">{{ member.email }}</span
+                                                ><span
+                                                    v-if="$page.props.auth.user.id === member.user_id"
+                                                    class="badge badge-sm text-xs font-semibold"
+                                                    >YOU</span
+                                                >
+                                            </div>
+                                            <span
+                                                v-if="group.owner_id === member.user_id"
+                                                class="badge badge-primary badge-sm text-xs font-semibold"
+                                                >CREATOR</span
+                                            >
+                                            <div
+                                                class="flex flex-row items-center gap-1"
+                                                :class="
+                                                    member.status === GroupMemberStatusEnum.REJECTED
+                                                        ? 'text-error'
+                                                        : 'text-gray-400'
+                                                "
+                                                v-if="member.status !== GroupMemberStatusEnum.ACCEPTED"
+                                            >
+                                                <ExclamationCircleIcon class="h-4 w-4" />
+                                                <span class="text-xs" v-if="member.user_id">{{ member.status }}</span>
+                                                <span class="text-xs" v-else>UNAVAILABLE</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div
+                                    class="flex flex-grow flex-col items-end"
+                                    v-if="
+                                        member.user_id !== $page.props.auth.user.id && member.user_id !== group.owner_id
+                                    "
+                                >
+                                    <button
+                                        type="button"
+                                        class="btn btn-square btn-error btn-sm"
+                                        :disabled="isLoading"
+                                        @click="onRemoveMemberClicked(member)"
+                                    >
+                                        <span class="loading loading-spinner loading-sm" v-if="isLoading" />
+                                        <XMarkIcon class="h-4 w-4" v-else />
                                     </button>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </TransitionChild>
-            </TransitionRoot>
-            <div class="flex-1 overflow-y-auto pb-4 pt-2">
-                <div class="flex flex-col gap-3">
-                    <template v-for="member in activeGroupMembers">
-                        <div
-                            class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-3 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                            <div class="flex flex-shrink flex-col">
-                                <div class="flex flex-row items-center gap-3">
-                                    <div class="avatar" v-if="member?.user?.profile_photo_url">
-                                        <div class="mask mask-squircle w-8">
-                                            <img :src="member?.user?.profile_photo_url" />
-                                        </div>
-                                    </div>
-                                    <PlaceholderImage :size="8" v-else />
-                                    <div class="flex flex-col gap-1">
-                                        <span class="break-all text-sm font-medium leading-3">{{
-                                            member.user?.name
-                                        }}</span>
-                                        <div class="flex flex-row flex-wrap items-center gap-2">
-                                            <span class="break-all text-xs text-gray-400">{{ member.email }}</span
-                                            ><span
-                                                v-if="$page.props.auth.user.id === member.user_id"
-                                                class="badge badge-sm text-xs font-semibold"
-                                                >YOU</span
-                                            >
-                                        </div>
-                                        <span
-                                            v-if="group.owner_id === member.user_id"
-                                            class="badge badge-primary badge-sm text-xs font-semibold"
-                                            >CREATOR</span
-                                        >
-                                        <div
-                                            class="flex flex-row items-center gap-1"
-                                            :class="
-                                                member.status === GroupMemberStatusEnum.REJECTED
-                                                    ? 'text-error'
-                                                    : 'text-gray-400'
-                                            "
-                                            v-if="member.status !== GroupMemberStatusEnum.ACCEPTED"
-                                        >
-                                            <ExclamationCircleIcon class="h-4 w-4" />
-                                            <span class="text-xs" v-if="member.user_id">{{ member.status }}</span>
-                                            <span class="text-xs" v-else>UNAVAILABLE</span>
-                                        </div>
-                                    </div>
+                        </template>
+                        <div v-if="deletedGroupMembers.length > 0" class="flex flex-col">
+                            <div class="divider m-0 p-0"></div>
+                            <div class="flex flex-col gap-3 pb-3 pt-2">
+                                <div class="flex flex-col gap-3 px-6">
+                                    <span class="text-md font-medium">Deleted Members</span>
+                                    <span class="text-xs text-gray-400">
+                                        Deleted members cannot be included in new expenses, but will remain visible in
+                                        older expenses. You can invite them to the group again if needed.
+                                    </span>
                                 </div>
-                            </div>
-                            <div
-                                class="flex flex-grow flex-col items-end"
-                                v-if="member.user_id !== $page.props.auth.user.id && member.user_id !== group.owner_id"
-                            >
-                                <button
-                                    type="button"
-                                    class="btn btn-square btn-error btn-sm"
-                                    :disabled="isLoading"
-                                    @click="onRemoveMemberClicked(member)"
-                                >
-                                    <span class="loading loading-spinner loading-sm" v-if="isLoading" />
-                                    <XMarkIcon class="h-4 w-4" v-else />
-                                </button>
-                            </div>
-                        </div>
-                    </template>
-                    <div v-if="deletedGroupMembers.length > 0" class="flex flex-col">
-                        <div class="divider m-0 p-0"></div>
-                        <div class="flex flex-col gap-3 pb-3 pt-2">
-                            <div class="flex flex-col gap-3 px-6">
-                                <span class="text-md font-medium">Deleted Members</span>
-                                <span class="text-xs text-gray-400">
-                                    Deleted members cannot be included in new expenses, but will remain visible in older
-                                    expenses. You can invite them to the group again if needed.
-                                </span>
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <template v-for="member in deletedGroupMembers">
-                                    <div
-                                        class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                    >
-                                        <span class="break-all text-xs">{{ member.email }}</span>
-                                        <button
-                                            type="button"
-                                            class="btn btn-link btn-xs no-underline"
-                                            @click="onRestoreDeletedGroupMemberClicked(member)"
+                                <div class="flex flex-col gap-2">
+                                    <template v-for="member in deletedGroupMembers">
+                                        <div
+                                            class="flex flex-row items-center justify-between gap-2 rounded-2xl px-6 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
                                         >
-                                            <span class="loading loading-spinner loading-xs" v-if="isLoading"></span>
-                                            <span v-else>Invite</span>
-                                        </button>
-                                    </div>
-                                </template>
+                                            <span class="break-all text-xs">{{ member.email }}</span>
+                                            <button
+                                                type="button"
+                                                class="btn btn-link btn-xs no-underline"
+                                                @click="onRestoreDeletedGroupMemberClicked(member)"
+                                            >
+                                                <span
+                                                    class="loading loading-spinner loading-xs"
+                                                    v-if="isLoading"
+                                                ></span>
+                                                <span v-else>Invite</span>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
                         </div>
                     </div>
