@@ -99,7 +99,7 @@ class ExpenseCommentController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return $this->CommonController->handleException($e, 'default', 'delete');
+            return $this->CommonController->handleException($e, 'default', 'edit');
         }
     }
 
@@ -121,6 +121,11 @@ class ExpenseCommentController extends Controller
             $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($expense->group_id, auth()->user()->id, false);
             if (!$isGroupMember) {
                 throw new Exception("You are not a member of this group.");
+            }
+
+            $isCommenter = $expenseComment->user_id == auth()->user()->id;
+            if (!$isCommenter) {
+                throw new Exception("You cannot delete this comment as you are not the author.");
             }
 
             ExpenseComment::destroy($request['id']);
