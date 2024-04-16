@@ -237,7 +237,8 @@ const onDistributeExpenseToSelectedUsersEquallyClicked = (forms) => {
             p.amount = amountPerUser;
             remainder -= amountPerUser;
         } else {
-            p.amount = remainder;
+            const roundedRemainder = Number.parseFloat(to2DecimalPlacesIfValid(remainder, false));
+            p.amount = !isNaN(roundedRemainder) ? roundedRemainder : 0;
         }
     });
 };
@@ -264,9 +265,9 @@ const remainingReceiverAmount = computed(() => {
     return expenseForm?.amount - totalAmount;
 });
 const isAmountBalanced = computed(() => {
-    const expenseAmount = expenseForm.amount;
-    const payerAmounts = payerFormArray.value.reduce((total, p) => total + p.amount, 0);
-    const receiverAmounts = receiverFormArray.value.reduce((total, r) => total + r.amount, 0);
+    const expenseAmount = to2DecimalPlacesIfValid(expenseForm.amount);
+    const payerAmounts = to2DecimalPlacesIfValid(payerFormArray.value.reduce((total, p) => total + p.amount, 0));
+    const receiverAmounts = to2DecimalPlacesIfValid(receiverFormArray.value.reduce((total, r) => total + r.amount, 0));
 
     return !!expenseAmount && expenseAmount === payerAmounts && expenseAmount === receiverAmounts;
 });
