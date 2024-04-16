@@ -191,7 +191,7 @@ const onDeleteCommentClicked = (comment) => {
                 />
             </div>
         </div>
-        <div class="mx-auto flex max-w-xl flex-col gap-4 dark:text-gray-200">
+        <div class="mx-auto flex max-w-xl flex-col gap-4 pb-6 dark:text-gray-200">
             <div class="flex w-full flex-row px-4" :class="expense.is_settlement ? 'justify-center' : ''">
                 <div
                     class="badge badge-neutral badge-lg flex flex-row items-center gap-2 dark:badge-secondary dark:font-bold dark:text-gray-700"

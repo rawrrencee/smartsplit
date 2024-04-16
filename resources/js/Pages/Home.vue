@@ -74,18 +74,17 @@ const recentActivityByGroup = computed(() => {
 
 <template>
     <AppLayout title="Home">
-        <div
-            class="relative isolate mx-auto max-w-xl overflow-hidden bg-gray-50 sm:px-6 lg:px-8 dark:bg-gray-700/65"
-            v-if="stats.length > 0"
-        >
-            <div class="border-b border-b-gray-900/10 lg:border-t lg:border-t-gray-900/5 dark:border-b-gray-400/10">
+        <div class="relative isolate mx-auto max-w-xl sm:px-4" v-if="stats.length > 0">
+            <div
+                class="bg-gray-50 shadow-sm lg:border-t lg:border-t-gray-900/5 dark:border-b-gray-400/10 dark:bg-gray-700/65"
+            >
                 <dl class="mx-auto grid max-w-xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:px-2 xl:px-0">
                     <div
                         v-for="(stat, statIdx) in stats"
                         :key="stat.name"
                         :class="[
                             statIdx % 2 === 1 ? 'sm:border-l' : statIdx === 2 ? 'lg:border-l' : '',
-                            'flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-t border-gray-900/5 px-4 py-4 sm:px-6 lg:border-t-0 xl:px-8  dark:border-gray-200/5',
+                            'flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-t border-gray-900/5 px-4 py-4 sm:px-6 lg:border-t-0 xl:px-8 dark:border-gray-200/5',
                         ]"
                     >
                         <dt class="text-sm leading-6 text-gray-600 dark:text-gray-200">{{ stat.name }}</dt>
@@ -108,7 +107,7 @@ const recentActivityByGroup = computed(() => {
                 </dl>
             </div>
         </div>
-        <div class="mx-auto flex max-w-xl flex-col gap-4 px-4 pt-6">
+        <div class="mx-auto flex max-w-xl flex-col gap-4 px-4 py-6">
             <span class="text-xl font-semibold text-gray-700 dark:text-gray-200" v-if="recentActivityByGroup.length > 0"
                 >Recent activity</span
             >

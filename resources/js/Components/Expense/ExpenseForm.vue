@@ -392,7 +392,7 @@ watch(expenseForm, () => {
             <span>Save</span>
         </button>
     </div>
-    <div class="mx-auto flex max-w-xl flex-col gap-6 px-4 sm:px-6 lg:px-8 dark:text-gray-200">
+    <div class="mx-auto flex max-w-xl flex-col gap-6 px-4 pb-6 sm:px-6 lg:px-8 dark:text-gray-200">
         <div class="flex flex-col gap-2">
             <div class="flex flex-col gap-1">
                 <span>Expense to {{ isEdit ? "" : "selected" }} group</span>

@@ -267,7 +267,7 @@ const filteredCurrencies = computed(() =>
             <span>Save</span>
         </button>
     </div>
-    <div class="flex flex-row justify-center">
+    <div class="flex flex-row justify-center pb-6">
         <div class="flex min-w-0 max-w-xl flex-grow flex-col justify-center gap-12 px-4 dark:text-gray-200">
             <div class="flex w-full flex-col gap-2">
                 <div class="flex w-full flex-col gap-1">
