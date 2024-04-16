@@ -24,7 +24,7 @@ class ExpenseCommentController extends Controller
     {
         $request->validate([
             'expense_id' => 'required|exists:expenses,id',
-            'content' => 'required|string|max:500',
+            'content' => 'required|string|max:200',
         ]);
 
         try {
@@ -58,6 +58,79 @@ class ExpenseCommentController extends Controller
                 ->with('type', 'default')
                 ->with('status', 'error')
                 ->with('message', 'Failed to create record: ' . $this->CommonController->formatException($e));
+        }
+    }
+
+    public function editComment(Request $request)
+    {
+        $request->validate([
+            'id' => 'exists:expense_comments,id',
+            'content' => 'required|string|max:200',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $expenseComment = ExpenseComment::where('id', $request['id'])->with(['expense'])->first();
+            if (!isset($expenseComment)) {
+                throw new Exception("Expense not found.");
+            }
+
+            $expense = $expenseComment->expense;
+            $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($expense->group_id, auth()->user()->id, false);
+            if (!$isGroupMember) {
+                throw new Exception("You are not a member of this group.");
+            }
+
+            $expenseComment->update(['content' => $request['content']]);
+
+            DB::commit();
+
+            return redirect()->back()
+                ->with('show', true)
+                ->with('type', 'default')
+                ->with('status', 'success')
+                ->with('message', 'Comment updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return $this->CommonController->handleException($e, 'default', 'delete');
+        }
+    }
+
+    public function deleteComment(Request $request)
+    {
+        $request->validate([
+            'id' => 'exists:expense_comments,id',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $expenseComment = ExpenseComment::where('id', $request['id'])->with(['expense'])->first();
+            if (!isset($expenseComment)) {
+                throw new Exception("Expense not found.");
+            }
+
+            $expense = $expenseComment->expense;
+            $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($expense->group_id, auth()->user()->id, false);
+            if (!$isGroupMember) {
+                throw new Exception("You are not a member of this group.");
+            }
+
+            ExpenseComment::destroy($request['id']);
+
+            DB::commit();
+
+            return redirect()->back()
+                ->with('show', true)
+                ->with('type', 'default')
+                ->with('status', 'success')
+                ->with('message', 'Comment deleted successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return $this->CommonController->handleException($e, 'default', 'delete');
         }
     }
 }

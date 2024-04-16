@@ -5,13 +5,21 @@ import { onMounted, ref, watch } from "vue";
 import ProfilePhotoImage from "../Image/ProfilePhotoImage.vue";
 
 const props = defineProps({
+    isLoading: Boolean,
     commentForm: Object,
     comments: Array,
-    editingComment: String,
+    editingComment: Object,
     shouldClearComment: Boolean,
     userId: Number,
+    showCommentError: Boolean,
 });
-defineEmits(["addCommentClicked", "editCommentClicked", "deleteCommentClicked", "clearCommentErrors"]);
+const emit = defineEmits([
+    "addCommentClicked",
+    "editCommentClicked",
+    "saveEditedCommentClicked",
+    "deleteCommentClicked",
+    "clearCommentErrors",
+]);
 
 const commentsScrollableDiv = ref(null);
 const commentInput = ref(props.editingComment?.value);
@@ -32,6 +40,24 @@ watch(
         }
     },
 );
+
+watch(
+    () => props.editingComment,
+    () => {
+        if (props.editingComment) {
+            commentInput.value = props.editingComment.content ?? "";
+        } else {
+            commentInput.value = "";
+        }
+    },
+);
+
+watch(
+    () => props.showCommentError,
+    () => {
+        console.log(props.showCommentError);
+    },
+);
 </script>
 
 <template>
@@ -43,7 +69,7 @@ watch(
                         <MenuButton
                             as="div"
                             class="chat cursor-pointer px-4"
-                            :class="userId !== comment.user_id ? 'chat-end' : 'chat-start'"
+                            :class="userId === comment.user_id ? 'chat-end' : 'chat-start'"
                         >
                             <ProfilePhotoImage :imageUrl="comment?.user?.profile_photo_url" :is-chat-image="true" />
                             <div class="chat-header pb-1">{{ comment.user?.name }}</div>
@@ -73,14 +99,15 @@ watch(
                                     <MenuItem v-slot="{ active }">
                                         <button
                                             :class="[
-                                                active ? 'bg-gray-500 text-white' : 'text-gray-900',
+                                                active ? 'bg-gray-700 text-gray-200' : 'text-gray-900',
                                                 'group flex w-full items-center rounded-md px-2 py-2 text-sm',
                                             ]"
+                                            @click="$emit('editCommentClicked', comment)"
                                         >
                                             <PencilIcon
                                                 :active="active"
                                                 class="mr-2 h-5 w-5"
-                                                :class="[active ? 'bg-gray-500 text-gray-200' : 'text-gray-400']"
+                                                :class="[active ? 'bg-gray-700 text-gray-200' : 'text-gray-400']"
                                                 aria-hidden="true"
                                             />
                                             Edit
@@ -89,14 +116,15 @@ watch(
                                     <MenuItem v-slot="{ active }">
                                         <button
                                             :class="[
-                                                active ? 'bg-gray-500 text-white' : 'text-gray-900',
+                                                active ? 'bg-gray-700 text-gray-200' : 'text-gray-900',
                                                 'group flex w-full items-center rounded-md px-2 py-2 text-sm',
                                             ]"
+                                            @click="$emit('deleteCommentClicked', comment)"
                                         >
                                             <TrashIcon
                                                 :active="active"
                                                 class="mr-2 h-5 w-5"
-                                                :class="[active ? 'bg-gray-500 text-gray-200' : 'text-gray-400']"
+                                                :class="[active ? 'bg-gray-700 text-gray-200' : 'text-gray-400']"
                                                 aria-hidden="true"
                                             />
                                             Delete
@@ -110,8 +138,14 @@ watch(
             </div>
         </div>
         <div class="flex flex-col">
-            <div v-if="commentForm?.errors['content']" class="flex flex-col bg-error">
+            <div v-if="commentForm?.errors['content'] || showCommentError" class="flex flex-col bg-error">
                 <span class="py-2 pl-4 text-xs text-gray-200">Please enter a comment.</span>
+            </div>
+            <div v-if="editingComment" class="flex flex-col bg-gray-700 py-2 pl-4">
+                <div class="flex flex-col gap-1 border-l-2 border-r-0 pl-2">
+                    <span class="text-xs font-semibold text-gray-400">Edit Message</span>
+                    <span class="text-xs text-gray-200">{{ editingComment.content }}</span>
+                </div>
             </div>
             <div class="relative w-full">
                 <input
@@ -123,9 +157,15 @@ watch(
                     <button
                         type="button"
                         class="btn btn-square btn-neutral rounded-none p-0"
-                        @click="$emit('addCommentClicked', commentInput, commentsScrollableDiv)"
+                        :disabled="isLoading"
+                        @click="
+                            editingComment
+                                ? $emit('saveEditedCommentClicked', editingComment, commentInput)
+                                : $emit('addCommentClicked', commentInput, commentsScrollableDiv)
+                        "
                     >
-                        <PaperAirplaneIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        <span v-if="isLoading" class="loading loading-spinner"></span>
+                        <PaperAirplaneIcon v-else class="h-5 w-5 text-gray-400" aria-hidden="true" />
                     </button>
                 </div>
             </div>

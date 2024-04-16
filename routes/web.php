@@ -69,6 +69,8 @@ Route::middleware([
         Route::post('/delete', [ExpenseController::class, 'deleteExpense'])->name('expenses.delete');
 
         Route::post('/add-comment', [ExpenseCommentController::class, 'addComment'])->name('expenses.add-comment');
+        Route::post('/edit-comment', [ExpenseCommentController::class, 'editComment'])->name('expenses.edit-comment');
+        Route::post('/delete-comment', [ExpenseCommentController::class, 'deleteComment'])->name('expenses.delete-comment');
     });
 
     Route::prefix('settle-up')->group(function () {

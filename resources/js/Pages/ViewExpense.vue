@@ -22,6 +22,7 @@ const commentForm = useForm({
 });
 const editingComment = ref(null);
 const shouldClearComment = ref(false);
+const showCommentError = ref(false);
 
 const isLoading = ref(false);
 const setIsLoading = (value) => {
@@ -96,6 +97,10 @@ const onDeleteClicked = () => {
     );
 };
 
+const onClearCommentErrors = () => {
+    commentForm.clearErrors("content");
+    showCommentError.value = false;
+};
 const onAddCommentClicked = (comment, commentsScrollableDiv) => {
     shouldClearComment.value = false;
     setIsLoading(true);
@@ -107,7 +112,7 @@ const onAddCommentClicked = (comment, commentsScrollableDiv) => {
         .post(route("expenses.add-comment"), {
             onSuccess: (s) => {
                 commentForm.reset();
-                router.reload({ only: ["comments"] });
+                router.reload({ only: ["expense"] });
                 showToastIfNeeded(toast, s.props.flash);
                 shouldClearComment.value = true;
                 if (commentsScrollableDiv) {
@@ -119,11 +124,51 @@ const onAddCommentClicked = (comment, commentsScrollableDiv) => {
             },
         });
 };
+const onSaveEditedCommentClicked = (comment, newContent) => {
+    showCommentError.value = false;
+
+    if (!newContent?.length) {
+        showCommentError.value = true;
+        return;
+    }
+
+    setIsLoading(true);
+    router.post(
+        route("expenses.edit-comment"),
+        { id: comment.id, content: newContent },
+        {
+            onSuccess: (s) => {
+                commentForm.reset();
+                shouldClearComment.value = true;
+                editingComment.value = null;
+                router.reload({ only: ["expense"] });
+                showToastIfNeeded(toast, s.props.flash);
+            },
+            onFinish: () => {
+                setIsLoading(false);
+            },
+        },
+    );
+};
 const onEditCommentClicked = (comment) => {
-    console.log("edit clicked", comment);
+    editingComment.value = comment;
 };
 const onDeleteCommentClicked = (comment) => {
-    console.log("delete clicked", comment);
+    if (!confirm("Are you sure you want to delete this comment?")) return;
+    setIsLoading(true);
+    router.post(
+        route("expenses.delete-comment"),
+        { id: comment.id },
+        {
+            onSuccess: (s) => {
+                router.reload({ only: ["expense"] });
+                showToastIfNeeded(toast, s.props.flash);
+            },
+            onFinish: () => {
+                setIsLoading(false);
+            },
+        },
+    );
 };
 // #endregion Event Handlers
 </script>
@@ -310,15 +355,18 @@ const onDeleteCommentClicked = (comment) => {
     >
         <template v-slot:body>
             <ExpenseComments
+                :isLoading
                 :commentForm
                 :editingComment
                 :shouldClearComment
+                :showCommentError
                 :comments="expense.expense_comments"
                 :userId="auth.user.id"
                 @add-comment-clicked="onAddCommentClicked"
                 @edit-comment-clicked="onEditCommentClicked"
                 @delete-comment-clicked="onDeleteCommentClicked"
-                @clear-comment-errors="commentForm.clearErrors('content')"
+                @clear-comment-errors="onClearCommentErrors"
+                @save-edited-comment-clicked="onSaveEditedCommentClicked"
             />
         </template>
     </DialogAnimated>
