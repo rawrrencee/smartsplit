@@ -82,6 +82,11 @@ class ExpenseCommentController extends Controller
                 throw new Exception("You are not a member of this group.");
             }
 
+            $isCommenter = $expenseComment->user_id == auth()->user()->id;
+            if (!$isCommenter) {
+                throw new Exception("You cannot edit this comment as you are not the author.");
+            }
+
             $expenseComment->update(['content' => $request['content']]);
 
             DB::commit();
