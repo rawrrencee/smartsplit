@@ -367,6 +367,7 @@ const onDeleteCommentClicked = (comment) => {
                 @delete-comment-clicked="onDeleteCommentClicked"
                 @clear-comment-errors="onClearCommentErrors"
                 @save-edited-comment-clicked="onSaveEditedCommentClicked"
+                @clear-editing-comment="editingComment = null"
             />
         </template>
     </DialogAnimated>

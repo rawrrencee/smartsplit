@@ -1,6 +1,6 @@
 <script setup>
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
-import { PaperAirplaneIcon, PencilIcon, TrashIcon } from "@heroicons/vue/24/outline";
+import { PaperAirplaneIcon, PencilIcon, TrashIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 import { onMounted, ref, watch } from "vue";
 import ProfilePhotoImage from "../Image/ProfilePhotoImage.vue";
 
@@ -19,6 +19,7 @@ const emit = defineEmits([
     "saveEditedCommentClicked",
     "deleteCommentClicked",
     "clearCommentErrors",
+    "clearEditingComment",
 ]);
 
 const commentsScrollableDiv = ref(null);
@@ -68,7 +69,7 @@ watch(
                     <Menu as="div">
                         <MenuButton
                             as="div"
-                            class="chat cursor-pointer px-4"
+                            class="chat cursor-pointer px-4 pb-1"
                             :class="userId === comment.user_id ? 'chat-end' : 'chat-start'"
                         >
                             <ProfilePhotoImage :imageUrl="comment?.user?.profile_photo_url" :is-chat-image="true" />
@@ -141,11 +142,14 @@ watch(
             <div v-if="commentForm?.errors['content'] || showCommentError" class="flex flex-col bg-error">
                 <span class="py-2 pl-4 text-xs text-gray-200">Please enter a comment.</span>
             </div>
-            <div v-if="editingComment" class="flex flex-col bg-gray-700 py-2 pl-4">
+            <div v-if="editingComment" class="flex flex-row justify-between bg-gray-700 py-2 pl-4">
                 <div class="flex flex-col gap-1 border-l-2 border-r-0 pl-2">
                     <span class="text-xs font-semibold text-gray-400">Edit Message</span>
                     <span class="text-xs text-gray-200">{{ editingComment.content }}</span>
                 </div>
+                <button type="button" class="pr-2 text-gray-200" @click="$emit('clearEditingComment')">
+                    <XMarkIcon class="h-6 w-6" />
+                </button>
             </div>
             <div class="relative w-full">
                 <input
