@@ -64,12 +64,12 @@ class ExpenseController extends Controller
                 $query->orderBy('created_at', 'asc');
             },
             'expenseComments.user' => function ($query) {
-                $query->select('id', 'name');
+                $query->select('id', 'name', 'profile_photo_path');
             },
             'expenseDetails.payer' => function ($query) {
-                $query->select('id', 'name');
+                $query->select('id', 'name', 'profile_photo_path');
             }, 'expenseDetails.receiver' => function ($query) {
-                $query->select('id', 'name');
+                $query->select('id', 'name', 'profile_photo_path');
             }, 'createdBy' => function ($query) {
                 $query->select('id', 'name');
             }, 'updatedBy' => function ($query) {
