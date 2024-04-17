@@ -113,6 +113,9 @@ const onRemovePhotoClicked = () => {
                             <XMarkIcon class="h-6 w-6" aria-hidden="true" />
                         </button>
                     </div>
+                    <span v-if="form.errors?.['group_photo']" class="text-error dark:text-red-400">{{
+                        form.errors?.["group_photo"]
+                    }}</span>
                     <div v-if="isEditing && group?.img_path">
                         <button
                             type="button"

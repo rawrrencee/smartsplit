@@ -245,7 +245,7 @@ class GroupController extends Controller
     {
         $request->validate([
             'group_title' => 'required|max:25',
-            'group_photo' => 'nullable|image',
+            'group_photo' => ['nullable', 'image', 'max:4096'],
         ]);
 
         $request['owner_id'] = auth()->user()->id;
@@ -398,7 +398,7 @@ class GroupController extends Controller
         $request->validate([
             'id' => 'required|exists:groups,id',
             'group_title' => 'required|max:25',
-            'group_photo' => 'nullable|image',
+            'group_photo' => ['nullable', 'image', 'max:4096'],
         ]);
 
         $isGroupMember = $this->isGroupMemberWithUserIdExisting($request['id'], auth()->user()->id, false);
