@@ -1,5 +1,6 @@
 <script setup>
 import {
+    distributeEqually,
     getAllCurrencies,
     kDefaultExpenseCurrencyKey,
     kDefaultExpenseGroupKey,
@@ -224,16 +225,10 @@ const onDistributeExpenseToSelectedUsersEquallyClicked = (forms) => {
     if (selectedForms.length === 0) {
         return;
     }
-    let remainder = expenseForm.amount;
-    const amountPerUser = Number.parseFloat(to2DecimalPlacesIfValid(expenseForm.amount / selectedForms.length, false));
+    const amountsDistributed = distributeEqually(expenseForm.amount, selectedForms.length);
     selectedForms.forEach((p, i) => {
-        if (i !== selectedForms.length - 1) {
-            p.amount = amountPerUser;
-            remainder -= amountPerUser;
-        } else {
-            const roundedRemainder = Number.parseFloat(to2DecimalPlacesIfValid(remainder, false));
-            p.amount = !isNaN(roundedRemainder) ? roundedRemainder : 0;
-        }
+        const amountPerUser = amountsDistributed?.[i] ?? 0;
+        p.amount = amountPerUser;
     });
 };
 const onSelectUser = (isPayer, form) => {

@@ -77,6 +77,19 @@ export const showToastIfNeeded = (toast, flash) => {
     }
 };
 
+export const distributeEqually = (amount, people) => {
+    const m = amount * 100;
+    const n = m % people;
+    const v = Math.floor(m / people) / 100;
+    const w = Math.floor(m / people + 1) / 100;
+    let out = new Array(people);
+
+    for (let i = 0; i < people; ++i) {
+        out[i] = i < n ? w : v;
+    }
+    return out;
+};
+
 export const to2DecimalPlacesIfValid = (value, withSeparator = true) => {
     const floatVal = Number.parseFloat(value);
     if (typeof floatVal === "number" && !isNaN(floatVal)) {
