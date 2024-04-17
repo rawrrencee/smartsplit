@@ -1,6 +1,7 @@
 <script setup>
 import AnimatedCat from "@/Components/AnimatedCat.vue";
 import { TransitionRoot } from "@headlessui/vue";
+import { KeyIcon, UserIcon } from "@heroicons/vue/24/outline";
 import { Head, router } from "@inertiajs/vue3";
 
 defineProps({
@@ -8,6 +9,7 @@ defineProps({
     canRegister: Boolean,
     laravelVersion: String,
     phpVersion: String,
+    auth: Object,
 });
 </script>
 
@@ -58,16 +60,37 @@ defineProps({
                             </div>
                         </div>
                         <div class="flex items-center justify-center gap-x-6">
-                            <button type="button" class="btn btn-outline btn-xs" @click="router.visit('register')">
-                                Register
-                            </button>
-                            <button
-                                type="button"
-                                class="text-sm font-semibold leading-6 text-gray-900"
-                                @click="router.visit('login')"
-                            >
-                                Login <span aria-hidden="true">→</span>
-                            </button>
+                            <template v-if="auth.user">
+                                <button
+                                    type="button"
+                                    class="btn btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                                    @click="router.visit('home')"
+                                >
+                                    Dashboard
+                                </button>
+                            </template>
+                            <template v-else>
+                                <div class="flex flex-col items-center gap-2">
+                                    <div class="flex flex-row items-center gap-2">
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline min-w-0 dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                                            @click="router.visit('register')"
+                                        >
+                                            <KeyIcon class="h-4 w-4" />
+                                            <span>Register</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline min-w-0 dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                                            @click="router.visit('login')"
+                                        >
+                                            <UserIcon class="h-4 w-4" />
+                                            <span>Login</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </TransitionRoot>
