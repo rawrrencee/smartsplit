@@ -226,7 +226,9 @@ class ExpenseController extends Controller
                 ->with('show', true)
                 ->with('type', 'default')
                 ->with('status', 'success')
-                ->with('message', $message);
+                ->with('message', $message)
+                ->with('route', 'expenses.view')
+                ->with('id', $expense->id);
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -264,14 +266,22 @@ class ExpenseController extends Controller
 
             // Set receiver name
             if ($isSettlement) {
+                if (!isset($request['payer_details'][0]) || !isset($request['payer_details'][0]['user_id']) || !isset($request['payer_details'][0]['receiver_id'])) {
+                    throw new Exception("Invalid payer or receiver details.");
+                }
+
                 $payer = $this->UserController->getUserByUserId($request['payer_details'][0]['user_id']);
                 if (isset($payer)) {
                     $request['payer_name'] = $payer->name;
+                } else {
+                    throw new Exception("Payer of settlement was not found.");
                 }
 
                 $receiver = $this->UserController->getUserByUserId($request['payer_details'][0]['receiver_id']);
                 if (isset($receiver)) {
                     $request['receiver_name'] = $receiver->name;
+                } else {
+                    throw new Exception("Recipient of settlement was not found.");
                 }
 
                 $currencySymbol = $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $request['currency_key'], 'key', 'symbol');
@@ -283,39 +293,81 @@ class ExpenseController extends Controller
             $request['updated_by'] = auth()->user()->id;
 
             $expense = Expense::where('id', $request['id'])->first();
+            if (!isset($expense)) {
+                throw new Exception("Expense to update was not found.");
+            }
             $expense->update($request->only(['group_id', 'date', 'category', 'description', 'currency_key', 'amount', 'num_payers', 'payer_name', 'receiver_name', 'is_settlement', 'created_by', 'updated_by']));
 
+            if (!$isSettlement) {
+                $existingExpenseDetails = ExpenseDetail::where('expense_id', $expense->id)->get();
+                $requestPayers = collect($request['payer_details']);
+                $requestReceivers = collect($request['receiver_details']);
 
-            // Delete existing expense details
-            ExpenseDetail::where('expense_id', $expense->id)->delete();
+                foreach ($existingExpenseDetails as $ed) {
+                    $payerToUpdate = $requestPayers->first(function ($p) use ($ed) {
+                        return isset($p['id']) && $p['user_id'] == $ed->payer_id;
+                    });
+                    $receiverToUpdate = $requestReceivers->first(function ($r) use ($ed) {
+                        return isset($r['id']) && $r['user_id'] == $ed->receiver_id;
+                    });
 
-            foreach ($request['payer_details'] as $payer) {
-                $data = [
-                    'group_id' => $expense->group_id,
-                    'expense_id' => $expense->id,
-                    'payer_id' => $payer['user_id'],
-                    'currency_key' => $expense->currency_key,
-                    'amount' => $payer['amount'],
-                    'is_settlement' => $isSettlement,
-                ];
-                if ($isSettlement) {
-                    $data['receiver_id'] = $payer['receiver_id'];
+                    // Update existing expense details if found
+                    if (isset($payerToUpdate)) {
+                        $ed->update(['amount' => $payerToUpdate['amount'], 'currency_key' => $expense->currency_key]);
+                    } else if (isset($receiverToUpdate)) {
+                        $ed->update(['amount' => -$receiverToUpdate['amount'], 'currency_key' => $expense->currency_key]);
+                    } else {
+                        // Delete existing expense detail if not found
+                        $ed->delete();
+                    }
                 }
 
-                ExpenseDetail::create($data);
-            }
+                // Create if null expense detail id
+                $newPayers = $requestPayers->whereNull('id')->all();
+                $newReceivers = $requestReceivers->whereNull('id')->all();
 
-            foreach ($request['receiver_details'] as $receiver) {
-                $data = [
-                    'group_id' => $expense->group_id,
-                    'expense_id' => $expense->id,
-                    'receiver_id' => $receiver['user_id'],
-                    'currency_key' => $expense->currency_key,
-                    'amount' => -$receiver['amount'],
-                    'is_settlement' => $isSettlement,
-                ];
+                foreach ($newPayers as $payer) {
+                    $data = [
+                        'group_id' => $expense->group_id,
+                        'expense_id' => $expense->id,
+                        'payer_id' => $payer['user_id'],
+                        'currency_key' => $expense->currency_key,
+                        'amount' => $payer['amount'],
+                        'is_settlement' => $isSettlement,
+                    ];
 
-                ExpenseDetail::create($data);
+                    ExpenseDetail::create($data);
+                }
+
+                foreach ($newReceivers as $receiver) {
+                    $data = [
+                        'group_id' => $expense->group_id,
+                        'expense_id' => $expense->id,
+                        'receiver_id' => $receiver['user_id'],
+                        'currency_key' => $expense->currency_key,
+                        'amount' => -$receiver['amount'],
+                        'is_settlement' => $isSettlement,
+                    ];
+
+                    ExpenseDetail::create($data);
+                }
+            } else {
+                // is settlement
+                $existingExpenseDetails = ExpenseDetail::where('expense_id', $expense->id)->get();
+
+                if ($existingExpenseDetails->isEmpty() || count($existingExpenseDetails) > 1) {
+                    throw new Exception("Invalid expense details for settlement.");
+                }
+
+                foreach ($existingExpenseDetails as $ed) {
+                    $ed->update([
+                        'amount' => $request['amount'],
+                        'currency_key' => $expense->currency_key,
+                        'payer_id' => $request['payer_details'][0]['user_id'],
+                        'receiver_id' => $request['payer_details'][0]['receiver_id'],
+                        'is_settlement' => true,
+                    ]);
+                }
             }
 
             DB::commit();

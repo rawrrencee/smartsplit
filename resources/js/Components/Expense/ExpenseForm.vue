@@ -89,16 +89,18 @@ const expenseForm = useForm({
     payer_details: [],
     receiver_details: [],
 });
-const generateExpenseDetail = (user, amount = null, shouldSelectAll = false, selectedUserIds) => {
+const generateExpenseDetail = (user, amount = null, shouldSelectAll = false, expenseDetailId, isSelected) => {
     return useForm({
         user_id: user.id,
+        id: expenseDetailId ?? null,
         amount: amount && !isNaN(parseFloat(amount)) ? Math.abs(parseFloat(amount)) : null,
-        isSelected: shouldSelectAll || selectedUserIds?.includes(user.id),
+        isSelected: shouldSelectAll || isSelected,
         user,
     });
 };
 const mapExpenseDetailToFormData = (expenseDetail) => {
     return {
+        id: expenseDetail.id,
         user_id: expenseDetail.user_id,
         amount: expenseDetail.amount,
         is_settlement: false,
@@ -113,37 +115,29 @@ const currenciesFromSource = computed(() => {
         return props.currencies;
     }
 });
+const updateExpenseDetailsFormArray = () => {
+    currentGroup.value?.group_members?.forEach((m) => {
+        const existingPayerDetail = props.expense?.expense_details.find((d) => d.payer_id === m.user?.id);
+        const existingReceiverDetail = props.expense?.expense_details.find((d) => d.receiver_id === m.user?.id);
 
-const getAmountFromExpense = (userId, isPayer) => {
-    if (isPayer) {
-        return props.expense?.expense_details.find((d) => d.payer_id === userId)?.amount ?? null;
-    } else {
-        return props.expense?.expense_details.find((d) => d.receiver_id === userId)?.amount ?? null;
-    }
-};
-const updatePayerFormArray = () => {
-    payerFormArray.value =
-        currentGroup.value?.group_members?.map((m) =>
-            generateExpenseDetail(
-                m.user,
-                getAmountFromExpense(m.user.id, true),
-                false,
-                props.isEdit
-                    ? props.expense?.expense_details.filter((d) => d.payer_id >= 0).map((d) => d.payer_id)
-                    : [props.auth.user.id],
-            ),
-        ) ?? [];
-    receiverFormArray.value =
-        currentGroup.value?.group_members?.map((m) =>
-            generateExpenseDetail(
-                m.user,
-                getAmountFromExpense(m.user.id, false),
-                !props.isEdit,
-                props.isEdit
-                    ? props.expense?.expense_details.filter((d) => d.receiver_id >= 0).map((d) => d.receiver_id)
-                    : null,
-            ),
-        ) ?? [];
+        const payerDetail = generateExpenseDetail(
+            m.user,
+            existingPayerDetail?.amount ?? null,
+            false,
+            existingPayerDetail?.id,
+            props.isEdit ? !!existingPayerDetail : props.auth.user.id === m.user?.id,
+        );
+        const receiverDetail = generateExpenseDetail(
+            m.user,
+            existingReceiverDetail?.amount ?? null,
+            !props.isEdit,
+            existingReceiverDetail?.id,
+            !!existingReceiverDetail,
+        );
+
+        payerFormArray.value = [...payerFormArray.value, payerDetail];
+        receiverFormArray.value = [...receiverFormArray.value, receiverDetail];
+    });
 };
 const allPayersSelected = computed(() => {
     return payerFormArray.value.every((payer) => payer.isSelected);
@@ -194,7 +188,7 @@ const selectedGroupId = ref(getSelectedGroupId());
 const setSelectedGroupId = (groupId) => {
     sessionStorage.setItem(kDefaultExpenseGroupKey, groupId);
     selectedGroupId.value = getSelectedGroupIdFromSessionStorage();
-    updatePayerFormArray();
+    updateExpenseDetailsFormArray();
 };
 const onGroupClicked = (groupId) => {
     setSelectedGroupId(groupId);
@@ -493,6 +487,7 @@ watch(expenseForm, () => {
                         placeholder="0.00"
                         v-model="expenseForm.amount"
                         inputId="minmaxfraction"
+                        :min="0.0"
                         :minFractionDigits="2"
                         :maxFractionDigits="2"
                     />

@@ -57,7 +57,7 @@ class GroupController extends Controller
                 $query->whereNotNull('user_id');
             }
 
-            $query->select('id', 'group_id', 'user_id', 'status');
+            $query->select('id', 'group_id', 'user_id', 'status')->orderBy('user_id');
             if ($withUser) {
                 $query->with(['user' => function ($query) {
                     $query->select('id', 'name', 'email', 'profile_photo_path');
@@ -268,7 +268,7 @@ class GroupController extends Controller
                 ->with('type', 'default')
                 ->with('status', 'success')
                 ->with('message', 'Group created successfully.')
-                ->with('route', 'groups')
+                ->with('route', 'groups.view')
                 ->with('id', $group->id);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -325,9 +325,7 @@ class GroupController extends Controller
                 ->with('show', true)
                 ->with('type', 'default')
                 ->with('status', 'success')
-                ->with('message', 'Group member added successfully.')
-                ->with('route', 'groups.view')
-                ->with('id', $groupMember->id);
+                ->with('message', 'Group member added successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -355,9 +353,7 @@ class GroupController extends Controller
                     ->with('show', true)
                     ->with('type', 'default')
                     ->with('status', 'success')
-                    ->with('message', 'Group member removed successfully.')
-                    ->with('route', 'groups.view')
-                    ->with('id', $groupMember->group_id);
+                    ->with('message', 'Group member removed successfully.');
             } catch (\Exception $e) {
                 DB::rollBack();
 
@@ -427,9 +423,7 @@ class GroupController extends Controller
                 ->with('show', true)
                 ->with('type', 'default')
                 ->with('status', 'success')
-                ->with('message', 'Group updated successfully.')
-                ->with('route', 'groups')
-                ->with('id', $group->id);
+                ->with('message', 'Group updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -472,9 +466,7 @@ class GroupController extends Controller
                     ->with('show', true)
                     ->with('type', 'default')
                     ->with('status', 'success')
-                    ->with('message', $message)
-                    ->with('route', 'groups.view')
-                    ->with('id', $groupMember->group_id);
+                    ->with('message', $message);
             } catch (\Exception $e) {
                 DB::rollBack();
 

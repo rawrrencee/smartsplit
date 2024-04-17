@@ -51,9 +51,10 @@ const groupForm = useForm({
 const createGroup = (formData) => {
     setIsLoading(true);
     formData.post(route("groups.add"), {
-        onSuccess: () => {
+        onSuccess: (s) => {
             setIsDialogOpen(false);
             groupForm.reset();
+            showToastIfNeeded(toast, s.props.flash);
         },
         onFinish: () => {
             setIsLoading(false);

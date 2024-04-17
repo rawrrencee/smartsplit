@@ -16,6 +16,7 @@ import {
     UserGroupIcon,
     WrenchIcon,
 } from "@heroicons/vue/24/outline";
+import { router } from "@inertiajs/vue3";
 
 export const kAllCurrenciesKey = "allCurrencies";
 export const kDefaultExpenseGroupKey = "addExpenseDefaultGroupId";
@@ -59,8 +60,20 @@ export const getImgSrcFromPath = (path) => {
 
 export const showToastIfNeeded = (toast, flash) => {
     if (flash.show) {
-        if (flash.status === "error") toast.error(flash.message);
-        else toast.success(flash.message);
+        if (flash.status === "error") {
+            toast.error(flash.message);
+        } else {
+            if (flash.route && flash.id && route().has(flash.route)) {
+                toast.success(flash.message, {
+                    action: {
+                        label: "View",
+                        onClick: () => router.get(route(flash.route), { id: flash.id }),
+                    },
+                });
+                return;
+            }
+            toast.success(flash.message);
+        }
     }
 };
 

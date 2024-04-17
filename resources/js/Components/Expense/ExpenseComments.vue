@@ -52,18 +52,11 @@ watch(
         }
     },
 );
-
-watch(
-    () => props.showCommentError,
-    () => {
-        console.log(props.showCommentError);
-    },
-);
 </script>
 
 <template>
     <div class="flex h-full flex-col justify-between">
-        <div class="flex flex-1 flex-col overflow-y-scroll bg-gray-50" ref="commentsScrollableDiv">
+        <div class="flex flex-1 flex-col overflow-y-scroll bg-gray-50 dark:bg-gray-900" ref="commentsScrollableDiv">
             <div v-if="comments.length > 0">
                 <template v-for="comment in comments" :key="comment.id">
                     <Menu as="div">
@@ -73,9 +66,11 @@ watch(
                             :class="userId === comment.user_id ? 'chat-end' : 'chat-start'"
                         >
                             <ProfilePhotoImage :imageUrl="comment?.user?.profile_photo_url" :is-chat-image="true" />
-                            <div class="chat-header pb-1">{{ comment.user?.name }}</div>
                             <div class="chat-bubble items-center break-words dark:bg-gray-600">
-                                <span>{{ comment.content }}</span>
+                                <p class="font-bold text-blue-300">
+                                    {{ comment.user?.name }}
+                                </p>
+                                <p>{{ comment.content }}</p>
                             </div>
                             <div class="chat-footer pt-1 text-xs opacity-50">
                                 <time>{{
@@ -153,8 +148,9 @@ watch(
             </div>
             <div class="relative w-full">
                 <input
-                    class="input join-item w-full py-1.5 pr-10 text-xs text-gray-600 disabled:bg-gray-300 dark:bg-gray-900 dark:text-gray-50"
+                    class="input join-item w-full py-1.5 pr-14 text-xs text-gray-600 disabled:bg-gray-300 dark:bg-gray-900 dark:text-gray-50"
                     v-model="commentInput"
+                    :maxlength="200"
                     @change="$emit('clearCommentErrors')"
                 />
                 <div class="absolute inset-y-0 right-0 flex items-center">

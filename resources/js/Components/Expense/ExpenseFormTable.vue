@@ -101,6 +101,7 @@ const onSelectUser = (form) => {
                         placeholder="0.00"
                         v-model="form.amount"
                         :inputId="`minmaxfraction-${form.user_id}`"
+                        :min="0.0"
                         :minFractionDigits="2"
                         :maxFractionDigits="2"
                     />

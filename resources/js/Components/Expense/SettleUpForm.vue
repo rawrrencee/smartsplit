@@ -407,6 +407,7 @@ const filteredCurrencies = computed(() =>
                                 placeholder="0.00"
                                 v-model="expenseForm.amount"
                                 inputId="minmaxfraction"
+                                :min="0.0"
                                 :minFractionDigits="2"
                                 :maxFractionDigits="2"
                             />
