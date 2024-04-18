@@ -24,7 +24,7 @@ defineProps({
     <div v-if="providers.length" class="mb-2 mt-6 space-y-6">
         <div class="relative flex items-center">
             <div class="flex-grow border-t border-gray-400"></div>
-            <span class="flex-shrink px-6 text-gray-400">
+            <span class="flex-shrink px-6 text-gray-400 dark:text-gray-50">
                 {{ prompt }}
             </span>
             <div class="flex-grow border-t border-gray-400"></div>
@@ -36,11 +36,11 @@ defineProps({
             <a
                 v-for="provider in providers"
                 :key="provider.id"
-                class="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-400 py-2.5 text-center text-sm font-normal shadow-sm transition duration-200 hover:shadow-md"
+                class="btn btn-outline btn-md dark:border-0 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-600"
                 :href="route('oauth.redirect', provider.id)"
             >
                 <ProviderIcon :provider="provider" classes="h-6 w-6 mx-2" />
-                <span class="block text-sm font-medium text-gray-700">{{ provider.buttonLabel || provider.name }}</span>
+                <span class="block text-sm font-medium">{{ provider.buttonLabel || provider.name }}</span>
             </a>
         </div>
     </div>
