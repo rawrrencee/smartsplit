@@ -141,6 +141,12 @@ const updateExpenseDetailsFormArray = () => {
         payerFormArray.value = [...payerFormArray.value, payerDetail];
         receiverFormArray.value = [...receiverFormArray.value, receiverDetail];
     });
+    if (shouldDistributePayersEqually.value) {
+        onDistributeExpenseToSelectedUsersEquallyClicked(payerFormArray.value);
+    }
+    if (shouldDistributeReceiversEqually.value) {
+        onDistributeExpenseToSelectedUsersEquallyClicked(receiverFormArray.value);
+    }
 };
 const allPayersSelected = computed(() => {
     return payerFormArray.value.every((payer) => payer.isSelected);
