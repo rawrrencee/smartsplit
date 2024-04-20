@@ -78,7 +78,7 @@ const recentActivityByGroup = computed(() => {
             <div
                 class="bg-gray-50 shadow-sm lg:border-t lg:border-t-gray-900/5 dark:border-b-gray-400/10 dark:bg-gray-700/65"
             >
-                <dl class="mx-auto grid max-w-xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:px-2 xl:px-0">
+                <dl class="mx-auto grid max-w-xl grid-cols-1 sm:grid-cols-2">
                     <div
                         v-for="(stat, statIdx) in stats"
                         :key="stat.name"
