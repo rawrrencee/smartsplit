@@ -35,7 +35,10 @@ class HomeController extends Controller
         })->select('id', 'group_title', 'img_path')->take($limit)->get();
 
         foreach ($groups as $group) {
-            $expenses = $this->GroupController->mapExpenseDetailsByDate($this->GroupController->getExpensesWithGroupForUser($group->id, $limit, $limit), $userId);
+            $expenses = $this->GroupController->mapExpenseDetailsByDate(
+                $this->GroupController->getExpensesWithGroupForUser($group->id, $limit, $limit),
+                $userId
+            );
             if (count($expenses) > 0) {
                 $result[] = (object) array(
                     'group' => $group,

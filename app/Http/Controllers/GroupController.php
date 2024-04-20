@@ -121,7 +121,7 @@ class GroupController extends Controller
         return false;
     }
 
-    public function getExpensesWithGroupForUser($groupId, $perPage, $limit = null)
+    public function getExpensesWithGroupForUser($groupId, $perPage, $limit = null, $userId = null)
     {
         $expenseQuery = Expense::select(
             DB::raw('YEAR(date) as year'),
@@ -146,6 +146,12 @@ class GroupController extends Controller
 
         if (isset($limit)) {
             $expenseQuery = $expenseQuery->take($limit);
+        }
+
+        if (isset($userId)) {
+            $expenseQuery->whereHas('expenseDetails', function ($query) use ($userId) {
+                $query->where('payer_id', $userId)->orWhere('receiver_id', $userId);
+            });
         }
 
         return $expenseQuery->paginate($perPage ?? 300);
@@ -229,7 +235,7 @@ class GroupController extends Controller
             ->with(['user'])
             ->get();
 
-        $expenses = $this->getExpensesWithGroupForUser($id, $request['perPage'], null);
+        $expenses = $this->getExpensesWithGroupForUser($id, $request['perPage'], null, $request['onlyUser']);
 
         try {
             $groupBalance = $this->ExpenseDetailController->getGroupBalance($id);

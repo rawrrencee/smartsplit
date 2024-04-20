@@ -19,6 +19,7 @@ import {
     PlusIcon,
     XMarkIcon,
 } from "@heroicons/vue/24/outline";
+import { CheckCircleIcon } from "@heroicons/vue/24/solid";
 import { router, useForm } from "@inertiajs/vue3";
 import { computed, onMounted, ref } from "vue";
 import { toast } from "vue-sonner";
@@ -42,8 +43,6 @@ onMounted(() => {
     }
 });
 
-console.log(props.groupBalance);
-
 const back = () => {
     if (route().params.returnTo === "home") {
         router.visit(route("home"));
@@ -66,6 +65,31 @@ const setIsDialogOpen = (value, mode) => {
         addMemberForm.clearErrors();
     }
 };
+
+const selectedUserIdToViewExpenses = ref(
+    isNaN(parseInt(route().params.onlyUser)) ? null : parseInt(route().params.onlyUser),
+);
+console.log(route().params.onlyUser);
+
+const setSelectedUserIdToViewExpenses = (userId) => {
+    const shouldUnset = selectedUserIdToViewExpenses.value === userId;
+    if (shouldUnset) {
+        selectedUserIdToViewExpenses.value = null;
+    } else {
+        selectedUserIdToViewExpenses.value = userId;
+    }
+
+    setIsDialogOpen(false, dialogMode.value);
+    router.reload({
+        data: {
+            onlyUser: shouldUnset ? null : userId,
+        },
+        only: ["expenses", "paginatedResults"],
+    });
+};
+const showingExpensesForUserName = computed(() => {
+    return props.groupMembers?.find((m) => m.user_id === selectedUserIdToViewExpenses.value)?.user.name ?? null;
+});
 
 const hasValidOwedAmountsArray = computed(() => {
     if (isNaN(parseInt(props.auth.user?.id))) return false;
@@ -200,6 +224,17 @@ const expenseDetails = computed(() => {
     }
     return expenses;
 });
+
+const dialogTitleFromMode = computed(() => {
+    switch (dialogMode.value) {
+        case "groupMembers":
+            return `Group Members (${activeGroupMembers.value.length ?? 0})`;
+        case "viewBalances":
+            return "Group Balances";
+        case "filterExpensesByMember":
+            return "Filter Expenses";
+    }
+});
 </script>
 
 <template>
@@ -312,8 +347,12 @@ const expenseDetails = computed(() => {
                     <button
                         type="button"
                         class="btn btn-outline btn-xs dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                        @click="setIsDialogOpen(true, 'filterExpensesByMember')"
                     >
-                        Show only my expenses
+                        <span v-if="showingExpensesForUserName">
+                            Showing expenses for {{ showingExpensesForUserName }}
+                        </span>
+                        <span v-else>Filter expenses by member</span>
                     </button>
                 </div>
             </div>
@@ -348,9 +387,7 @@ const expenseDetails = computed(() => {
 
     <DialogAnimated
         :is-dialog-open="isDialogOpen"
-        :dialog-title="
-            dialogMode === 'groupMembers' ? `Group Members (${activeGroupMembers.length ?? 0})` : 'Group Balances'
-        "
+        :dialog-title="dialogTitleFromMode"
         :size="dialogMode === 'groupMembers' ? 'xl' : '2xl'"
         @dialog-closed="setIsDialogOpen(false, dialogMode)"
     >
@@ -591,6 +628,32 @@ const expenseDetails = computed(() => {
                             </span>
                         </div>
                     </div>
+                </template>
+            </div>
+        </template>
+
+        <template v-slot:body v-if="dialogMode === 'filterExpensesByMember'">
+            <div class="scrollbar-none flex h-full flex-col gap-2 overflow-y-scroll pb-4 [&::-webkit-scrollbar]:hidden">
+                <template v-for="m in groupMembers">
+                    <button
+                        type="button"
+                        class="flex flex-row items-center justify-between gap-2 px-6 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        @click="setSelectedUserIdToViewExpenses(m.user_id)"
+                    >
+                        <div class="flex min-w-0 flex-row items-center gap-2">
+                            <ProfilePhotoImage v-if="m.user?.profile_photo_url" :image-url="m.user.profile_photo_url" />
+                            <PlaceholderImage :size="6" v-else />
+                            <div class="flex min-w-0 flex-col gap-1 py-2 text-start">
+                                <span class="truncate text-sm font-medium">
+                                    {{ m.user?.name }}
+                                </span>
+                            </div>
+                        </div>
+                        <CheckCircleIcon
+                            class="h-6 w-6 text-success"
+                            v-if="selectedUserIdToViewExpenses === m.user_id"
+                        />
+                    </button>
                 </template>
             </div>
         </template>
