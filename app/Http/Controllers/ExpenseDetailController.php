@@ -77,16 +77,18 @@ class ExpenseDetailController extends Controller
                     if ($currencyDelta->amount->isNegative() && $otherMemberCurrencyDelta->amount->isPositive()) {
                         $amountToRepay = Money::min($currencyDelta->amount->absolute(), $otherMemberCurrencyDelta->amount);
                         $currencyDelta->amount = $currencyDelta->amount->add($amountToRepay);
+                        error_log(json_encode($currencyDelta));
                         $otherMemberCurrencyDelta->amount = $otherMemberCurrencyDelta->amount->subtract($amountToRepay);
+                        error_log(json_encode($otherMemberCurrencyDelta));
                         $membersOwedAmounts[$member->user_id][] = $this->generateAmountOwed(
                             $otherMember->user_id,
-                            $moneyFormatter->format($amountToRepay->multiply('-1')),
+                            $moneyFormatter->format($amountToRepay),
                             $currencyDelta->symbol,
                             $currencyDelta->currency_key
                         );
                         $membersOwedAmounts[$otherMember->user_id][] = $this->generateAmountOwed(
                             $member->user_id,
-                            $moneyFormatter->format($amountToRepay),
+                            $moneyFormatter->format($amountToRepay->multiply('-1')),
                             $currencyDelta->symbol,
                             $currencyDelta->currency_key
                         );
