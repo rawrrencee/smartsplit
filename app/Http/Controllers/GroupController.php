@@ -232,6 +232,7 @@ class GroupController extends Controller
 
         $groupMembers = GroupMember::withTrashed()
             ->where('group_id', $id)
+            ->orderBy('user_id', 'asc')
             ->with(['user'])
             ->get();
 
