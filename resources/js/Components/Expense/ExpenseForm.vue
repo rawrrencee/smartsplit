@@ -117,6 +117,8 @@ const currenciesFromSource = computed(() => {
     }
 });
 const updateExpenseDetailsFormArray = () => {
+    payerFormArray.value = [];
+    receiverFormArray.value = [];
     currentGroup.value?.group_members?.forEach((m) => {
         const existingPayerDetail = props.expense?.expense_details.find((d) => d.payer_id === m.user?.id);
         const existingReceiverDetail = props.expense?.expense_details.find((d) => d.receiver_id === m.user?.id);
