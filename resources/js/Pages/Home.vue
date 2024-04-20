@@ -90,14 +90,14 @@ const recentActivityByGroup = computed(() => {
                         <dt class="text-sm leading-6 text-gray-600 dark:text-gray-200">{{ stat.name }}</dt>
                         <dd class="text-md w-full flex-none font-medium leading-6 tracking-tight text-gray-900">
                             <template v-if="stat.key === 'negative'" v-for="(v, i) in negativeAmount">
-                                <span v-if="i !== 0"> + </span>
+                                <span v-if="i !== 0" class="dark:text-gray-200"> + </span>
                                 <span class="text-red-800 dark:text-red-400"
                                     >{{ v.symbol }}{{ to2DecimalPlacesIfValid(Math.abs(parseFloat(v.amount))) }}</span
                                 >
                             </template>
 
                             <template v-if="stat.key === 'positive'" v-for="(v, i) in positiveAmount">
-                                <span v-if="i !== 0"> + </span>
+                                <span v-if="i !== 0" class="dark:text-gray-200"> + </span>
                                 <span class="text-success"
                                     >{{ v.symbol }}{{ to2DecimalPlacesIfValid(Math.abs(parseFloat(v.amount))) }}</span
                                 >

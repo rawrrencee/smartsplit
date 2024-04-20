@@ -10,23 +10,6 @@ const props = defineProps({
 });
 
 defineEmits(["groupClicked"]);
-
-// const groupsWithDeltas = computed(() => {
-//     return props.groups.map((g) => {
-//         return {
-//             ...g,
-//             ...(g.delta && {
-//                 deltas:
-//                     Object.keys(g.delta)?.map((c) => {
-//                         return {
-//                             symbol: g.delta[c].symbol,
-//                             amount: g.delta[c].amount,
-//                         };
-//                     }) ?? [],
-//             }),
-//         };
-//     });
-// });
 </script>
 
 <template>

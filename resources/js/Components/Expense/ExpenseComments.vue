@@ -56,7 +56,10 @@ watch(
 
 <template>
     <div class="flex h-full flex-col justify-between">
-        <div class="flex flex-1 flex-col overflow-y-scroll bg-gray-50 dark:bg-gray-900" ref="commentsScrollableDiv">
+        <div
+            class="scrollbar-none flex flex-1 flex-col overflow-y-scroll bg-gray-50 dark:bg-gray-900 [&::-webkit-scrollbar]:hidden"
+            ref="commentsScrollableDiv"
+        >
             <div v-if="comments.length > 0">
                 <template v-for="comment in comments" :key="comment.id">
                     <Menu as="div">

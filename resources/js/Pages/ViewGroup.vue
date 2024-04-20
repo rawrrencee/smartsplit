@@ -3,6 +3,7 @@ import { showToastIfNeeded, to2DecimalPlacesIfValid } from "@/Common";
 import DialogAnimated from "@/Components/DialogAnimated.vue";
 import ExpenseRowItem from "@/Components/Group/ExpenseRowItem.vue";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
+import ProfilePhotoImage from "@/Components/Image/ProfilePhotoImage.vue";
 import ServerImage from "@/Components/Image/ServerImage.vue";
 import NavigationBarButton from "@/Components/NavigationBarButton.vue";
 import Pagination from "@/Components/Pagination.vue";
@@ -41,6 +42,8 @@ onMounted(() => {
     }
 });
 
+console.log(props.groupBalance);
+
 const back = () => {
     if (route().params.returnTo === "home") {
         router.visit(route("home"));
@@ -53,11 +56,15 @@ const setIsLoading = (value) => {
     isLoading.value = value;
 };
 
+const dialogMode = ref("groupMembers");
 const isDialogOpen = ref(false);
-const setIsDialogOpen = (value) => {
+const setIsDialogOpen = (value, mode) => {
     isDialogOpen.value = value;
-    addMemberForm.reset();
-    addMemberForm.clearErrors();
+    dialogMode.value = mode;
+    if (mode === "groupMembers") {
+        addMemberForm.reset();
+        addMemberForm.clearErrors();
+    }
 };
 
 const hasValidOwedAmountsArray = computed(() => {
@@ -214,7 +221,11 @@ const expenseDetails = computed(() => {
                     group?.group_title
                 }}</span>
             </div>
-            <button type="button" class="flex flex-row items-center self-start" @click="setIsDialogOpen(true)">
+            <button
+                type="button"
+                class="flex flex-row items-center self-start"
+                @click="setIsDialogOpen(true, 'groupMembers')"
+            >
                 <div class="avatar-group -space-x-4 rtl:space-x-reverse">
                     <template v-for="(member, index) in featuredGroupMemberProfiles" :key="index">
                         <div class="avatar" v-if="member?.user?.profile_photo_url">
@@ -287,6 +298,25 @@ const expenseDetails = computed(() => {
                     </li>
                 </template>
             </ul>
+            <div class="carousel carousel-center pt-4">
+                <div class="carousel-item px-2">
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-xs dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                        @click="setIsDialogOpen(true, 'viewBalances')"
+                    >
+                        View Balances
+                    </button>
+                </div>
+                <div class="carousel-item">
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-xs dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                    >
+                        Show only my expenses
+                    </button>
+                </div>
+            </div>
         </div>
         <div class="mx-auto flex-col gap-4 pt-6">
             <div
@@ -318,11 +348,13 @@ const expenseDetails = computed(() => {
 
     <DialogAnimated
         :is-dialog-open="isDialogOpen"
-        :dialog-title="`Group Members (${activeGroupMembers.length ?? 0})`"
-        size="xl"
-        @dialog-closed="setIsDialogOpen(false)"
+        :dialog-title="
+            dialogMode === 'groupMembers' ? `Group Members (${activeGroupMembers.length ?? 0})` : 'Group Balances'
+        "
+        :size="dialogMode === 'groupMembers' ? 'xl' : '2xl'"
+        @dialog-closed="setIsDialogOpen(false, dialogMode)"
     >
-        <template v-slot:dialogTitle>
+        <template v-slot:dialogTitle v-if="dialogMode === 'groupMembers'">
             <button
                 type="button"
                 class="btn btn-link btn-xs m-0 flex flex-row gap-1 border-2 border-gray-300 no-underline hover:border-gray-800 dark:border-gray-600 dark:text-gray-50 hover:dark:border-gray-50"
@@ -332,7 +364,7 @@ const expenseDetails = computed(() => {
                 <span>Add</span>
             </button>
         </template>
-        <template v-slot:body>
+        <template v-slot:body v-if="dialogMode === 'groupMembers'">
             <div class="flex h-full flex-col">
                 <TransitionRoot
                     as="template"
@@ -419,7 +451,7 @@ const expenseDetails = computed(() => {
                         </div>
                     </TransitionChild>
                 </TransitionRoot>
-                <div class="flex h-full flex-col overflow-y-scroll">
+                <div class="scrollbar-none flex h-full flex-col overflow-y-scroll [&::-webkit-scrollbar]:hidden">
                     <div class="flex flex-col gap-3 pb-4">
                         <template v-for="member in activeGroupMembers">
                             <div
@@ -518,6 +550,48 @@ const expenseDetails = computed(() => {
                         </div>
                     </div>
                 </div>
+            </div>
+        </template>
+
+        <template v-slot:body v-if="dialogMode === 'viewBalances'">
+            <div
+                class="scrollbar-none flex h-full flex-col gap-6 overflow-y-scroll px-6 pb-8 [&::-webkit-scrollbar]:hidden"
+            >
+                <template v-for="userId in Object.keys(groupBalance?.deltas)">
+                    <div class="flex flex-col gap-1" v-if="groupBalance?.deltas?.[userId]?.length > 0">
+                        <div class="flex flex-row items-center gap-2">
+                            <ProfilePhotoImage
+                                :size="6"
+                                :image-url="
+                                    groupMembers.find((m) => `${m.user_id}` === userId)?.user?.profile_photo_url
+                                "
+                            />
+                            <span class="text-gray-700 dark:text-gray-200">{{
+                                groupMembers.find((m) => `${m.user_id}` === userId)?.user?.name
+                            }}</span>
+                        </div>
+                        <span
+                            v-for="delta in groupBalance?.deltas?.[userId]"
+                            class="pl-8 text-xs font-semibold text-gray-700 dark:text-gray-200"
+                        >
+                            <span>{{ parseFloat(delta.amount) < 0 ? "owes" : "is owed" }}</span>
+                            <span
+                                :class="parseFloat(delta.amount) > 0 ? 'text-success' : 'text-error dark:text-red-400'"
+                                >&nbsp;{{ delta.symbol }}{{ Math.abs(parseFloat(delta.amount)) }}</span
+                            >
+                        </span>
+                        <div class="flex flex-col gap-1 pl-12">
+                            <span v-for="a in groupBalance.membersOwedAmounts?.[userId]" class="text-xs">
+                                <span>{{ groupMembers.find((m) => m.user_id === a.user_id)?.user?.name }}</span>
+                                <span>&nbsp;{{ parseFloat(a.amount) < 0 ? "pays" : "will get" }}</span>
+                                <span
+                                    :class="parseFloat(a.amount) > 0 ? 'text-success' : 'text-error dark:text-red-400'"
+                                    >&nbsp;{{ a.symbol }}{{ Math.abs(parseFloat(a.amount)) }}</span
+                                >
+                            </span>
+                        </div>
+                    </div>
+                </template>
             </div>
         </template>
     </DialogAnimated>

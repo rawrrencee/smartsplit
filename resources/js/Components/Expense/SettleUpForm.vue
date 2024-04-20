@@ -36,8 +36,6 @@ const props = defineProps({
 const popover = ref({
     visibility: "focus",
 });
-console.log(props.groupBalance);
-
 const isLoading = ref(false);
 const setIsLoading = (value) => {
     isLoading.value = value;

@@ -19,6 +19,8 @@ const paddingTop = computed(() => {
             return "pt-32";
         case "xl":
             return "pt-28";
+        case "2xl":
+            return "pt-14";
         default:
             return "pt-28";
     }
