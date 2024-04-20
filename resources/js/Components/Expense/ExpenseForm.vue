@@ -365,12 +365,18 @@ watch(expenseForm, () => {
         <div class="flex flex-row items-center gap-2">
             <NavigationBarButton
                 :icon="ArrowLeftIcon"
+                :isLoading
                 v-if="isEdit"
-                @on-click="router.visit(route('expenses.view', { id: expense.id }))"
+                @on-click="
+                    () => {
+                        setIsLoading(true);
+                        router.visit(route('expenses.view', { id: expense.id }));
+                    }
+                "
             />
             <span class="text-lg font-bold">{{ isEdit ? "Edit" : "Add" }} an expense</span>
         </div>
-        <span v-if="isLoading" class="loading loading-spinner"></span>
+        <span v-if="isLoading" class="loading loading-spinner py-6"></span>
         <button
             v-else
             type="button"

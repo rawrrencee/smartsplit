@@ -44,6 +44,7 @@ onMounted(() => {
 });
 
 const back = () => {
+    setIsLoading(true);
     if (route().params.returnTo === "home") {
         router.visit(route("home"));
     } else {
@@ -69,8 +70,6 @@ const setIsDialogOpen = (value, mode) => {
 const selectedUserIdToViewExpenses = ref(
     isNaN(parseInt(route().params.onlyUser)) ? null : parseInt(route().params.onlyUser),
 );
-console.log(route().params.onlyUser);
-
 const setSelectedUserIdToViewExpenses = (userId) => {
     const shouldUnset = selectedUserIdToViewExpenses.value === userId;
     if (shouldUnset) {
@@ -242,7 +241,7 @@ const dialogTitleFromMode = computed(() => {
         <div
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
         >
-            <NavigationBarButton :icon="ArrowLeftIcon" @on-click="back" />
+            <NavigationBarButton :icon="ArrowLeftIcon" :isLoading @on-click="back" />
             <NavigationBarButton
                 :icon="PencilIcon"
                 @on-click="() => router.get(route('groups.edit'), { id: group.id })"
@@ -334,7 +333,7 @@ const dialogTitleFromMode = computed(() => {
                 </template>
             </ul>
         </div>
-        <div class="carousel carousel-center pl-4 pt-4">
+        <div class="carousel carousel-center w-full px-4 pt-4">
             <div class="carousel-item pr-2" v-if="positiveCurrencies.length || negativeCurrencies.length">
                 <button
                     type="button"

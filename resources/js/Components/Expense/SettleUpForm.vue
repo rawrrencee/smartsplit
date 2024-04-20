@@ -146,7 +146,7 @@ const reloadWithGroupId = () => {
             route("settle-up"),
             { id: selectedGroupId.value },
             {
-                only: ["userOwes"],
+                only: ["groupBalance"],
             },
         );
     }
@@ -271,8 +271,14 @@ const selectedPayerOwedAmounts = computed(() => {
         <div class="flex flex-row items-center gap-2">
             <NavigationBarButton
                 :icon="ArrowLeftIcon"
+                :isLoading
                 v-if="isEdit"
-                @on-click="router.visit(route('expenses.view', { id: expense.id }))"
+                @on-click="
+                    () => {
+                        setIsLoading(true);
+                        router.visit(route('expenses.view', { id: expense.id }));
+                    }
+                "
             />
             <span class="text-lg font-bold">{{ isEdit ? "Edit " : "" }}Settle Up</span>
         </div>

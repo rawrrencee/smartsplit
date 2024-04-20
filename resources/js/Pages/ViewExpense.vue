@@ -33,6 +33,7 @@ const navigateToRoute = (route, data) => {
     router.visit(route, data);
 };
 const onBackButtonClicked = () => {
+    setIsLoading(true);
     if (route().params.returnTo === "home") {
         navigateToRoute(route("home"));
     } else {
@@ -178,7 +179,7 @@ const onDeleteCommentClicked = (comment) => {
         <div
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
         >
-            <NavigationBarButton :icon="ArrowLeftIcon" @on-click="onBackButtonClicked" />
+            <NavigationBarButton :icon="ArrowLeftIcon" :isLoading @on-click="onBackButtonClicked" />
             <div class="flex flex-row gap-4">
                 <NavigationBarButton :icon="TrashIcon" @on-click="onDeleteClicked" />
                 <NavigationBarButton

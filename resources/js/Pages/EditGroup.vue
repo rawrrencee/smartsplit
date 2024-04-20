@@ -14,6 +14,7 @@ const props = defineProps({
 });
 
 const back = () => {
+    setIsLoading(true);
     router.visit(route("groups.view", { id: props.group.id }));
 };
 
@@ -95,7 +96,7 @@ const onDeleteClicked = () => {
         <div
             class="sticky top-0 z-10 flex w-full flex-row items-center justify-between px-4 py-2 backdrop-blur sm:px-6 lg:px-8"
         >
-            <NavigationBarButton :icon="ArrowLeftIcon" @on-click="back" />
+            <NavigationBarButton :icon="ArrowLeftIcon" :isLoading @on-click="back" />
             <div class="flex flex-row gap-2">
                 <NavigationBarButton :icon="TrashIcon" @on-click="onDeleteClicked" />
                 <button
