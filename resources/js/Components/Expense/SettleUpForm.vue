@@ -31,10 +31,12 @@ const props = defineProps({
     userOwes: Object,
     expense: Object,
     isEdit: Boolean,
+    groupBalance: Object,
 });
 const popover = ref({
     visibility: "focus",
 });
+console.log(props.groupBalance);
 
 const isLoading = ref(false);
 const setIsLoading = (value) => {
@@ -58,8 +60,9 @@ const dialogTitle = computed(() => {
         case "selectCurrency":
             return "Currencies";
         case "selectPayer":
+            return "Who is settling up?";
         case "selectReceiver":
-            return "Group Members";
+            return "Settle up with";
         default:
             return "";
     }
@@ -163,11 +166,14 @@ const setSelectedGroupMember = (groupMember) => {
         selectedReceiver.value = groupMember;
         payerFormArray.value[0].receiver_id = groupMember.user_id;
         if (
-            props.userOwes?.[groupMember.user_id]?.[0]?.key &&
-            confirm("Would you like to prefill the amount you owe?")
+            selectedPayerOwedAmounts.value.some((a) => a.amount > 0) &&
+            confirm("Would you like to prefill the amount owed?")
         ) {
-            setSelectedCurrency(props.userOwes?.[groupMember.user_id][0].key);
-            expenseForm.amount = props.userOwes?.[groupMember.user_id][0].amount;
+            const amount = selectedPayerOwedAmounts.value?.find((a) => a.user_id === groupMember.user_id);
+            if (amount) {
+                setSelectedCurrency(amount.key);
+                expenseForm.amount = amount.amount;
+            }
         }
     }
     setIsDialogOpen(false);
@@ -243,6 +249,22 @@ const filteredCurrencies = computed(() =>
           }),
 );
 // #endregion Currency
+
+// #region Owed Amounts
+const selectedPayerOwedAmounts = computed(() => {
+    const payerId = selectedPayer.value?.user_id;
+    return (
+        props.groupBalance?.membersOwedAmounts?.[payerId]
+            ?.filter((a) => !isNaN(parseFloat(a.amount)) && parseFloat(a.amount) > 0)
+            .map((a) => {
+                return {
+                    ...a,
+                    amount: parseFloat(a.amount),
+                };
+            }) || []
+    );
+});
+// #endregion Owed Amounts
 </script>
 <template>
     <div
@@ -362,14 +384,12 @@ const filteredCurrencies = computed(() =>
                                 <span class="truncate">
                                     {{ selectedReceiver?.user?.name ?? "Select a group member" }}
                                 </span>
-                                <template
-                                    v-if="
-                                        selectedPayer?.user_id === $props.auth.user.id &&
-                                        userOwes?.[selectedReceiver?.user_id]
-                                    "
-                                >
-                                    <YouOweLabel :userOwes :userId="selectedReceiver.user_id" :shouldTruncate="true" />
-                                </template>
+                                <YouOweLabel
+                                    v-if="selectedPayerOwedAmounts.length > 0"
+                                    :userOwes="selectedPayerOwedAmounts"
+                                    :userId="selectedReceiver?.user.id"
+                                    :shouldTruncate="true"
+                                />
                             </div>
                         </div>
                     </button>
@@ -497,13 +517,14 @@ const filteredCurrencies = computed(() =>
                                                                 {{ m.user?.name }}
                                                             </span>
                                                             <YouOweLabel
-                                                                :userOwes
-                                                                :userId="m.user_id"
                                                                 v-if="
                                                                     dialogMode === 'selectReceiver' &&
-                                                                    selectedPayer?.user_id === $props.auth.user.id &&
-                                                                    userOwes?.[m.user_id]?.length > 0
+                                                                    selectedPayerOwedAmounts.length > 0
                                                                 "
+                                                                :userOwes="selectedPayerOwedAmounts"
+                                                                :receiverName="selectedPayer.user.name"
+                                                                :userId="m.user_id"
+                                                                :shouldTruncate="true"
                                                             />
                                                         </div>
                                                     </div>

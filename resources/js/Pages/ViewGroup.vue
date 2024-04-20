@@ -19,16 +19,26 @@ import {
     XMarkIcon,
 } from "@heroicons/vue/24/outline";
 import { router, useForm } from "@inertiajs/vue3";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { toast } from "vue-sonner";
 
 const props = defineProps({
     group: Object,
     groupMembers: Array,
     userAmounts: Object,
-    userOwes: Object,
+    groupBalance: Object,
     expenses: Object,
     paginatedResults: Object,
+    auth: Object,
+    show: Boolean, // error handling
+    status: String, // error handling
+    message: String, // error handling
+});
+
+onMounted(() => {
+    if (props.show) {
+        showToastIfNeeded(toast, props);
+    }
 });
 
 const back = () => {
@@ -50,6 +60,13 @@ const setIsDialogOpen = (value) => {
     addMemberForm.clearErrors();
 };
 
+const hasValidOwedAmountsArray = computed(() => {
+    if (isNaN(parseInt(props.auth.user?.id))) return false;
+    return props.groupBalance && props.groupBalance.membersOwedAmounts?.[props.auth?.user?.id]?.length > 0;
+});
+const currentUserOwes = computed(() => {
+    return hasValidOwedAmountsArray?.value ? props.groupBalance.membersOwedAmounts[props.auth.user.id] : [];
+});
 const currenciesPaidByUser = computed(() => {
     return Object.entries(props.userAmounts).map((val) => {
         return {
@@ -235,21 +252,11 @@ const expenseDetails = computed(() => {
             </button>
         </div>
         <div
-            class="mx-auto flex flex-col gap-1 px-4 pt-6 sm:px-6 lg:px-8"
+            class="mx-auto flex flex-col px-4 pt-6 sm:px-6 lg:px-8"
             v-if="positiveCurrencies.length || negativeCurrencies.length"
         >
             <div
-                class="break-words text-sm font-bold text-success dark:text-green-300"
-                v-if="positiveCurrencies.length"
-            >
-                <span>You are owed&nbsp;</span>
-                <template v-for="(c, i) in positiveCurrencies">
-                    <span v-if="i > 0">&nbsp;&plus;&nbsp;</span
-                    ><span>{{ c.symbol }}{{ to2DecimalPlacesIfValid(c.amount) }}</span>
-                </template>
-            </div>
-            <div
-                class="break-words text-sm font-semibold text-error dark:text-red-400"
+                class="break-words text-sm font-semibold leading-6 text-error dark:text-red-400"
                 v-if="negativeCurrencies.length"
             >
                 <span>You owe </span>
@@ -258,17 +265,26 @@ const expenseDetails = computed(() => {
                     ><span>{{ c.symbol }}{{ to2DecimalPlacesIfValid(Math.abs(c.amount)) }}</span>
                 </template>
             </div>
-            <ul class="list-none pl-4 text-xs" v-if="Object.keys(userOwes).length">
-                <template v-for="userId in Object.keys(userOwes)">
-                    <template v-for="currency in userOwes[userId]">
-                        <li class="dark:text-gray-200">
-                            <span class="font-medium"
-                                >{{ groupMembers?.find((m) => `${m.user_id}` === userId)?.user?.name }}&nbsp;</span
-                            >gets back&nbsp;<span class="font-semibold text-error dark:text-red-400"
-                                >{{ currency.symbol }}{{ to2DecimalPlacesIfValid(currency.amount) }}</span
-                            >&period;
-                        </li>
-                    </template>
+            <div class="break-words text-sm font-bold leading-6 text-success" v-if="positiveCurrencies.length">
+                <span>You are owed&nbsp;</span>
+                <template v-for="(c, i) in positiveCurrencies">
+                    <span v-if="i > 0">&nbsp;&plus;&nbsp;</span
+                    ><span>{{ c.symbol }}{{ to2DecimalPlacesIfValid(c.amount) }}</span>
+                </template>
+            </div>
+            <ul class="list-none pl-4 pt-1 text-xs leading-5 dark:text-gray-200" v-if="hasValidOwedAmountsArray">
+                <template v-for="owed in currentUserOwes">
+                    <li>
+                        <span class="font-medium"
+                            >{{ groupMembers?.find((m) => m.user_id === owed.user_id)?.user?.name }}&nbsp;</span
+                        >
+                        <span>{{ owed.amount > 0 ? "gets back" : "pays you" }}</span>
+                        <span
+                            class="font-semibold"
+                            :class="owed.amount > 0 ? 'text-error dark:text-red-400' : 'text-success'"
+                            >&nbsp;{{ owed.symbol }}{{ to2DecimalPlacesIfValid(Math.abs(owed.amount)) }}</span
+                        >
+                    </li>
                 </template>
             </ul>
         </div>

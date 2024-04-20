@@ -37,14 +37,22 @@ class ExpenseController extends Controller
     public function settleUpPage(Request $request)
     {
         if ($request['id']) {
-            $userOwes = $this->ExpenseDetailController->getAmountUserOwesToEachGroupMember(auth()->user()->id, $request['id']);
+            try {
+                $groupBalance = $this->ExpenseDetailController->getGroupBalance($request['id']);
+            } catch (\Exception $e) {
+                $e = $e;
+                $groupBalance = null;
+            }
         }
-        return Inertia::render('SettleUp', [
+
+        $pageResponse = Inertia::render('SettleUp', [
             'currencies' => filter_var($request['withCurrencies'], FILTER_VALIDATE_BOOLEAN) ? $this->HardcodedDataController->getCurrencies() : [],
             'categories' => $this->HardcodedDataController->getCategories(),
             'groups' => $this->GroupController->getGroupsByMemberUserIdOrEmail($request->user()->id, null, GroupMemberStatusEnum::ACCEPTED, false, true),
-            'userOwes' => $userOwes ?? [],
+            'groupBalance' => $groupBalance,
         ]);
+
+        return $pageResponse;
     }
 
     public function expenseDetailsPage(Request $request)
@@ -127,17 +135,24 @@ class ExpenseController extends Controller
             return redirect()->route('404');
         }
 
-        if ($expense->is_settlement) {
-            $userOwes = $this->ExpenseDetailController->getAmountUserOwesToEachGroupMember(auth()->user()->id, $request['id']);
+        if ($request['id']) {
+            try {
+                $groupBalance = $this->ExpenseDetailController->getGroupBalance($expense->group_id);
+            } catch (\Exception $e) {
+                $e = $e;
+                $groupBalance = null;
+            }
         }
 
-        return Inertia::render('EditExpense', [
+        $pageResponse = Inertia::render('EditExpense', [
             'expense' => $expense,
             'currencies' => filter_var($request['withCurrencies'], FILTER_VALIDATE_BOOLEAN) ? $this->HardcodedDataController->getCurrencies() : [],
             'categories' => $this->HardcodedDataController->getCategories(),
             'groups' => $this->GroupController->getGroupsByMemberUserIdOrEmail($request->user()->id, null, GroupMemberStatusEnum::ACCEPTED, false, true),
-            'userOwes' => $userOwes ?? [],
+            'groupBalance' => $groupBalance,
         ]);
+
+        return $pageResponse;
     }
 
     public function saveNewExpense(Request $request)

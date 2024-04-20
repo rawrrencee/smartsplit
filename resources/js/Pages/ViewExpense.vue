@@ -220,7 +220,7 @@ const onDeleteCommentClicked = (comment) => {
                             }}</span
                         >
                         <span class="text-xs text-gray-400"
-                            >Updated at {{ expense.updated_by.name }} on
+                            >Updated by {{ expense.updated_by.name }} on
                             {{
                                 new Date(expense.updated_at).toLocaleString("en-SG", {
                                     dateStyle: "medium",
@@ -255,7 +255,7 @@ const onDeleteCommentClicked = (comment) => {
                                 }}</span
                             >
                             <span class="text-xs text-gray-400"
-                                >Updated at {{ expense.updated_by.name }} on
+                                >Updated by {{ expense.updated_by.name }} on
                                 {{
                                     new Date(expense.updated_at).toLocaleString("en-SG", {
                                         dateStyle: "medium",
@@ -282,10 +282,7 @@ const onDeleteCommentClicked = (comment) => {
                                         <div>
                                             <span>{{ p.user.name }}</span>
                                             <template v-for="(d, i) in p.expenseDetails">
-                                                <span
-                                                    v-if="getNumberFromAmount(d.amount) > 0"
-                                                    class="text-success dark:text-green-300"
-                                                >
+                                                <span v-if="getNumberFromAmount(d.amount) > 0" class="text-success">
                                                     paid {{ d.currency_symbol
                                                     }}{{ to2DecimalPlacesIfValid(getNumberFromAmount(d.amount)) }}</span
                                                 >
@@ -311,7 +308,7 @@ const onDeleteCommentClicked = (comment) => {
                                         <ProfilePhotoImage :image-url="p.payer.profile_photo_url" :size="6" />
                                         <span
                                             ><span>{{ p.payer.name }}&nbsp;</span><span>paid&nbsp;</span
-                                            ><span class="text-success dark:text-green-300"
+                                            ><span class="text-success"
                                                 >{{ p.currency_symbol
                                                 }}{{ to2DecimalPlacesIfValid(p.amount, true) }}</span
                                             >&period;</span

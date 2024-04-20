@@ -9,12 +9,12 @@ const props = defineProps({
     categories: Array,
     currencies: Array,
     auth: Object,
-    userOwes: Object,
+    groupBalance: Object,
 });
 </script>
 
 <template>
     <AppLayout title="Settle Up">
-        <SettleUpForm :groups :categories :currencies :auth :userOwes />
+        <SettleUpForm :groups :categories :currencies :auth :groupBalance />
     </AppLayout>
 </template>

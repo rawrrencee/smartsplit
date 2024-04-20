@@ -98,7 +98,7 @@ const recentActivityByGroup = computed(() => {
 
                             <template v-if="stat.key === 'positive'" v-for="(v, i) in positiveAmount">
                                 <span v-if="i !== 0"> + </span>
-                                <span class="text-green-800 dark:text-green-400"
+                                <span class="text-success"
                                     >{{ v.symbol }}{{ to2DecimalPlacesIfValid(Math.abs(parseFloat(v.amount))) }}</span
                                 >
                             </template>

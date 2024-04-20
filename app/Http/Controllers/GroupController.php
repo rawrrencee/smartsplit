@@ -121,7 +121,7 @@ class GroupController extends Controller
         return false;
     }
 
-    public function getExpensesWithGroupForUser($groupId, $limit = null, $perPage)
+    public function getExpensesWithGroupForUser($groupId, $perPage, $limit = null)
     {
         $expenseQuery = Expense::select(
             DB::raw('YEAR(date) as year'),
@@ -229,16 +229,32 @@ class GroupController extends Controller
             ->with(['user'])
             ->get();
 
-        $expenses = $this->getExpensesWithGroupForUser($id, null, $request['perPage']);
+        $expenses = $this->getExpensesWithGroupForUser($id, $request['perPage'], null);
 
-        return Inertia::render('ViewGroup', [
+        try {
+            $groupBalance = $this->ExpenseDetailController->getGroupBalance($id);
+        } catch (\Exception $e) {
+            $e = $e;
+            $groupBalance = null;
+        }
+
+        $pageResponse = Inertia::render('ViewGroup', [
             'group' => $group,
             'groupMembers' => $groupMembers,
             'userAmounts' => $this->ExpenseDetailController->getOverallExpenseDeltaForUserInGroup(auth()->user()->id, $id),
-            'userOwes' => $this->ExpenseDetailController->getAmountUserOwesToEachGroupMember(auth()->user()->id, $id),
+            'groupBalance' => $groupBalance,
             'expenses' => $this->mapExpenseDetailsByDate($expenses, auth()->user()->id),
             'paginatedResults' => $expenses
         ]);
+
+        if (!isset($groupBalance)) {
+            $pageResponse->with('show', true)
+                ->with('type', 'default')
+                ->with('status', 'error')
+                ->with('message', 'Group balance was not retrieved successfully, but you can still view the expenses. ' . $this->CommonController->formatException($e));
+        }
+
+        return $pageResponse;
     }
 
     public function store(Request $request)

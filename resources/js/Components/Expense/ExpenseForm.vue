@@ -638,7 +638,7 @@ watch(expenseForm, () => {
                                                 <template v-for="(c, i) in categories" :key="i">
                                                     <button
                                                         type="button"
-                                                        class="flex flex-row items-center justify-between gap-4 px-6 py-2 text-start hover:bg-gray-100"
+                                                        class="flex flex-row items-center justify-between gap-4 px-6 py-2 text-start hover:bg-gray-100 hover:dark:bg-gray-700"
                                                         @click="setSelectedCategory(c.key)"
                                                     >
                                                         <div class="flex flex-row items-center gap-2">
@@ -658,7 +658,7 @@ watch(expenseForm, () => {
                                         <div class="flex flex-col gap-2" v-if="dialogMode === 'selectCurrency'">
                                             <div class="flex flex-col px-6 py-2">
                                                 <label
-                                                    class="input input-sm input-bordered flex items-center gap-2 border-0 outline-0"
+                                                    class="input input-sm input-bordered flex items-center gap-2 border-0 outline-0 dark:bg-gray-700 dark:text-gray-200"
                                                 >
                                                     <MagnifyingGlassIcon class="h-4 w-4 text-gray-400" />
                                                     <input
@@ -673,7 +673,7 @@ watch(expenseForm, () => {
                                                 <template v-for="(c, i) in filteredCurrencies" :key="i">
                                                     <button
                                                         type="button"
-                                                        class="flex flex-row items-center justify-between px-6 py-2 text-start hover:bg-gray-100"
+                                                        class="flex flex-row items-center justify-between px-6 py-2 text-start hover:bg-gray-100 hover:dark:bg-gray-700"
                                                         :class="selectedCurrency.key === c.key && 'font-bold'"
                                                         @click="setSelectedCurrency(c.key)"
                                                     >

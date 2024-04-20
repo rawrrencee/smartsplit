@@ -3,7 +3,6 @@ import { to2DecimalPlacesIfValid } from "@/Common";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
 import ServerImage from "@/Components/Image/ServerImage.vue";
 import { UserIcon } from "@heroicons/vue/24/outline";
-import { computed } from "vue";
 
 const props = defineProps({
     groups: Array,
@@ -12,28 +11,28 @@ const props = defineProps({
 
 defineEmits(["groupClicked"]);
 
-const groupsWithDeltas = computed(() => {
-    return props.groups.map((g) => {
-        return {
-            ...g,
-            ...(g.delta && {
-                deltas:
-                    Object.keys(g.delta)?.map((c) => {
-                        return {
-                            symbol: g.delta[c].symbol,
-                            amount: g.delta[c].amount,
-                        };
-                    }) ?? [],
-            }),
-        };
-    });
-});
+// const groupsWithDeltas = computed(() => {
+//     return props.groups.map((g) => {
+//         return {
+//             ...g,
+//             ...(g.delta && {
+//                 deltas:
+//                     Object.keys(g.delta)?.map((c) => {
+//                         return {
+//                             symbol: g.delta[c].symbol,
+//                             amount: g.delta[c].amount,
+//                         };
+//                     }) ?? [],
+//             }),
+//         };
+//     });
+// });
 </script>
 
 <template>
     <ul role="list" class="divide-y divide-gray-100 dark:divide-gray-800" v-if="groups?.length > 0">
         <li
-            v-for="group in groupsWithDeltas"
+            v-for="group in groups"
             :key="group.id"
             class="flex flex-row items-center justify-between gap-4 bg-gray-50 px-6 py-5 hover:cursor-pointer hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-700/40"
             @click="$emit('groupClicked', group.id)"
@@ -70,26 +69,26 @@ const groupsWithDeltas = computed(() => {
                 </div>
             </div>
             <div class="min-w-0 flex-shrink-0 text-right text-xs" v-if="!hideOwedAmounts">
-                <span v-if="group?.deltas?.length === 0 || group?.deltas?.[0]?.amount === 0" class="text-success"
+                <span v-if="group?.delta?.length === 0 || group?.delta?.[0]?.amount === 0" class="text-success"
                     >settled up</span
                 >
-                <div class="flex flex-col text-success" v-else-if="group?.deltas?.[0]?.amount > 0">
-                    <span>you are owed{{ group?.deltas?.length > 1 ? "*" : "" }}</span>
+                <div class="flex flex-col text-success" v-else-if="group?.delta?.[0]?.amount > 0">
+                    <span>you are owed{{ group?.delta?.length > 1 ? "*" : "" }}</span>
                     <div>
-                        <span v-html="group?.deltas?.[0]?.symbol"></span>
-                        <span>{{ to2DecimalPlacesIfValid(Math.abs(group?.deltas?.[0]?.amount)) }}</span>
-                        <span v-if="group?.deltas?.length > 1" class="text-gray-500 dark:text-gray-400"
-                            >&nbsp;+{{ group?.deltas?.length - 1 }}</span
+                        <span v-html="group?.delta?.[0]?.symbol"></span>
+                        <span>{{ to2DecimalPlacesIfValid(Math.abs(group?.delta?.[0]?.amount)) }}</span>
+                        <span v-if="group?.delta?.length > 1" class="text-gray-500 dark:text-gray-400"
+                            >&nbsp;+{{ group?.delta?.length - 1 }}</span
                         >
                     </div>
                 </div>
                 <div class="flex flex-col text-error dark:text-red-400" v-else>
-                    <span>you owe{{ group?.deltas?.length > 1 ? "*" : "" }}</span>
+                    <span>you owe{{ group?.delta?.length > 1 ? "*" : "" }}</span>
                     <div>
-                        <span v-html="group?.deltas?.[0]?.symbol"></span>
-                        <span>{{ to2DecimalPlacesIfValid(Math.abs(group?.deltas?.[0]?.amount)) }}</span>
-                        <span v-if="group?.deltas?.length > 1" class="text-gray-500 dark:text-gray-400"
-                            >&nbsp;+{{ group?.deltas?.length - 1 }}</span
+                        <span v-html="group?.delta?.[0]?.symbol"></span>
+                        <span>{{ to2DecimalPlacesIfValid(Math.abs(group?.delta?.[0]?.amount)) }}</span>
+                        <span v-if="group?.delta?.length > 1" class="text-gray-500 dark:text-gray-400"
+                            >&nbsp;+{{ group?.delta?.length - 1 }}</span
                         >
                     </div>
                 </div>
