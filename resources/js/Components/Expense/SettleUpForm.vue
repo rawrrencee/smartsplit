@@ -392,6 +392,7 @@ const selectedPayerOwedAmounts = computed(() => {
                                     v-if="selectedPayerOwedAmounts.length > 0"
                                     :userOwes="selectedPayerOwedAmounts"
                                     :userId="selectedReceiver?.user.id"
+                                    :receiverName="selectedPayer?.user.name"
                                     :shouldTruncate="true"
                                 />
                             </div>
@@ -526,7 +527,7 @@ const selectedPayerOwedAmounts = computed(() => {
                                                                     selectedPayerOwedAmounts.length > 0
                                                                 "
                                                                 :userOwes="selectedPayerOwedAmounts"
-                                                                :receiverName="selectedPayer.user.name"
+                                                                :receiverName="selectedPayer?.user.name"
                                                                 :userId="m.user_id"
                                                                 :shouldTruncate="true"
                                                             />
