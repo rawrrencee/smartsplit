@@ -36,6 +36,7 @@ class ExpenseController extends Controller
 
     public function settleUpPage(Request $request)
     {
+        $groupBalance = null;
         if ($request['id']) {
             try {
                 $groupBalance = $this->ExpenseDetailController->getGroupBalance($request['id']);
@@ -135,6 +136,7 @@ class ExpenseController extends Controller
             return redirect()->route('404');
         }
 
+        $groupBalance = null;
         if ($request['id']) {
             try {
                 $groupBalance = $this->ExpenseDetailController->getGroupBalance($expense->group_id);
