@@ -333,28 +333,28 @@ const dialogTitleFromMode = computed(() => {
                     </li>
                 </template>
             </ul>
-            <div class="carousel carousel-center pt-4">
-                <div class="carousel-item px-2">
-                    <button
-                        type="button"
-                        class="btn btn-outline btn-xs dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
-                        @click="setIsDialogOpen(true, 'viewBalances')"
-                    >
-                        View Balances
-                    </button>
-                </div>
-                <div class="carousel-item">
-                    <button
-                        type="button"
-                        class="btn btn-outline btn-xs dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
-                        @click="setIsDialogOpen(true, 'filterExpensesByMember')"
-                    >
-                        <span v-if="showingExpensesForUserName">
-                            Showing expenses for {{ showingExpensesForUserName }}
-                        </span>
-                        <span v-else>Filter expenses by member</span>
-                    </button>
-                </div>
+        </div>
+        <div class="carousel carousel-center pl-4 pt-4">
+            <div class="carousel-item pr-2" v-if="positiveCurrencies.length || negativeCurrencies.length">
+                <button
+                    type="button"
+                    class="btn btn-outline btn-xs dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                    @click="setIsDialogOpen(true, 'viewBalances')"
+                >
+                    View Balances
+                </button>
+            </div>
+            <div class="carousel-item" :class="positiveCurrencies.length || negativeCurrencies.length ? 'pl-2' : ''">
+                <button
+                    type="button"
+                    class="btn btn-outline btn-xs dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                    @click="setIsDialogOpen(true, 'filterExpensesByMember')"
+                >
+                    <span v-if="showingExpensesForUserName">
+                        Showing expenses for {{ showingExpensesForUserName }}
+                    </span>
+                    <span v-else>Filter expenses by member</span>
+                </button>
             </div>
         </div>
         <div class="mx-auto flex-col gap-4 pt-6">
