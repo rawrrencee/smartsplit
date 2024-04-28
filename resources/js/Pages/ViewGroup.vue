@@ -30,12 +30,15 @@ const props = defineProps({
     userAmounts: Object,
     groupBalance: Object,
     expenses: Object,
+    spending: Object,
     paginatedResults: Object,
     auth: Object,
     show: Boolean, // error handling
     status: String, // error handling
     message: String, // error handling
 });
+
+console.log(props.spending);
 
 onMounted(() => {
     if (props.show) {
@@ -230,6 +233,8 @@ const dialogTitleFromMode = computed(() => {
             return `Group Members (${activeGroupMembers.value.length ?? 0})`;
         case "viewBalances":
             return "Group Balances";
+        case "viewSpending":
+            return "Group Spend";
         case "filterExpensesByMember":
             return "Filter Expenses";
     }
@@ -333,8 +338,8 @@ const dialogTitleFromMode = computed(() => {
                 </template>
             </ul>
         </div>
-        <div class="carousel carousel-center w-full px-4 pt-4">
-            <div class="carousel-item pr-2" v-if="positiveCurrencies.length || negativeCurrencies.length">
+        <div class="carousel carousel-center w-full space-x-2 px-4 pt-4">
+            <div class="carousel-item" v-if="positiveCurrencies.length || negativeCurrencies.length">
                 <button
                     type="button"
                     class="btn btn-outline btn-xs dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -343,7 +348,16 @@ const dialogTitleFromMode = computed(() => {
                     View Balances
                 </button>
             </div>
-            <div class="carousel-item" :class="positiveCurrencies.length || negativeCurrencies.length ? 'pl-2' : ''">
+            <div class="carousel-item">
+                <button
+                    type="button"
+                    class="btn btn-outline btn-xs dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                    @click="setIsDialogOpen(true, 'viewSpending')"
+                >
+                    View Spend
+                </button>
+            </div>
+            <div class="carousel-item">
                 <button
                     type="button"
                     class="btn btn-outline btn-xs dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -613,7 +627,8 @@ const dialogTitleFromMode = computed(() => {
                             <span>{{ parseFloat(delta.amount) < 0 ? "owes" : "is owed" }}</span>
                             <span
                                 :class="parseFloat(delta.amount) > 0 ? 'text-success' : 'text-error dark:text-red-400'"
-                                >&nbsp;{{ delta.symbol }}{{ Math.abs(parseFloat(delta.amount)) }}</span
+                                >&nbsp;{{ delta.symbol
+                                }}{{ to2DecimalPlacesIfValid(Math.abs(parseFloat(delta.amount))) }}</span
                             >
                         </span>
                         <div class="flex flex-col gap-1 pl-12">
@@ -622,12 +637,107 @@ const dialogTitleFromMode = computed(() => {
                                 <span>&nbsp;{{ parseFloat(a.amount) < 0 ? "pays" : "will get" }}</span>
                                 <span
                                     :class="parseFloat(a.amount) > 0 ? 'text-success' : 'text-error dark:text-red-400'"
-                                    >&nbsp;{{ a.symbol }}{{ Math.abs(parseFloat(a.amount)) }}</span
+                                    >&nbsp;{{ a.symbol
+                                    }}{{ to2DecimalPlacesIfValid(Math.abs(parseFloat(a.amount))) }}</span
                                 >
                             </span>
                         </div>
                     </div>
                 </template>
+            </div>
+        </template>
+
+        <template v-slot:body v-if="dialogMode === 'viewSpending'">
+            <div
+                class="scrollbar-none flex h-full flex-col gap-6 overflow-y-scroll px-6 pb-8 [&::-webkit-scrollbar]:hidden"
+            >
+                <span
+                    class="font-medium"
+                    v-if="
+                        spending?.group_spending_by_currency &&
+                        Object.keys(spending.group_spending_by_currency).length > 0
+                    "
+                    >Total spend</span
+                >
+                <div
+                    class="flex flex-col gap-2"
+                    v-if="
+                        spending?.group_spending_by_currency &&
+                        Object.keys(spending.group_spending_by_currency).length > 0
+                    "
+                >
+                    <div
+                        class="scrollbar-none flex min-h-0 w-full shrink-0 flex-row gap-3 overflow-x-scroll [&::-webkit-scrollbar]:hidden"
+                    >
+                        <div
+                            class="z-10 flex flex-col gap-2 rounded-lg bg-gray-600 p-2 text-gray-50"
+                            v-for="currency in Object.keys(spending.group_spending_by_currency)"
+                        >
+                            <span class="text-lg font-bold">{{ currency }}</span>
+                            <span class="text-sm">{{
+                                to2DecimalPlacesIfValid(parseFloat(spending.group_spending_by_currency[currency]))
+                            }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <span class="font-medium" v-if="spending.group_member_spending?.length > 0"
+                    >Spending for each member</span
+                >
+                <div class="flex flex-col gap-6" v-if="spending.group_member_spending?.length > 0">
+                    <div class="flex flex-col gap-2" v-for="s in spending.group_member_spending">
+                        <div class="flex flex-row items-center gap-2">
+                            <ProfilePhotoImage
+                                :size="6"
+                                :image-url="groupMembers.find((m) => m.user_id === s.user_id)?.user?.profile_photo_url"
+                            />
+                            <span class="text-gray-700 dark:text-gray-200">{{
+                                groupMembers.find((m) => m.user_id === s.user_id)?.user?.name
+                            }}</span>
+                        </div>
+
+                        <div
+                            class="scrollbar-none flex min-w-0 flex-row gap-4 overflow-x-scroll pl-4 pr-8 [&::-webkit-scrollbar]:hidden"
+                            v-if="
+                                (s.spending_by_currency && Object.keys(s.spending_by_currency).length > 0) ||
+                                (s.settle_up_by_currency && Object.keys(s.settle_up_by_currency).length > 0)
+                            "
+                        >
+                            <div
+                                class="flex flex-col gap-1 text-error dark:text-red-400"
+                                v-if="s.spending_by_currency && Object.keys(s.spending_by_currency).length > 0"
+                            >
+                                <span class="text-xs font-bold">Spend</span>
+                                <template v-for="currency_key in Object.keys(s.spending_by_currency)">
+                                    <span class="text-xs"
+                                        >{{ currency_key }}&nbsp;{{
+                                            to2DecimalPlacesIfValid(
+                                                Math.abs(parseFloat(s.spending_by_currency[currency_key])),
+                                            )
+                                        }}</span
+                                    >
+                                </template>
+                            </div>
+
+                            <div
+                                class="flex flex-col gap-1 text-success"
+                                v-if="s.settle_up_by_currency && Object.keys(s.settle_up_by_currency).length > 0"
+                            >
+                                <span class="text-xs font-bold">Settled</span>
+                                <template v-for="currency_key in Object.keys(s.settle_up_by_currency)">
+                                    <span class="text-xs"
+                                        >{{ currency_key }}&nbsp;{{
+                                            to2DecimalPlacesIfValid(
+                                                Math.abs(parseFloat(s.settle_up_by_currency[currency_key])),
+                                            )
+                                        }}</span
+                                    >
+                                </template>
+                            </div>
+                        </div>
+                        <div class="w-full text-xs text-gray-400" v-else>No spend</div>
+                    </div>
+                </div>
             </div>
         </template>
 

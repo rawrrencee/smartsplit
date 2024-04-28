@@ -15,7 +15,6 @@ import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } fro
 import { ArrowLeftIcon, CalendarIcon, MagnifyingGlassIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 import { CheckCircleIcon } from "@heroicons/vue/24/solid";
 import { router, useForm } from "@inertiajs/vue3";
-import InputNumber from "primevue/inputnumber";
 import { DatePicker } from "v-calendar";
 import "v-calendar/style.css";
 import { computed, ref } from "vue";
@@ -414,27 +413,15 @@ const selectedPayerOwedAmounts = computed(() => {
                             <span>{{ selectedCurrency?.symbol ?? "$" }}</span>
                         </button>
                         <div class="flex w-full flex-col gap-1">
-                            <InputNumber
-                                :unstyled="true"
-                                :pt="{
-                                    root: {
-                                        class: ['w-full'],
-                                    },
-                                    input: {
-                                        root: {
-                                            class: [
-                                                'input input-bordered w-full dark:bg-gray-900',
-                                                expenseForm.errors.amount ? 'input-error' : '',
-                                            ],
-                                        },
-                                    },
-                                }"
-                                placeholder="0.00"
-                                v-model="expenseForm.amount"
-                                inputId="minmaxfraction"
+                            <input
+                                type="number"
                                 :min="0.0"
-                                :minFractionDigits="2"
-                                :maxFractionDigits="2"
+                                :minlength="1"
+                                placeholder="0.00"
+                                class="input input-bordered w-full [appearance:textfield] dark:border-0 dark:bg-gray-900 dark:text-gray-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                :class="expenseForm.errors.amount ? 'input-error' : ''"
+                                v-model="expenseForm.amount"
+                                @change="expenseForm.clearErrors('amount')"
                             />
                             <span v-if="expenseForm.errors.amount" class="text-xs text-error dark:text-red-400">{{
                                 expenseForm.errors.amount

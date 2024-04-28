@@ -2,7 +2,6 @@
 import { to2DecimalPlacesIfValid } from "@/Common.js";
 import ProfilePhotoImage from "@/Components/Image/ProfilePhotoImage.vue";
 import { CheckCircleIcon } from "@heroicons/vue/24/solid";
-import InputNumber from "primevue/inputnumber";
 import "v-calendar/style.css";
 
 const { expenseForm, formArray, selectedCurrency } = defineProps({
@@ -86,24 +85,14 @@ const onSelectUser = (form) => {
                     </label>
                 </div>
                 <div class="w-24 flex-shrink-0" v-if="form.isSelected && !shouldDistributeEqually">
-                    <InputNumber
-                        :unstyled="true"
-                        :pt="{
-                            root: {
-                                class: ['w-full'],
-                            },
-                            input: {
-                                root: {
-                                    class: ['input input-bordered input-sm w-full dark:bg-gray-700'],
-                                },
-                            },
-                        }"
-                        placeholder="0.00"
-                        v-model="form.amount"
-                        :inputId="`minmaxfraction-${form.user_id}`"
+                    <input
+                        type="number"
+                        :id="`minmaxfraction-${form.user_id}`"
                         :min="0.0"
-                        :minFractionDigits="2"
-                        :maxFractionDigits="2"
+                        :minlength="1"
+                        placeholder="0.00"
+                        class="input input-sm input-bordered w-full [appearance:textfield] dark:border-0 dark:bg-gray-700 dark:text-gray-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        v-model="form.amount"
                     />
                 </div>
                 <span v-else class="text-xs font-bold"

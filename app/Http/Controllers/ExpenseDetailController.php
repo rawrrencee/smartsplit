@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ExpenseDetail;
 use App\Models\Group;
 use App\Models\GroupMember;
+use Illuminate\Support\Arr;
 use Money\Currencies;
 use Money\Currencies\ISOCurrencies;
 use Money\Currency;
@@ -183,5 +184,56 @@ class ExpenseDetailController extends Controller
         }
 
         return $mergedAmounts;
+    }
+
+    public function getGroupSpendWithUsers($groupId)
+    {
+        $groupExpenseDetails = ExpenseDetail::where('group_id', '=', $groupId);
+        $groupExpenseDetails = $groupExpenseDetails->whereNull('payer_id')->where('is_settlement', '=', 0);
+        $groupSpendingByCurrency = $groupExpenseDetails
+            ->groupBy('currency_key')
+            ->orderBy('currency_key')
+            ->selectRaw('currency_key, SUM(amount) as total_amount')
+            ->pluck('total_amount', 'currency_key')
+            ->toArray();
+
+        // Get all users in group
+        $groupMembers = GroupMember::withTrashed()
+            ->where('group_id', $groupId)
+            ->orderBy('user_id', 'asc')
+            ->pluck('user_id')->toArray();
+
+        $groupMemberSpending = [];
+        foreach ($groupMembers as $userId) {
+            // Spending by user
+            $userExpenseDetails = ExpenseDetail::where('group_id', '=', $groupId)
+                ->where('is_settlement', '=', 0)
+                ->where('receiver_id', '=', $userId)
+                ->groupBy('currency_key')
+                ->orderBy('currency_key')
+                ->selectRaw('currency_key, SUM(amount) as total_amount')
+                ->pluck('total_amount', 'currency_key')
+                ->toArray();
+
+            $userSettleUpDetails = ExpenseDetail::where('group_id', '=', $groupId)
+                ->where('is_settlement', '=', 1)
+                ->where('payer_id', '=', $userId)
+                ->groupBy('currency_key')
+                ->orderBy('currency_key')
+                ->selectRaw('currency_key, SUM(amount) as total_amount')
+                ->pluck('total_amount', 'currency_key')
+                ->toArray();
+
+            $groupMemberSpending[] = (object) array(
+                'user_id' => $userId,
+                'spending_by_currency' => $userExpenseDetails,
+                'settle_up_by_currency' => $userSettleUpDetails
+            );
+        }
+
+        return (object) array(
+            'group_spending_by_currency' => $groupSpendingByCurrency,
+            'group_member_spending' => $groupMemberSpending,
+        );
     }
 }

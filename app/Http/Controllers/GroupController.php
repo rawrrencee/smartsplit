@@ -237,6 +237,7 @@ class GroupController extends Controller
             ->get();
 
         $expenses = $this->getExpensesWithGroupForUser($id, $request['perPage'], null, $request['onlyUser']);
+        $spending = $this->ExpenseDetailController->getGroupSpendWithUsers($id);
 
         try {
             $groupBalance = $this->ExpenseDetailController->getGroupBalance($id);
@@ -251,6 +252,7 @@ class GroupController extends Controller
             'userAmounts' => $this->ExpenseDetailController->getOverallExpenseDeltaForUserInGroup(auth()->user()->id, $id),
             'groupBalance' => $groupBalance,
             'expenses' => $this->mapExpenseDetailsByDate($expenses, auth()->user()->id),
+            'spending' => $spending,
             'paginatedResults' => $expenses
         ]);
 
