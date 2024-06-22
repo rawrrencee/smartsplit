@@ -107,6 +107,9 @@ const currenciesPaidByUser = computed(() => {
         };
     });
 });
+const hasGroupBalanceDeltas = computed(() => {
+    return Object.keys(props.groupBalance?.deltas ?? {}).some((key) => props.groupBalance.deltas?.[key]?.length);
+});
 const positiveCurrencies = computed(() => {
     return currenciesPaidByUser.value.filter((v) => v.amount > 0);
 });
@@ -355,8 +358,8 @@ const dialogTitleFromMode = computed(() => {
                 </template>
             </ul>
         </div>
-        <div class="carousel carousel-center w-full space-x-2 px-4 pt-4" v-if="expenseDetails.length">
-            <div v-if="Object.keys(groupBalance?.deltas ?? {}).length" class="carousel-item">
+        <div v-if="expenseDetails.length" class="carousel carousel-center w-full space-x-2 px-4 pt-4">
+            <div v-if="hasGroupBalanceDeltas" class="carousel-item">
                 <button
                     class="btn btn-outline btn-xs dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
                     type="button"
@@ -631,9 +634,10 @@ const dialogTitleFromMode = computed(() => {
 
         <template v-if="dialogMode === 'viewBalances'" v-slot:body>
             <div
+                v-if="hasGroupBalanceDeltas"
                 class="scrollbar-none flex h-full flex-col gap-6 overflow-y-scroll px-6 pb-8 [&::-webkit-scrollbar]:hidden"
             >
-                <template v-for="userId in Object.keys(groupBalance?.deltas)">
+                <template v-for="userId in Object.keys(groupBalance?.deltas ?? {})">
                     <div v-if="groupBalance?.deltas?.[userId]?.length > 0" class="flex flex-col gap-1">
                         <div class="flex flex-row items-center gap-2">
                             <ProfilePhotoImage
@@ -694,10 +698,10 @@ const dialogTitleFromMode = computed(() => {
                         >
                             <div
                                 v-for="currency in Object.keys(spending.group_spending_by_currency)"
-                                class="z-10 flex flex-col gap-2 rounded-lg bg-gray-600 p-2 text-gray-50"
+                                class="z-10 flex min-w-24 flex-col gap-2 rounded-lg bg-gray-600 p-2 text-gray-50"
                             >
                                 <span class="text-lg font-bold">{{ currency }}</span>
-                                <span class="text-sm">{{
+                                <span class="text-right text-sm">{{
                                     to2DecimalPlacesIfValid(parseFloat(spending.group_spending_by_currency[currency]))
                                 }}</span>
                             </div>
