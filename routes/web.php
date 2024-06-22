@@ -52,6 +52,8 @@ Route::middleware([
         Route::post('/update', [GroupController::class, 'update'])->name('groups.update');
         Route::post('/delete', [GroupController::class, 'destroy'])->name('groups.delete');
         Route::post('/delete-photo', [GroupController::class, 'deletePhoto'])->name('groups.delete-photo');
+
+        Route::post('/export-expenses', [GroupController::class, 'exportExpensesToCsv'])->name('groups.export-expenses');
     });
 
     Route::prefix('group-members')->group(function () {

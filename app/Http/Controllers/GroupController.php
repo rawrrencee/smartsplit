@@ -551,6 +551,122 @@ class GroupController extends Controller
         }
     }
 
+    public function exportExpensesToCsv(Request $request)
+    {
+        $request->validate([
+            'id' => 'exists:groups,id',
+        ]);
+
+        $id = intval($request['id']);
+        $isGroupMember = $this->isGroupMemberWithUserIdExisting($id, auth()->user()->id, false);
+        if ($id === 0 || !$isGroupMember) {
+            return redirect()->route('404');
+        }
+
+        $userIdWithNames = GroupMember::where('group_id', $id)
+            ->with('user')
+            ->get()
+            ->map(function ($groupMember) {
+                return [
+                    'user_id' => $groupMember->user->id,
+                    'name' => $groupMember->user->name,
+                ];
+            })
+            ->toArray();
+        $userNames = collect($userIdWithNames)->pluck('name')->toArray();
+        $userIds = collect($userIdWithNames)->pluck('user_id')->toArray();
+
+        // Open a memory "file" for write
+        $file = fopen('php://memory', 'w');
+
+        // Define the CSV headers
+        $row2Header = [
+            'Date',
+            'Expense Name',
+            'Is Settlement',
+            'Currency',
+            'Total Amount'
+        ];
+
+        $row1Header = array_fill(0, count($row2Header), '');
+
+        for ($cycle = 0; $cycle < 2; $cycle++) {
+            for ($i = 0; $i < count($userNames); $i++) {
+                if ($i === 0) {
+                    $row1Header[] = $cycle == 0 ? 'Payer' : 'Receiver';
+                } else {
+                    $row1Header[] = "";
+                }
+            }
+        }
+
+        foreach ($row1Header as &$item) {
+            $item = mb_convert_encoding($item, 'UTF-8');
+        }
+
+        // Insert the CSV header
+        fputcsv($file, $row1Header);
+
+        // Merge once for Payers
+        $row2HeaderWithPayers = array_merge($row2Header, $userNames);
+        // Merge again for Receivers
+        $row2HeaderWithPayersAndReceivers = array_merge($row2HeaderWithPayers, $userNames);
+
+        foreach ($row2HeaderWithPayersAndReceivers as &$item) {
+            $item = mb_convert_encoding($item, 'UTF-8');
+        }
+        fputcsv($file, $row2HeaderWithPayersAndReceivers);
+
+        // Fetch expenses
+        $expenses = Expense::where('group_id', $request['id'])->get();
+
+        // Insert the expense data
+        foreach ($expenses as $expense) {
+            $payerExpenseDetails = ExpenseDetail::where('expense_id', $expense->id)->whereNotNull('payer_id')->get();
+            $receiverExpenseDetails = ExpenseDetail::where('expense_id', $expense->id)->whereNotNull('receiver_id')->get();
+
+            $payerDataColumns = [];
+            $receiverDataColumns = [];
+
+            foreach ($userIds as $userId) {
+                $payerAmount = $payerExpenseDetails->where('payer_id', $userId)->pluck('amount')->implode('');
+                $payerDataColumns[] = empty($payerAmount) ? '0.00' : $payerAmount;
+
+                $receiverAmount = $receiverExpenseDetails->where('receiver_id', $userId)->pluck('amount')->implode('');
+                $receiverDataColumns[] = empty($receiverAmount) ? '0.00' : $receiverAmount;
+            }
+
+            $row = [
+                $expense->date,
+                $expense->description,
+                $expense->is_settlement ? 'YES' : 'NO',
+                $expense->currency_key,
+                $expense->amount
+            ];
+
+            $rowWithPayerData = array_merge($row, $payerDataColumns);
+            $rowWithPayerAndReceiverData = array_merge($rowWithPayerData, $receiverDataColumns);
+
+            // Convert each item in the row to UTF-8
+            foreach ($rowWithPayerAndReceiverData as &$item) {
+                $item = mb_convert_encoding($item, 'UTF-8');
+            }
+
+            fputcsv($file, $rowWithPayerAndReceiverData);
+        }
+
+        // Reset the file pointer to the start of the file
+        fseek($file, 0);
+
+        // Send BOM header for UTF-8 CSV
+        echo "\xEF\xBB\xBF";
+
+        // Return a CSV file for download
+        return response()->streamDownload(function () use ($file) {
+            fpassthru($file);
+        }, 'expenses.csv');
+    }
+
     private function buildGroupMemberWithUser(int $groupId, int $userId, GroupMemberStatusEnum $status): GroupMember
     {
         $groupMember = new GroupMember();
