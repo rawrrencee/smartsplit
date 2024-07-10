@@ -35,7 +35,7 @@ defineProps({
             <div v-else class="flex min-w-0 flex-grow flex-row items-center justify-between gap-2">
                 <CategoryIcon :category="expense.category" />
                 <div class="flex min-w-0 flex-grow flex-col text-xs">
-                    <span class="dark:text-gray-200">{{ expense.description }}</span>
+                    <span class="dark:text-gray-200 break-words">{{ expense.description }}</span>
                     <span class="break-words text-gray-500 dark:text-gray-300"
                         >{{ expense.num_payers > 1 ? `${expense.num_payers}&nbsp;` : "" }}{{ expense.payer_name }} paid
                         {{ expense.symbol }}{{ to2DecimalPlacesIfValid(expense.amount) }}</span
