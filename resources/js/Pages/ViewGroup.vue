@@ -698,7 +698,7 @@ const dialogTitleFromMode = computed(() => {
                         >
                             <div
                                 v-for="currency in Object.keys(spending.group_spending_by_currency)"
-                                class="z-10 flex min-w-24 flex-col gap-2 rounded-lg bg-gray-600 p-2 text-gray-50"
+                                class="z-10 flex shrink-0 min-w-24 flex-col gap-2 rounded-lg bg-gray-600 p-2 text-gray-50"
                             >
                                 <span class="text-lg font-bold">{{ currency }}</span>
                                 <span class="text-right text-sm">{{

@@ -29,11 +29,11 @@ defineProps({
         </div>
         <div class="w-full min-w-10 pr-4 sm:pr-6 lg:pr-8">
             <div v-if="expense.is_settlement" class="flex flex-row items-center gap-2">
-                <CurrencyDollarIcon class="h-6 w-6 flex-shrink-0 text-success" />
+                <CurrencyDollarIcon class="h-6 w-6 shrink-0 text-success" />
                 <span class="break-word text-xs">{{ expense.description }}</span>
             </div>
             <div v-else class="flex min-w-0 flex-grow flex-row items-center justify-between gap-2">
-                <CategoryIcon :category="expense.category" />
+                <CategoryIcon class="shrink-0" :category="expense.category" />
                 <div class="flex min-w-0 flex-grow flex-col text-xs">
                     <span class="dark:text-gray-200 break-words">{{ expense.description }}</span>
                     <span class="break-words text-gray-500 dark:text-gray-300"
@@ -42,11 +42,11 @@ defineProps({
                     >
                 </div>
                 <template v-if="expense.net_amount === 0">
-                    <span class="w-16 flex-shrink-0 text-right text-[0.65rem] text-gray-400">not involved</span>
+                    <span class="w-16 shrink-0 text-right text-[0.65rem] text-gray-400">not involved</span>
                 </template>
                 <div
                     v-else
-                    class="flex min-w-0 flex-shrink-0 flex-col break-words text-right text-xs"
+                    class="flex min-w-0 shrink-0 flex-col break-words text-right text-xs"
                     :class="expense.net_amount < 0 ? 'text-error dark:text-red-400' : 'text-success'"
                 >
                     <span>you {{ expense.net_amount < 0 ? "borrowed" : "lent" }}</span>
