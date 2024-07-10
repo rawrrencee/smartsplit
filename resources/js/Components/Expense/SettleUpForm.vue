@@ -199,7 +199,6 @@ const onSaveExpenseClicked = () => {
         .post(route(props.isEdit ? "expenses.update" : "expenses.save"), {
             onSuccess: (s) => {
                 expenseForm.reset();
-                payerFormArray.value.forEach((f) => f.reset());
                 router.reload();
                 showToastIfNeeded(toast, s.props.flash);
             },

@@ -17,7 +17,7 @@ import {
     PaperAirplaneIcon,
     PencilIcon,
     PlusIcon,
-    XMarkIcon,
+    XMarkIcon
 } from "@heroicons/vue/24/outline";
 import { CheckCircleIcon } from "@heroicons/vue/24/solid";
 import { router, useForm } from "@inertiajs/vue3";
@@ -35,7 +35,7 @@ const props = defineProps({
     auth: Object,
     show: Boolean, // error handling
     status: String, // error handling
-    message: String, // error handling
+    message: String // error handling
 });
 
 onMounted(() => {
@@ -69,7 +69,7 @@ const setIsDialogOpen = (value, mode) => {
 };
 
 const selectedUserIdToViewExpenses = ref(
-    isNaN(parseInt(route().params.onlyUser)) ? null : parseInt(route().params.onlyUser),
+    isNaN(parseInt(route().params.onlyUser)) ? null : parseInt(route().params.onlyUser)
 );
 const setSelectedUserIdToViewExpenses = (userId) => {
     const shouldUnset = selectedUserIdToViewExpenses.value === userId;
@@ -82,9 +82,9 @@ const setSelectedUserIdToViewExpenses = (userId) => {
     setIsDialogOpen(false, dialogMode.value);
     router.reload({
         data: {
-            onlyUser: shouldUnset ? null : userId,
+            onlyUser: shouldUnset ? null : userId
         },
-        only: ["expenses", "paginatedResults"],
+        only: ["expenses", "paginatedResults"]
     });
 };
 const showingExpensesForUserName = computed(() => {
@@ -103,7 +103,7 @@ const currenciesPaidByUser = computed(() => {
         return {
             key: val[0],
             symbol: val[1].symbol,
-            amount: val[1].amount,
+            amount: val[1].amount
         };
     });
 });
@@ -144,14 +144,14 @@ const setIsAddMemberInputShown = (value) => {
     isAddMemberInputShown.value = value;
 };
 const addMemberForm = useForm({
-    email: "",
+    email: ""
 });
 const onAddMemberClicked = () => {
     setIsLoading(true);
     addMemberForm
         .transform((data) => ({
             ...data,
-            group_id: props.group.id,
+            group_id: props.group.id
         }))
         .post(route("groups-members.add"), {
             onSuccess: (s) => {
@@ -161,7 +161,7 @@ const onAddMemberClicked = () => {
             },
             onFinish: () => {
                 setIsLoading(false);
-            },
+            }
         });
 };
 const onClearAddMemberFormClicked = () => {
@@ -172,14 +172,14 @@ const onAppendEmailDomainClicked = () => {
     addMemberForm.email = addMemberForm.email.includes("@") ? addMemberForm.email : `${addMemberForm.email}@gmail.com`;
 };
 const removeMemberForm = useForm({
-    id: "",
+    id: ""
 });
 const onRemoveMemberClicked = (member) => {
     if (!confirm("Are you sure you want to remove this member?")) return;
     setIsLoading(true);
     removeMemberForm
         .transform(() => ({
-            id: member.id,
+            id: member.id
         }))
         .post(route("groups-members.remove"), {
             onSuccess: (s) => {
@@ -189,7 +189,7 @@ const onRemoveMemberClicked = (member) => {
             },
             onFinish: () => {
                 setIsLoading(false);
-            },
+            }
         });
 };
 const onRestoreDeletedGroupMemberClicked = (member) => {
@@ -201,11 +201,11 @@ const onGoToPageClicked = (data) => {
         data: {
             id: props.group.id,
             page: data?.page ?? 1,
-            perPage: data?.perPage ?? 10,
+            perPage: data?.perPage ?? 10
         },
         only: ["paginatedResults", "expenses"],
         replace: true,
-        preserveScroll: true,
+        preserveScroll: true
     });
 };
 
@@ -215,8 +215,8 @@ const onExportToCsvClicked = () => {
         method: "POST",
         responseType: "blob",
         data: {
-            id: props.group.id,
-        },
+            id: props.group.id
+        }
     }).then((response) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
@@ -240,7 +240,7 @@ const expenseDetails = computed(() => {
             const groupByTitle = `${month} ${year}`;
             expenses.push({
                 groupByTitle,
-                monthExpenses,
+                monthExpenses
             });
         }
     }
@@ -277,8 +277,8 @@ const dialogTitleFromMode = computed(() => {
                 <ServerImage v-if="group?.img_path" :image-url="group.img_path" :preview-enabled="true" :size="12" />
                 <PlaceholderImage v-else :size="12" />
                 <span class="min-w-0 break-words text-2xl font-medium dark:text-gray-100">{{
-                    group?.group_title
-                }}</span>
+                        group?.group_title
+                    }}</span>
             </div>
             <button
                 class="flex flex-row items-center self-start"
@@ -314,7 +314,7 @@ const dialogTitleFromMode = computed(() => {
                     class="rounded-md p-2 text-xs text-gray-500 hover:bg-gray-300 dark:text-gray-400 dark:hover:bg-gray-900/40"
                 >
                     <span
-                        >{{ activeGroupMembers.length > 0 ? activeGroupMembers.length : "" }} member{{
+                    >{{ activeGroupMembers.length > 0 ? activeGroupMembers.length : "" }} member{{
                             activeGroupMembers?.length === 1 ? "" : "s"
                         }}</span
                     >
@@ -346,13 +346,13 @@ const dialogTitleFromMode = computed(() => {
                 <template v-for="owed in currentUserOwes">
                     <li>
                         <span class="font-medium"
-                            >{{ groupMembers?.find((m) => m.user_id === owed.user_id)?.user?.name }}&nbsp;</span
+                        >{{ groupMembers?.find((m) => m.user_id === owed.user_id)?.user?.name }}&nbsp;</span
                         >
                         <span>{{ owed.amount > 0 ? "gets back" : "pays you" }}</span>
                         <span
                             :class="owed.amount > 0 ? 'text-error dark:text-red-400' : 'text-success'"
                             class="font-semibold"
-                            >&nbsp;{{ owed.symbol }}{{ to2DecimalPlacesIfValid(Math.abs(owed.amount)) }}</span
+                        >&nbsp;{{ owed.symbol }}{{ to2DecimalPlacesIfValid(Math.abs(owed.amount)) }}</span
                         >
                     </li>
                 </template>
@@ -461,11 +461,11 @@ const dialogTitleFromMode = computed(() => {
                         <div class="flex flex-col gap-1 px-6 pb-4 text-xs text-gray-500 dark:text-gray-400">
                             <span> Some new members have yet to accept the invitation to this group. </span>
                             <span
-                                >You can include <span class="font-semibold">PENDING</span> users in the expenses, but
+                            >You can include <span class="font-semibold">PENDING</span> users in the expenses, but
                                 someone else will need to settle up on their behalf.</span
                             >
                             <span
-                                ><span class="font-semibold">UNAVAILABLE</span> users cannot be added to expenses until
+                            ><span class="font-semibold">UNAVAILABLE</span> users cannot be added to expenses until
                                 they create an account.</span
                             >
                         </div>
@@ -503,7 +503,7 @@ const dialogTitleFromMode = computed(() => {
                                 <span
                                     v-if="addMemberForm.errors['email']"
                                     class="text-xs text-error dark:text-red-400"
-                                    >{{ addMemberForm.errors["email"] }}</span
+                                >{{ addMemberForm.errors["email"] }}</span
                                 >
                                 <div class="flex flex-grow flex-row justify-between gap-1">
                                     <button
@@ -546,20 +546,19 @@ const dialogTitleFromMode = computed(() => {
                                         <PlaceholderImage v-else :size="8" />
                                         <div class="flex flex-col gap-1">
                                             <span class="break-all text-sm font-medium leading-3">{{
-                                                member.user?.name
-                                            }}</span>
-                                            <div class="flex flex-row flex-wrap items-center gap-2">
-                                                <span class="break-all text-xs text-gray-400">{{ member.email }}</span
-                                                ><span
-                                                    v-if="$page.props.auth.user.id === member.user_id"
-                                                    class="badge badge-sm text-xs font-semibold"
-                                                    >YOU</span
-                                                >
-                                            </div>
+                                                    member.user?.name
+                                                }}</span>
+                                            <span class="break-all text-xs text-gray-400">{{ member.email }}</span
+                                            >
+                                            <span
+                                                v-if="$page.props.auth.user.id === member.user_id"
+                                                class="badge badge-sm badge-outline text-xs font-semibold"
+                                            >YOU</span
+                                            >
                                             <span
                                                 v-if="group.owner_id === member.user_id"
                                                 class="badge badge-primary badge-sm text-xs font-semibold"
-                                                >CREATOR</span
+                                            >CREATOR</span
                                             >
                                             <div
                                                 v-if="member.status !== GroupMemberStatusEnum.ACCEPTED"
@@ -647,8 +646,8 @@ const dialogTitleFromMode = computed(() => {
                                 :size="6"
                             />
                             <span class="text-gray-700 dark:text-gray-200">{{
-                                groupMembers.find((m) => `${m.user_id}` === userId)?.user?.name
-                            }}</span>
+                                    groupMembers.find((m) => `${m.user_id}` === userId)?.user?.name
+                                }}</span>
                         </div>
                         <span
                             v-for="delta in groupBalance?.deltas?.[userId]"
@@ -657,7 +656,7 @@ const dialogTitleFromMode = computed(() => {
                             <span>{{ parseFloat(delta.amount) < 0 ? "owes" : "is owed" }}</span>
                             <span
                                 :class="parseFloat(delta.amount) > 0 ? 'text-success' : 'text-error dark:text-red-400'"
-                                >&nbsp;{{ delta.symbol
+                            >&nbsp;{{ delta.symbol
                                 }}{{ to2DecimalPlacesIfValid(Math.abs(parseFloat(delta.amount))) }}</span
                             >
                         </span>
@@ -667,7 +666,7 @@ const dialogTitleFromMode = computed(() => {
                                 <span>&nbsp;{{ parseFloat(a.amount) < 0 ? "pays" : "will get" }}</span>
                                 <span
                                     :class="parseFloat(a.amount) > 0 ? 'text-success' : 'text-error dark:text-red-400'"
-                                    >&nbsp;{{ a.symbol
+                                >&nbsp;{{ a.symbol
                                     }}{{ to2DecimalPlacesIfValid(Math.abs(parseFloat(a.amount))) }}</span
                                 >
                             </span>
@@ -702,8 +701,8 @@ const dialogTitleFromMode = computed(() => {
                             >
                                 <span class="text-lg font-bold">{{ currency }}</span>
                                 <span class="text-right text-sm">{{
-                                    to2DecimalPlacesIfValid(parseFloat(spending.group_spending_by_currency[currency]))
-                                }}</span>
+                                        to2DecimalPlacesIfValid(parseFloat(spending.group_spending_by_currency[currency]))
+                                    }}</span>
                             </div>
                         </div>
                     </div>
@@ -721,57 +720,57 @@ const dialogTitleFromMode = computed(() => {
                             class="table"
                         >
                             <thead class="dark:text-gray-200">
-                                <tr class="border-none">
-                                    <th class="w-50 pl-0 pt-0">Name</th>
-                                    <template v-for="currency in Object.keys(spending.group_spending_by_currency)">
-                                        <th class="pr-0 pt-0 text-right">{{ currency }}</th>
-                                    </template>
-                                </tr>
+                            <tr class="border-none">
+                                <th class="w-50 pl-0 pt-0">Name</th>
+                                <template v-for="currency in Object.keys(spending.group_spending_by_currency)">
+                                    <th class="pr-0 pt-0 text-right">{{ currency }}</th>
+                                </template>
+                            </tr>
                             </thead>
 
                             <tbody>
-                                <template v-for="s in spending.group_member_spending">
-                                    <tr class="border-none">
-                                        <td class="w-50 pl-0">
-                                            <div class="flex flex-row items-center gap-2">
-                                                <ProfilePhotoImage
-                                                    :image-url="
+                            <template v-for="s in spending.group_member_spending">
+                                <tr class="border-none">
+                                    <td class="w-50 pl-0">
+                                        <div class="flex flex-row items-center gap-2">
+                                            <ProfilePhotoImage
+                                                :image-url="
                                                         groupMembers.find((m) => m.user_id === s.user_id)?.user
                                                             ?.profile_photo_url
                                                     "
-                                                    :size="6"
-                                                />
-                                                <span class="text-xs font-medium text-gray-700 dark:text-gray-200">{{
+                                                :size="6"
+                                            />
+                                            <span class="text-xs font-medium text-gray-700 dark:text-gray-200">{{
                                                     groupMembers.find((m) => m.user_id === s.user_id)?.user?.name
                                                 }}</span>
-                                            </div>
+                                        </div>
+                                    </td>
+                                    <template v-for="currency in Object.keys(spending.group_spending_by_currency)">
+                                        <td class="pr-0 text-right text-xs text-gray-700 dark:text-gray-200">
+                                            {{
+                                                to2DecimalPlacesIfValid(
+                                                    parseFloat(s.spending_by_currency[currency])
+                                                )
+                                            }}
                                         </td>
-                                        <template v-for="currency in Object.keys(spending.group_spending_by_currency)">
-                                            <td class="pr-0 text-right text-xs text-gray-700 dark:text-gray-200">
-                                                {{
-                                                    to2DecimalPlacesIfValid(
-                                                        parseFloat(s.spending_by_currency[currency]),
-                                                    )
-                                                }}
-                                            </td>
-                                        </template>
-                                    </tr>
-                                </template>
+                                    </template>
+                                </tr>
+                            </template>
                             </tbody>
 
                             <tfoot>
-                                <tr class="dark:text-gray-200">
-                                    <th class="pl-0">Total spend</th>
-                                    <template v-for="currency in Object.keys(spending.group_spending_by_currency)">
-                                        <th class="pr-0 text-right">
-                                            {{
-                                                to2DecimalPlacesIfValid(
-                                                    parseFloat(spending.group_spending_by_currency[currency]),
-                                                )
-                                            }}
-                                        </th>
-                                    </template>
-                                </tr>
+                            <tr class="dark:text-gray-200">
+                                <th class="pl-0">Total spend</th>
+                                <template v-for="currency in Object.keys(spending.group_spending_by_currency)">
+                                    <th class="pr-0 text-right">
+                                        {{
+                                            to2DecimalPlacesIfValid(
+                                                parseFloat(spending.group_spending_by_currency[currency])
+                                            )
+                                        }}
+                                    </th>
+                                </template>
+                            </tr>
                             </tfoot>
                         </table>
                     </div>
@@ -789,42 +788,42 @@ const dialogTitleFromMode = computed(() => {
                             class="table"
                         >
                             <thead class="dark:text-gray-200">
-                                <tr class="border-none">
-                                    <th class="w-50 pl-0 pt-0">Name</th>
-                                    <template v-for="currency in Object.keys(spending.group_spending_by_currency)">
-                                        <th class="pr-0 pt-0 text-right">{{ currency }}</th>
-                                    </template>
-                                </tr>
+                            <tr class="border-none">
+                                <th class="w-50 pl-0 pt-0">Name</th>
+                                <template v-for="currency in Object.keys(spending.group_spending_by_currency)">
+                                    <th class="pr-0 pt-0 text-right">{{ currency }}</th>
+                                </template>
+                            </tr>
                             </thead>
 
                             <tbody>
-                                <template v-for="s in spending.group_member_spending">
-                                    <tr class="border-none">
-                                        <td class="w-50 pl-0">
-                                            <div class="flex flex-row items-center gap-2">
-                                                <ProfilePhotoImage
-                                                    :image-url="
+                            <template v-for="s in spending.group_member_spending">
+                                <tr class="border-none">
+                                    <td class="w-50 pl-0">
+                                        <div class="flex flex-row items-center gap-2">
+                                            <ProfilePhotoImage
+                                                :image-url="
                                                         groupMembers.find((m) => m.user_id === s.user_id)?.user
                                                             ?.profile_photo_url
                                                     "
-                                                    :size="6"
-                                                />
-                                                <span class="text-xs font-medium text-gray-700 dark:text-gray-200">{{
+                                                :size="6"
+                                            />
+                                            <span class="text-xs font-medium text-gray-700 dark:text-gray-200">{{
                                                     groupMembers.find((m) => m.user_id === s.user_id)?.user?.name
                                                 }}</span>
-                                            </div>
+                                        </div>
+                                    </td>
+                                    <template v-for="currency in Object.keys(spending.group_spending_by_currency)">
+                                        <td class="pr-0 text-right text-xs text-gray-700 dark:text-gray-200">
+                                            {{
+                                                to2DecimalPlacesIfValid(
+                                                    Math.abs(parseFloat(s.settle_up_by_currency[currency] ?? 0))
+                                                )
+                                            }}
                                         </td>
-                                        <template v-for="currency in Object.keys(spending.group_spending_by_currency)">
-                                            <td class="pr-0 text-right text-xs text-gray-700 dark:text-gray-200">
-                                                {{
-                                                    to2DecimalPlacesIfValid(
-                                                        Math.abs(parseFloat(s.settle_up_by_currency[currency] ?? 0)),
-                                                    )
-                                                }}
-                                            </td>
-                                        </template>
-                                    </tr>
-                                </template>
+                                    </template>
+                                </tr>
+                            </template>
                             </tbody>
                         </table>
                     </div>

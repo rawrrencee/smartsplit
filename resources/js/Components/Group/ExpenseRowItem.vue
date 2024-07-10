@@ -6,14 +6,14 @@ import { router } from "@inertiajs/vue3";
 
 defineProps({
     expense: Object,
-    origin: String,
+    origin: String
 });
 </script>
 
 <template>
     <button
-        type="button"
         class="flex flex-row items-center gap-2 py-1 text-left hover:bg-gray-200 dark:hover:bg-gray-900/40"
+        type="button"
         @click="
             router.visit(
                 route('expenses.view', {
@@ -29,15 +29,24 @@ defineProps({
         </div>
         <div class="w-full min-w-10 pr-4 sm:pr-6 lg:pr-8">
             <div v-if="expense.is_settlement" class="flex flex-row items-center gap-2">
-                <CurrencyDollarIcon class="h-6 w-6 shrink-0 text-success" />
+                <div class="flex flex-col items-center">
+                    <span v-if="expense.num_comments" class="badge badge-xs badge-primary font-semibold text-[0.65rem]">{{ expense.num_comments
+                        }}</span>
+                    <CurrencyDollarIcon class="h-6 w-6 shrink-0 text-success" />
+                </div>
                 <span class="break-word text-xs">{{ expense.description }}</span>
             </div>
             <div v-else class="flex min-w-0 flex-grow flex-row items-center justify-between gap-2">
-                <CategoryIcon class="shrink-0" :category="expense.category" />
+                <div class="flex flex-col items-center">
+                    <span v-if="expense.num_comments" class="badge badge-xs badge-primary font-semibold text-[0.65rem]">{{ expense.num_comments
+                        }}</span>
+                    <CategoryIcon :category="expense.category" class="shrink-0" />
+                </div>
+
                 <div class="flex min-w-0 flex-grow flex-col text-xs">
                     <span class="dark:text-gray-200 break-words">{{ expense.description }}</span>
                     <span class="break-words text-gray-500 dark:text-gray-300"
-                        >{{ expense.num_payers > 1 ? `${expense.num_payers}&nbsp;` : "" }}{{ expense.payer_name }} paid
+                    >{{ expense.num_payers > 1 ? `${expense.num_payers}&nbsp;` : "" }}{{ expense.payer_name }} paid
                         {{ expense.symbol }}{{ to2DecimalPlacesIfValid(expense.amount) }}</span
                     >
                 </div>
@@ -46,8 +55,8 @@ defineProps({
                 </template>
                 <div
                     v-else
-                    class="flex min-w-0 shrink-0 flex-col break-words text-right text-xs"
                     :class="expense.net_amount < 0 ? 'text-error dark:text-red-400' : 'text-success'"
+                    class="flex min-w-0 shrink-0 flex-col break-words text-right text-xs"
                 >
                     <span>you {{ expense.net_amount < 0 ? "borrowed" : "lent" }}</span>
                     <span>{{ expense.symbol }}{{ to2DecimalPlacesIfValid(Math.abs(expense.net_amount)) }}</span>

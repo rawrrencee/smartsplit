@@ -175,6 +175,7 @@ class GroupController extends Controller
             $netAmount = $expenseDetailsInvolvingUser->sum(function ($detail) {
                 return $detail->amount;
             });
+            $numComments = $expense->expenseComments->count();
 
             $results[$year][$month][] = [
                 'id' => $expense->id,
@@ -192,7 +193,8 @@ class GroupController extends Controller
                 'payer_name' => $expense->payer_name,
                 'receiver_name' => $expense->receiver_name,
                 'is_settlement' => $expense->is_settlement,
-                'net_amount' => $netAmount
+                'net_amount' => $netAmount,
+                'num_comments' => $numComments
             ];
         }
 

@@ -45,7 +45,7 @@ const onClick = (name) => {
                     aria-hidden="true"
                     v-if="isLoadingForRoute !== item.path"
                 />
-                <span class="loading loading-dots h-4 w-4" v-else></span>
+                <span class="loading loading-dots h-4 w-4 dark:bg-gray-200" v-else></span>
                 <template v-if="item.path !== 'groups'">
                     <span class="btm-nav-label text-xs dark:text-gray-200">{{ item.name }}</span>
                 </template>

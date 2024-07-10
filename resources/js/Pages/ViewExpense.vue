@@ -13,12 +13,12 @@ import { toast } from "vue-sonner";
 
 const props = defineProps({
     expense: Object,
-    auth: Object,
+    auth: Object
 });
 
 const commentForm = useForm({
     expense_id: props.expense.id,
-    content: null,
+    content: null
 });
 const editingComment = ref(null);
 const shouldClearComment = ref(false);
@@ -65,7 +65,7 @@ const consolidatedPaymentDetails = computed(() => {
             if (userId) {
                 userMap.set(uniqueKey, {
                     user: d.payer ?? d.receiver,
-                    expenseDetails: [d],
+                    expenseDetails: [d]
                 });
             }
         }
@@ -93,8 +93,8 @@ const onDeleteClicked = () => {
             },
             onFinish: () => {
                 setIsLoading(false);
-            },
-        },
+            }
+        }
     );
 };
 
@@ -108,7 +108,7 @@ const onAddCommentClicked = (comment, commentsScrollableDiv) => {
     commentForm
         .transform((data) => ({
             ...data,
-            content: comment,
+            content: comment
         }))
         .post(route("expenses.add-comment"), {
             onSuccess: (s) => {
@@ -122,7 +122,7 @@ const onAddCommentClicked = (comment, commentsScrollableDiv) => {
             },
             onFinish: () => {
                 setIsLoading(false);
-            },
+            }
         });
 };
 const onSaveEditedCommentClicked = (comment, newContent) => {
@@ -147,8 +147,8 @@ const onSaveEditedCommentClicked = (comment, newContent) => {
             },
             onFinish: () => {
                 setIsLoading(false);
-            },
-        },
+            }
+        }
     );
 };
 const onEditCommentClicked = (comment) => {
@@ -167,8 +167,8 @@ const onDeleteCommentClicked = (comment) => {
             },
             onFinish: () => {
                 setIsLoading(false);
-            },
-        },
+            }
+        }
     );
 };
 // #endregion Event Handlers
@@ -193,39 +193,39 @@ const onDeleteCommentClicked = (comment) => {
             </div>
         </div>
         <div class="mx-auto flex max-w-xl flex-col gap-4 pb-6 dark:text-gray-200">
-            <div class="flex w-full flex-row px-4" :class="expense.is_settlement ? 'justify-center' : ''">
+            <div :class="expense.is_settlement ? 'justify-center' : ''" class="flex w-full flex-row px-4">
                 <div
                     class="badge badge-neutral badge-lg flex flex-row items-center gap-2 dark:badge-secondary dark:font-bold dark:text-gray-700"
                 >
                     <CalendarIcon class="h-4 w-4" />
                     <span class="text-sm">{{
-                        new Date(expense.date).toLocaleString("en-SG", {
-                            dateStyle: "medium",
-                        })
-                    }}</span>
+                            new Date(expense.date).toLocaleString("en-SG", {
+                                dateStyle: "medium"
+                            })
+                        }}</span>
                 </div>
             </div>
 
-            <div class="flex flex-1 flex-col gap-2 px-4" v-if="expense.is_settlement">
+            <div v-if="expense.is_settlement" class="flex flex-1 flex-col gap-2 px-4">
                 <div class="flex flex-col place-items-center gap-6 pt-12">
                     <CurrencyDollarIcon class="h-24 w-24 flex-shrink-0 text-success" />
                     <div class="flex flex-col gap-1 text-center">
                         <span class="text-sm">{{ expense.description }}</span>
                         <span class="text-xs text-gray-400"
-                            >Added by {{ expense.created_by.name }} on
+                        >Added by {{ expense.created_by.name }} on
                             {{
                                 new Date(expense.created_at).toLocaleString("en-SG", {
                                     dateStyle: "medium",
-                                    timeStyle: "short",
+                                    timeStyle: "short"
                                 })
                             }}</span
                         >
                         <span class="text-xs text-gray-400"
-                            >Updated by {{ expense.updated_by.name }} on
+                        >Updated by {{ expense.updated_by.name }} on
                             {{
                                 new Date(expense.updated_at).toLocaleString("en-SG", {
                                     dateStyle: "medium",
-                                    timeStyle: "short",
+                                    timeStyle: "short"
                                 })
                             }}</span
                         >
@@ -241,26 +241,26 @@ const onDeleteCommentClicked = (comment) => {
                             <div class="flex flex-col">
                                 <span class="text-lg">{{ expense.description }}</span>
                                 <span class="text-2xl font-medium"
-                                    >{{ expense.currency_symbol }}{{ to2DecimalPlacesIfValid(expense.amount) }}</span
+                                >{{ expense.currency_symbol }}{{ to2DecimalPlacesIfValid(expense.amount) }}</span
                                 >
                             </div>
                         </div>
                         <div class="flex flex-col gap-1">
                             <span class="text-xs text-gray-400"
-                                >Added by {{ expense.created_by.name }} on
+                            >Added by {{ expense.created_by.name }} on
                                 {{
                                     new Date(expense.created_at).toLocaleString("en-SG", {
                                         dateStyle: "medium",
-                                        timeStyle: "short",
+                                        timeStyle: "short"
                                     })
                                 }}</span
                             >
                             <span class="text-xs text-gray-400"
-                                >Updated by {{ expense.updated_by.name }} on
+                            >Updated by {{ expense.updated_by.name }} on
                                 {{
                                     new Date(expense.updated_at).toLocaleString("en-SG", {
                                         dateStyle: "medium",
-                                        timeStyle: "short",
+                                        timeStyle: "short"
                                     })
                                 }}</span
                             >
@@ -271,7 +271,7 @@ const onDeleteCommentClicked = (comment) => {
                         <div class="flex flex-col gap-1">
                             <template v-if="payers.length > 1">
                                 <span
-                                    >{{ expense.num_payers }} {{ expense.payer_name }} paid {{ expense.currency_symbol
+                                >{{ expense.num_payers }} {{ expense.payer_name }} paid {{ expense.currency_symbol
                                     }}{{ to2DecimalPlacesIfValid(expense.amount) }}</span
                                 >
                                 <ul class="list-none space-y-1 pl-4 text-sm">
@@ -308,11 +308,11 @@ const onDeleteCommentClicked = (comment) => {
                                     <li v-for="p in payers" class="flex flex-row items-center gap-2">
                                         <ProfilePhotoImage :image-url="p.payer.profile_photo_url" :size="6" />
                                         <span
-                                            ><span>{{ p.payer.name }}&nbsp;</span><span>paid&nbsp;</span
-                                            ><span class="text-success"
-                                                >{{ p.currency_symbol
-                                                }}{{ to2DecimalPlacesIfValid(p.amount, true) }}</span
-                                            >&period;</span
+                                        ><span>{{ p.payer.name }}&nbsp;</span><span>paid&nbsp;</span
+                                        ><span class="text-success"
+                                        >{{ p.currency_symbol
+                                            }}{{ to2DecimalPlacesIfValid(p.amount, true) }}</span
+                                        >&period;</span
                                         >
                                     </li>
                                 </ul>
@@ -320,11 +320,11 @@ const onDeleteCommentClicked = (comment) => {
                                     <li v-for="r in receivers" class="flex flex-row items-center gap-2">
                                         <ProfilePhotoImage :image-url="r.receiver.profile_photo_url" :size="6" />
                                         <span
-                                            ><span>{{ r.receiver.name }}&nbsp;</span><span>owes&nbsp;</span
-                                            ><span class="text-error dark:text-red-400"
-                                                >{{ r.currency_symbol
-                                                }}{{ to2DecimalPlacesIfValid(Math.abs(r.amount), true) }}</span
-                                            >&period;</span
+                                        ><span>{{ r.receiver.name }}&nbsp;</span><span>owes&nbsp;</span
+                                        ><span class="text-error dark:text-red-400"
+                                        >{{ r.currency_symbol
+                                            }}{{ to2DecimalPlacesIfValid(Math.abs(r.amount), true) }}</span
+                                        >&period;</span
                                         >
                                     </li>
                                 </ul>
@@ -336,8 +336,8 @@ const onDeleteCommentClicked = (comment) => {
 
             <div class="flex flex-col px-4 pt-4">
                 <button
-                    type="button"
                     class="btn btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                    type="button"
                     @click="isDialogOpen = true"
                 >
                     Comments ({{ expense.expense_comments?.length ?? 0 }})
@@ -347,18 +347,18 @@ const onDeleteCommentClicked = (comment) => {
     </AppLayout>
 
     <DialogAnimated
-        :isDialogOpen
         :dialog-title="`Comments (${expense.expense_comments?.length ?? 0})`"
+        :isDialogOpen
         @dialog-closed="isDialogOpen = false"
     >
         <template v-slot:body>
             <ExpenseComments
-                :isLoading
                 :commentForm
+                :comments="expense.expense_comments"
                 :editingComment
+                :isLoading
                 :shouldClearComment
                 :showCommentError
-                :comments="expense.expense_comments"
                 :userId="auth.user.id"
                 @add-comment-clicked="onAddCommentClicked"
                 @edit-comment-clicked="onEditCommentClicked"
