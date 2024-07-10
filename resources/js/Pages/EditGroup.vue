@@ -117,10 +117,10 @@ const onDeleteClicked = () => {
                 @delete-photo-clicked="onDeletePhotoClicked"
             >
                 <template v-slot:afterName>
-                    <label class="flex cursor-pointer flex-row items-center gap-2 px-6">
+                    <label class="flex cursor-pointer flex-row items-center gap-2 px-6 dark:text-gray-200">
                         <button
                             type="button"
-                            class="btn btn-xs flex min-w-0 flex-row flex-wrap items-center gap-2"
+                            class="btn btn-xs flex min-w-0 flex-row flex-wrap items-center gap-2 dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
                             :class="rememberRecentGroup.id !== `${group.id}` ? 'btn-outline' : 'btn-neutral'"
                             @click="setRememberRecentGroupIfNeeded"
                         >
