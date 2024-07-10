@@ -115,9 +115,9 @@ const disableTwoFactorAuthentication = () => {
                 Finish enabling two factor authentication.
             </h3>
 
-            <h3 v-else class="text-lg font-medium text-gray-900">You have not enabled two factor authentication.</h3>
+            <h3 v-else class="text-lg font-medium text-gray-900 dark:text-gray-200">You have not enabled two factor authentication.</h3>
 
-            <div class="mt-3 max-w-xl text-sm text-gray-600">
+            <div class="mt-3 max-w-xl text-sm text-gray-600 dark:text-gray-200">
                 <p>
                     When two factor authentication is enabled, you will be prompted for a secure, random token during
                     authentication. You may retrieve this token from your phone's Google Authenticator application.
@@ -126,7 +126,7 @@ const disableTwoFactorAuthentication = () => {
 
             <div v-if="twoFactorEnabled">
                 <div v-if="qrCode">
-                    <div class="mt-4 max-w-xl text-sm text-gray-600">
+                    <div class="mt-4 max-w-xl text-sm text-gray-600 dark:text-gray-200">
                         <p v-if="confirming" class="font-semibold">
                             To finish enabling two factor authentication, scan the following QR code using your phone's
                             authenticator application or enter the setup key and provide the generated OTP code.
@@ -140,7 +140,7 @@ const disableTwoFactorAuthentication = () => {
 
                     <div class="mt-4 inline-block bg-white p-2" v-html="qrCode" />
 
-                    <div v-if="setupKey" class="mt-4 max-w-xl text-sm text-gray-600">
+                    <div v-if="setupKey" class="mt-4 max-w-xl text-sm text-gray-600 dark:text-gray-200">
                         <p class="font-semibold">Setup Key: <span v-html="setupKey"></span></p>
                     </div>
 
@@ -164,7 +164,7 @@ const disableTwoFactorAuthentication = () => {
                 </div>
 
                 <div v-if="recoveryCodes.length > 0 && !confirming">
-                    <div class="mt-4 max-w-xl text-sm text-gray-600">
+                    <div class="mt-4 max-w-xl text-sm text-gray-600 dark:text-gray-200">
                         <p class="font-semibold">
                             Store these recovery codes in a secure password manager. They can be used to recover access
                             to your account if your two factor authentication device is lost.

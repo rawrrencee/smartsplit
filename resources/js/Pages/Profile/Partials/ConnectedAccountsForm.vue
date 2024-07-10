@@ -18,7 +18,7 @@ const passwordInput = ref(null);
 const page = usePage();
 
 const form = useForm({
-    password: "",
+    password: ""
 });
 
 const getAccountForProvider = (provider) =>
@@ -26,7 +26,7 @@ const getAccountForProvider = (provider) =>
 
 const setProfilePhoto = (id) => {
     form.put(route("user-profile-photo.set", { id }), {
-        preserveScroll: true,
+        preserveScroll: true
     });
 };
 
@@ -43,7 +43,7 @@ const removeAccount = () => {
         preserveScroll: true,
         onSuccess: () => closeModal(),
         onError: () => passwordInput.value.focus(),
-        onFinish: () => form.reset(),
+        onFinish: () => form.reset()
     });
 };
 
@@ -56,9 +56,9 @@ const closeModal = () => {
 
 <template>
     <ActionSection>
-        <template #title> Connected Accounts </template>
+        <template #title> Connected Accounts</template>
 
-        <template #description> Connect your social media accounts to enable Sign In with OAuth. </template>
+        <template #description> Connect your social media accounts to enable Sign In with OAuth.</template>
 
         <template #content>
             <div
@@ -70,27 +70,24 @@ const closeModal = () => {
 
             <div class="mt-6 space-y-6">
                 <div v-for="provider in $page.props.socialstream.providers" :key="provider">
-                    <ConnectedAccount :provider="provider" :created-at="getAccountForProvider(provider)?.created_at">
+                    <ConnectedAccount :created-at="getAccountForProvider(provider)?.created_at" :provider="provider">
                         <template #action>
                             <template v-if="getAccountForProvider(provider)">
                                 <div class="flex flex-row items-center space-x-6">
-                                    <button
-                                        v-if="
+                                    <PrimaryButton v-if="
                                             $page.props.jetstream.managesProfilePhotos &&
                                             getAccountForProvider(provider).avatar_path
                                         "
-                                        @click="setProfilePhoto(getAccountForProvider(provider).id)"
-                                        class="btn btn-outline btn-md min-w-0 flex-shrink dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
-                                    >
+                                                   @click="setProfilePhoto(getAccountForProvider(provider).id)">
                                         Use Avatar as Profile Photo
-                                    </button>
+                                    </PrimaryButton>
 
                                     <DangerButton
-                                        @click="confirmRemoveAccount(getAccountForProvider(provider).id)"
                                         v-if="
                                             $page.props.socialstream.connectedAccounts.length > 1 ||
                                             $page.props.socialstream.hasPassword
                                         "
+                                        @click="confirmRemoveAccount(getAccountForProvider(provider).id)"
                                     >
                                         Remove
                                     </DangerButton>
@@ -98,7 +95,7 @@ const closeModal = () => {
                             </template>
 
                             <template v-else>
-                                <ActionLink :href="route('oauth.redirect', { provider })"> Connect </ActionLink>
+                                <ActionLink :href="route('oauth.redirect', { provider })"> Connect</ActionLink>
                             </template>
                         </template>
                     </ConnectedAccount>
@@ -107,7 +104,7 @@ const closeModal = () => {
 
             <!-- Confirmation Modal -->
             <DialogModal :show="confirmingRemoveAccount" @close="closeModal">
-                <template #title> Are you sure you want to remove this account? </template>
+                <template #title> Are you sure you want to remove this account?</template>
 
                 <template #content>
                     Please enter your password to confirm you would like to remove this account.
@@ -116,10 +113,10 @@ const closeModal = () => {
                         <TextInput
                             ref="passwordInput"
                             v-model="form.password"
-                            type="password"
+                            autocomplete="current-password"
                             class="mt-1 block w-3/4"
                             placeholder="Password"
-                            autocomplete="current-password"
+                            type="password"
                             @keyup.enter="removeAccount"
                         />
 
@@ -128,13 +125,13 @@ const closeModal = () => {
                 </template>
 
                 <template #footer>
-                    <SecondaryButton @click="closeModal"> Cancel </SecondaryButton>
+                    <SecondaryButton @click="closeModal"> Cancel</SecondaryButton>
 
                     <PrimaryButton
-                        class="ml-2"
-                        @click="removeAccount"
                         :class="{ 'opacity-25': form.processing }"
                         :disabled="form.processing"
+                        class="ml-2"
+                        @click="removeAccount"
                     >
                         Remove Account
                     </PrimaryButton>
