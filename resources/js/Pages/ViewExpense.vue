@@ -318,9 +318,9 @@ const onDeleteCommentClicked = (comment) => {
                                 </ul>
                                 <ul class="list-none space-y-1 pl-4 text-sm">
                                     <li v-for="r in receivers" class="flex flex-row items-center gap-2">
-                                        <ProfilePhotoImage :image-url="r.receiver.profile_photo_url" :size="6" />
+                                        <ProfilePhotoImage :image-url="r.receiver?.profile_photo_url" :size="6" />
                                         <span
-                                        ><span>{{ r.receiver.name }}&nbsp;</span><span>owes&nbsp;</span
+                                        ><span>{{ r.receiver?.name }}&nbsp;</span><span>owes&nbsp;</span
                                         ><span class="text-error dark:text-red-400"
                                         >{{ r.currency_symbol
                                             }}{{ to2DecimalPlacesIfValid(Math.abs(r.amount), true) }}</span

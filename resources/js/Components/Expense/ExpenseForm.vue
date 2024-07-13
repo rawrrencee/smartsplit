@@ -6,7 +6,7 @@ import {
     kDefaultExpenseGroupKey,
     setAllCurrencies,
     showToastIfNeeded,
-    to2DecimalPlacesIfValid,
+    to2DecimalPlacesIfValid
 } from "@/Common.js";
 import CategoryIcon from "@/Components/CategoryIcon.vue";
 import ExpenseFormTable from "@/Components/Expense/ExpenseFormTable.vue";
@@ -30,7 +30,7 @@ const props = defineProps({
     categories: Array,
     currencies: Array,
     auth: Object,
-    expense: Object,
+    expense: Object
 });
 
 onMounted(() => {
@@ -42,7 +42,7 @@ onMounted(() => {
 });
 
 const popover = ref({
-    visibility: "focus",
+    visibility: "focus"
 });
 
 const isLoading = ref(false);
@@ -87,15 +87,17 @@ const expenseForm = useForm({
     amount: props.expense?.amount && !isNaN(parseFloat(props.expense.amount)) ? parseFloat(props.expense.amount) : null,
     is_settlement: false,
     payer_details: [],
-    receiver_details: [],
+    receiver_details: []
 });
 const generateExpenseDetail = (user, amount = null, shouldSelectAll = false, expenseDetailId, isSelected) => {
+    if (!user) return;
+
     return useForm({
         user_id: user.id,
         id: expenseDetailId ?? null,
         amount: amount && !isNaN(parseFloat(amount)) ? Math.abs(parseFloat(amount)) : null,
         isSelected: shouldSelectAll || isSelected,
-        user,
+        user
     });
 };
 const mapExpenseDetailToFormData = (expenseDetail) => {
@@ -103,7 +105,7 @@ const mapExpenseDetailToFormData = (expenseDetail) => {
         id: expenseDetail.id,
         user_id: expenseDetail.user_id,
         amount: expenseDetail.amount,
-        is_settlement: false,
+        is_settlement: false
     };
 };
 const currenciesFromSource = computed(() => {
@@ -127,18 +129,22 @@ const updateExpenseDetailsFormArray = () => {
             existingPayerDetail?.amount ?? null,
             false,
             existingPayerDetail?.id,
-            props.isEdit ? !!existingPayerDetail : props.auth.user.id === m.user?.id,
+            props.isEdit ? !!existingPayerDetail : props.auth.user.id === m.user?.id
         );
         const receiverDetail = generateExpenseDetail(
             m.user,
             existingReceiverDetail?.amount ?? null,
             !props.isEdit,
             existingReceiverDetail?.id,
-            !!existingReceiverDetail,
+            !!existingReceiverDetail
         );
 
-        payerFormArray.value = [...payerFormArray.value, payerDetail];
-        receiverFormArray.value = [...receiverFormArray.value, receiverDetail];
+        if (payerDetail) {
+            payerFormArray.value = [...payerFormArray.value, payerDetail];
+        }
+        if (receiverDetail) {
+            receiverFormArray.value = [...receiverFormArray.value, receiverDetail];
+        }
     });
     if (shouldDistributePayersEqually.value) {
         onDistributeExpenseToSelectedUsersEquallyClicked(payerFormArray.value);
@@ -219,7 +225,7 @@ const setShouldDistributePayersEqually = (value) => {
 const isReceiverEquallyDistributed = computed(() => {
     return props.isEdit
         ? new Map(Array.from(props.expense?.expense_details.filter((d) => d.receiver_id).map((d) => [d.amount])))
-              .size === 1
+        .size === 1
         : true;
 });
 const shouldDistributeReceiversEqually = ref(isReceiverEquallyDistributed.value);
@@ -285,7 +291,7 @@ const onSaveExpenseClicked = () => {
             currency_key: selectedCurrency.value.key,
             group_id: currentGroup.value.id,
             payer_details: selectedPayerForms.value.map((v) => mapExpenseDetailToFormData(v)),
-            receiver_details: selectedReceiverForms.value.map((v) => mapExpenseDetailToFormData(v)),
+            receiver_details: selectedReceiverForms.value.map((v) => mapExpenseDetailToFormData(v))
         }))
         .post(route(props.isEdit ? "expenses.update" : "expenses.save"), {
             onSuccess: (s) => {
@@ -297,7 +303,7 @@ const onSaveExpenseClicked = () => {
             },
             onFinish: () => {
                 setIsLoading(false);
-            },
+            }
         });
 };
 // #endregion Expense Form
@@ -332,12 +338,12 @@ const filteredCurrencies = computed(() =>
     currencyQuery.value === ""
         ? currenciesFromSource.value
         : currenciesFromSource.value.filter((c) => {
-              const searchQuery = currencyQuery.value.toLowerCase().replace(/\s+/g, "");
-              const value = c.value.toLowerCase().replace(/\s+/g, "");
-              const key = c.key.toLowerCase().replace(/\s+/g, "");
-              const symbol = c.symbol.toLowerCase().replace(/\s+/g, "");
-              return value.includes(searchQuery) || key.includes(searchQuery) || symbol.includes(searchQuery);
-          }),
+            const searchQuery = currencyQuery.value.toLowerCase().replace(/\s+/g, "");
+            const value = c.value.toLowerCase().replace(/\s+/g, "");
+            const key = c.key.toLowerCase().replace(/\s+/g, "");
+            const symbol = c.symbol.toLowerCase().replace(/\s+/g, "");
+            return value.includes(searchQuery) || key.includes(searchQuery) || symbol.includes(searchQuery);
+        })
 );
 // #endregion Currency
 
@@ -375,9 +381,9 @@ watch(expenseForm, () => {
     >
         <div class="flex flex-row items-center gap-2">
             <NavigationBarButton
+                v-if="isEdit"
                 :icon="ArrowLeftIcon"
                 :isLoading
-                v-if="isEdit"
                 @on-click="
                     () => {
                         setIsLoading(true);
@@ -390,9 +396,9 @@ watch(expenseForm, () => {
         <span v-if="isLoading" class="loading loading-spinner py-6"></span>
         <button
             v-else
-            type="button"
-            class="btn btn-link px-0 text-gray-600 no-underline dark:text-gray-200"
             :disabled="isLoading"
+            class="btn btn-link px-0 text-gray-600 no-underline dark:text-gray-200"
+            type="button"
             @click="onSaveExpenseClicked"
         >
             <span>Save</span>
@@ -409,7 +415,7 @@ watch(expenseForm, () => {
                 >
                     <div class="flex w-full flex-row items-center gap-2">
                         <ServerImage v-if="currentGroup?.img_path" :image-url="currentGroup?.img_path" :size="6" />
-                        <PlaceholderImage :size="6" v-else />
+                        <PlaceholderImage v-else :size="6" />
                         <span class="place-self-center truncate py-2">
                             {{ currentGroup?.group_title ?? "Select a group" }}
                         </span>
@@ -417,7 +423,7 @@ watch(expenseForm, () => {
                 </button>
                 <div v-else class="flex w-full flex-row items-center gap-2">
                     <ServerImage v-if="currentGroup?.img_path" :image-url="currentGroup?.img_path" :size="6" />
-                    <PlaceholderImage :size="6" v-else />
+                    <PlaceholderImage v-else :size="6" />
                     <span class="place-self-center truncate py-2">
                         {{ currentGroup?.group_title ?? "Select a group" }}
                     </span>
@@ -430,20 +436,20 @@ watch(expenseForm, () => {
                     <template #default="{ inputValue, inputEvents }">
                         <div class="relative w-full">
                             <div class="absolute inset-y-0 left-0 z-10 flex items-center pl-3">
-                                <CalendarIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
+                                <CalendarIcon aria-hidden="true" class="h-5 w-5 text-gray-400" />
                             </div>
                             <input
-                                class="input join-item input-bordered w-full py-1.5 pl-10 text-gray-600 disabled:bg-gray-300 dark:bg-gray-900 dark:text-gray-50"
                                 :class="expenseForm.errors.date ? 'input-error' : ''"
                                 :value="inputValue"
+                                class="input join-item input-bordered w-full py-1.5 pl-10 text-gray-600 disabled:bg-gray-300 dark:bg-gray-900 dark:text-gray-50"
                                 v-on="inputEvents"
                             />
                         </div>
                     </template>
                 </DatePicker>
                 <span v-if="expenseForm.errors.date" class="text-xs text-error dark:text-red-400">{{
-                    expenseForm.errors.date
-                }}</span>
+                        expenseForm.errors.date
+                    }}</span>
             </div>
         </div>
 
@@ -454,22 +460,22 @@ watch(expenseForm, () => {
                     class="btn btn-square btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
                     @click="setDialogMode('selectCategory')"
                 >
-                    <ListBulletIcon class="h-6 w-6" v-if="!selectedCategory" />
+                    <ListBulletIcon v-if="!selectedCategory" class="h-6 w-6" />
                     <CategoryIcon v-else :category="selectedCategory" />
                 </button>
                 <div class="flex w-full flex-col gap-1">
                     <input
-                        type="text"
-                        placeholder="Enter a description"
-                        class="input input-bordered w-full dark:border-0 dark:bg-gray-900 dark:text-gray-50"
+                        v-model="expenseForm.description"
                         :class="expenseForm.errors.description ? 'input-error' : ''"
                         :maxlength="50"
-                        v-model="expenseForm.description"
+                        class="input input-bordered w-full dark:border-0 dark:bg-gray-900 dark:text-gray-50"
+                        placeholder="Enter a description"
+                        type="text"
                         @change="expenseForm.clearErrors('description')"
                     />
                     <span v-if="expenseForm.errors.description" class="text-xs text-error dark:text-red-400">{{
-                        expenseForm.errors.description
-                    }}</span>
+                            expenseForm.errors.description
+                        }}</span>
                 </div>
             </div>
 
@@ -482,34 +488,34 @@ watch(expenseForm, () => {
                 </button>
                 <div class="flex w-full flex-col gap-1">
                     <input
-                        type="number"
+                        v-model="expenseForm.amount"
+                        :class="expenseForm.errors.amount ? 'input-error' : ''"
                         :min="0.0"
                         :minlength="1"
-                        placeholder="0.00"
                         class="input input-bordered w-full [appearance:textfield] dark:border-0 dark:bg-gray-900 dark:text-gray-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                        :class="expenseForm.errors.amount ? 'input-error' : ''"
-                        v-model="expenseForm.amount"
+                        placeholder="0.00"
+                        type="number"
                         @change="expenseForm.clearErrors('amount')"
                     />
                     <span v-if="expenseForm.errors.amount" class="text-xs text-error dark:text-red-400">{{
-                        expenseForm.errors.amount
-                    }}</span>
+                            expenseForm.errors.amount
+                        }}</span>
                 </div>
             </div>
         </div>
 
-        <div class="flex flex-col gap-5" v-if="currentGroup">
+        <div v-if="currentGroup" class="flex flex-col gap-5">
             <div class="flex min-w-0 flex-row flex-wrap justify-center gap-2 px-2">
                 <div class="flex min-w-0 flex-row items-center justify-center gap-2">
                     <span class="flex-shrink-0">Paid by</span>
                     <button
-                        type="button"
-                        class="btn btn-sm min-w-0 flex-shrink"
                         :class="[
                             isPaidBySelectionShown
                                 ? 'btn-neutral dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-gray-400 dark:hover:text-gray-800'
                                 : 'btn-outline text-gray-900 dark:text-gray-200 dark:hover:bg-gray-400 dark:hover:text-gray-800',
                         ]"
+                        class="btn btn-sm min-w-0 flex-shrink"
+                        type="button"
                         @click="updateExpenseConfigurationState('paidBy')"
                     >
                         <div class="truncate py-1">{{ paidByString }}</div>
@@ -518,20 +524,20 @@ watch(expenseForm, () => {
                 <div class="flex flex-row items-center justify-center gap-2">
                     <span class="flex-shrink-0">and split</span>
                     <button
-                        type="button"
-                        class="btn btn-sm min-w-0 flex-shrink"
                         :class="[
                             isSelectSplitModeShown
                                 ? 'btn-neutral dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-gray-400 dark:hover:text-gray-800'
                                 : 'btn-outline text-gray-900 dark:text-gray-200 dark:hover:bg-gray-400 dark:hover:text-gray-800',
                         ]"
+                        class="btn btn-sm min-w-0 flex-shrink"
+                        type="button"
                         @click="updateExpenseConfigurationState('splitMode')"
                     >
                         <div class="truncate py-1">{{ splitEquallyString }}</div>
                     </button>
                 </div>
             </div>
-            <TransitionRoot as="template" :show="isPaidBySelectionShown">
+            <TransitionRoot :show="isPaidBySelectionShown" as="template">
                 <TransitionChild
                     as="template"
                     enter="ease-in-out duration-350"
@@ -543,11 +549,11 @@ watch(expenseForm, () => {
                 >
                     <ExpenseFormTable
                         :expenseForm
-                        :selectedCurrency
-                        :isPayer="true"
                         :formArray="payerFormArray"
-                        :shouldDistributeEqually="shouldDistributePayersEqually"
+                        :isPayer="true"
                         :remainingAmount="remainingPayerAmount"
+                        :selectedCurrency
+                        :shouldDistributeEqually="shouldDistributePayersEqually"
                         @toggle-all-users="toggleAllUsers(true, allPayersSelected)"
                         @set-should-distribute-equally="setShouldDistributePayersEqually"
                         @user-selected="(form) => onSelectUser(true, form)"
@@ -556,7 +562,7 @@ watch(expenseForm, () => {
                 </TransitionChild>
             </TransitionRoot>
 
-            <TransitionRoot as="template" :show="isSelectSplitModeShown">
+            <TransitionRoot :show="isSelectSplitModeShown" as="template">
                 <TransitionChild
                     as="template"
                     enter="ease-in-out duration-350"
@@ -568,11 +574,11 @@ watch(expenseForm, () => {
                 >
                     <ExpenseFormTable
                         :expenseForm
-                        :selectedCurrency
-                        :isPayer="false"
                         :formArray="receiverFormArray"
-                        :shouldDistributeEqually="shouldDistributeReceiversEqually"
+                        :isPayer="false"
                         :remainingAmount="remainingReceiverAmount"
+                        :selectedCurrency
+                        :shouldDistributeEqually="shouldDistributeReceiversEqually"
                         @toggle-all-users="toggleAllUsers(false, allReceiversSelected)"
                         @set-should-distribute-equally="setShouldDistributeReceiversEqually"
                         @user-selected="(form) => onSelectUser(false, form)"
@@ -582,7 +588,7 @@ watch(expenseForm, () => {
         </div>
     </div>
 
-    <TransitionRoot as="template" :show="isDialogOpen">
+    <TransitionRoot :show="isDialogOpen" as="template">
         <Dialog as="div" class="relative z-10" @close="setIsDialogOpen(false)">
             <TransitionChild
                 as="template"
@@ -616,17 +622,18 @@ watch(expenseForm, () => {
                                         <div class="flex items-start justify-between">
                                             <DialogTitle
                                                 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
-                                                >{{ dialogTitle }}</DialogTitle
+                                            >{{ dialogTitle }}
+                                            </DialogTitle
                                             >
                                             <div class="ml-3 flex h-7 items-center">
                                                 <button
-                                                    type="button"
                                                     class="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+                                                    type="button"
                                                     @click="setIsDialogOpen(false)"
                                                 >
                                                     <span class="absolute -inset-2.5" />
                                                     <span class="sr-only">Close panel</span>
-                                                    <XMarkIcon class="h-6 w-6" aria-hidden="true" />
+                                                    <XMarkIcon aria-hidden="true" class="h-6 w-6" />
                                                 </button>
                                             </div>
                                         </div>
@@ -638,19 +645,19 @@ watch(expenseForm, () => {
                                             :hide-owed-amounts="true"
                                             @group-clicked="onGroupClicked"
                                         />
-                                        <div class="flex flex-col gap-2" v-if="dialogMode === 'selectCategory'">
+                                        <div v-if="dialogMode === 'selectCategory'" class="flex flex-col gap-2">
                                             <div class="flex flex-col gap-2">
                                                 <template v-for="(c, i) in categories" :key="i">
                                                     <button
-                                                        type="button"
                                                         class="flex flex-row items-center justify-between gap-4 px-6 py-2 text-start hover:bg-gray-100 hover:dark:bg-gray-700"
+                                                        type="button"
                                                         @click="setSelectedCategory(c.key)"
                                                     >
                                                         <div class="flex flex-row items-center gap-2">
                                                             <CategoryIcon :category="c.key" size="h-5 w-5" />
                                                             <span :class="selectedCategory === c.key && 'font-bold'">{{
-                                                                c.value
-                                                            }}</span>
+                                                                    c.value
+                                                                }}</span>
                                                         </div>
                                                         <CheckCircleIcon
                                                             v-if="selectedCategory === c.key"
@@ -660,26 +667,26 @@ watch(expenseForm, () => {
                                                 </template>
                                             </div>
                                         </div>
-                                        <div class="flex flex-col gap-2" v-if="dialogMode === 'selectCurrency'">
+                                        <div v-if="dialogMode === 'selectCurrency'" class="flex flex-col gap-2">
                                             <div class="flex flex-col px-6 py-2">
                                                 <label
                                                     class="input input-sm input-bordered flex items-center gap-2 border-0 outline-0 dark:bg-gray-700 dark:text-gray-200"
                                                 >
                                                     <MagnifyingGlassIcon class="h-4 w-4 text-gray-400" />
                                                     <input
-                                                        type="text"
+                                                        v-model="currencyQuery"
                                                         class="grow border-transparent focus:border-transparent focus:ring-0"
                                                         placeholder="Filter currencies"
-                                                        v-model="currencyQuery"
+                                                        type="text"
                                                     />
                                                 </label>
                                             </div>
                                             <div class="flex flex-col gap-2">
                                                 <template v-for="(c, i) in filteredCurrencies" :key="i">
                                                     <button
-                                                        type="button"
-                                                        class="flex flex-row items-center justify-between px-6 py-2 text-start hover:bg-gray-100 hover:dark:bg-gray-700"
                                                         :class="selectedCurrency.key === c.key && 'font-bold'"
+                                                        class="flex flex-row items-center justify-between px-6 py-2 text-start hover:bg-gray-100 hover:dark:bg-gray-700"
+                                                        type="button"
                                                         @click="setSelectedCurrency(c.key)"
                                                     >
                                                         <div class="flex flex-row gap-2">

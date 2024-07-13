@@ -523,8 +523,8 @@ const selectedPayerOwedAmounts = computed(() => {
                                                         class="h-6 w-6 text-success"
                                                         v-if="
                                                             dialogMode === 'selectReceiver'
-                                                                ? selectedReceiver?.user_id === m.user.id
-                                                                : selectedPayer?.user_id === m.user.id
+                                                                ? selectedReceiver?.user_id === m.user?.id
+                                                                : selectedPayer?.user_id === m.user?.id
                                                         "
                                                     />
                                                 </button>

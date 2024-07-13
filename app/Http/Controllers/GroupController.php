@@ -61,6 +61,7 @@ class GroupController extends Controller
             if ($withUser) {
                 $query->with(['user' => function ($query) {
                     $query->select('id', 'name', 'email', 'profile_photo_path');
+                    $query->withTrashed();
                 }]);
             }
         }]);
@@ -235,7 +236,7 @@ class GroupController extends Controller
         $groupMembers = GroupMember::withTrashed()
             ->where('group_id', $id)
             ->orderBy('user_id', 'asc')
-            ->with(['user'])
+            ->with(['user' => fn ($q) => $q->withTrashed()])
             ->get();
 
         $expenses = $this->getExpensesWithGroupForUser($id, $request['perPage'], null, $request['onlyUser']);

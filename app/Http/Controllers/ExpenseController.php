@@ -74,15 +74,20 @@ class ExpenseController extends Controller
             },
             'expenseComments.user' => function ($query) {
                 $query->select('id', 'name', 'profile_photo_path');
+                $query->withTrashed();
             },
             'expenseDetails.payer' => function ($query) {
                 $query->select('id', 'name', 'profile_photo_path');
+                $query->withTrashed();
             }, 'expenseDetails.receiver' => function ($query) {
                 $query->select('id', 'name', 'profile_photo_path');
+                $query->withTrashed();
             }, 'createdBy' => function ($query) {
                 $query->select('id', 'name');
+                $query->withTrashed();
             }, 'updatedBy' => function ($query) {
                 $query->select('id', 'name');
+                $query->withTrashed();
             }
         ])->first();
 

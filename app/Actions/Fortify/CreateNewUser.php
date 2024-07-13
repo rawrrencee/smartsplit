@@ -19,6 +19,15 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
+        // Check if user was previously deleted
+        if (User::withTrashed()->where('email', $input['email'])->exists()) {
+            $user = User::withTrashed()->where('email', $input['email'])->first();
+            if (isset($user) && $user->trashed()) {
+                $user->restore();
+                return $user;
+            }
+        }
+
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],

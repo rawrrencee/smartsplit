@@ -32,6 +32,15 @@ class CreateUserFromProvider implements CreatesUserFromProvider
      */
     public function create(string $provider, ProviderUser $providerUser): User
     {
+        // Check if user was previously deleted
+        if (User::withTrashed()->where('email', $providerUser->getEmail())->exists()) {
+            $user = User::withTrashed()->where('email', $providerUser->getEmail())->first();
+            if (isset($user) && $user->trashed()) {
+                $user->restore();
+                return $user;
+            }
+        }
+
         return DB::transaction(function () use ($provider, $providerUser) {
             return tap(User::create([
                 'name' => $providerUser->getName() ?? $providerUser->getNickname(),
