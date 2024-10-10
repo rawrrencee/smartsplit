@@ -88,7 +88,7 @@ const setSelectedUserIdToViewExpenses = (userId) => {
     });
 };
 const showingExpensesForUserName = computed(() => {
-    return props.groupMembers?.find((m) => m.user_id === selectedUserIdToViewExpenses.value)?.user.name ?? null;
+    return props.groupMembers?.find((m) => m.user_id === selectedUserIdToViewExpenses.value)?.user?.name ?? null;
 });
 
 const hasValidOwedAmountsArray = computed(() => {
