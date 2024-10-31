@@ -6,8 +6,9 @@ import {
     kDefaultExpenseGroupKey,
     setAllCurrencies,
     showToastIfNeeded,
-    to2DecimalPlacesIfValid
+    to2DecimalPlacesIfValid,
 } from "@/Common.js";
+import { ArrowsUpDownIcon, ArrowsPointingOutIcon } from "@heroicons/vue/24/outline";
 import CategoryIcon from "@/Components/CategoryIcon.vue";
 import ExpenseFormTable from "@/Components/Expense/ExpenseFormTable.vue";
 import GroupList from "@/Components/GroupList.vue";
@@ -22,6 +23,7 @@ import "v-calendar/style.css";
 import { computed, onMounted, ref, watch } from "vue";
 import { toast } from "vue-sonner";
 import NavigationBarButton from "../NavigationBarButton.vue";
+import AdvancedExpenseForm from "@/Components/Expense/AdvancedExpenseForm.vue";
 
 // #region Configs
 const props = defineProps({
@@ -30,7 +32,7 @@ const props = defineProps({
     categories: Array,
     currencies: Array,
     auth: Object,
-    expense: Object
+    expense: Object,
 });
 
 onMounted(() => {
@@ -42,7 +44,7 @@ onMounted(() => {
 });
 
 const popover = ref({
-    visibility: "focus"
+    visibility: "focus",
 });
 
 const isLoading = ref(false);
@@ -51,6 +53,7 @@ const setIsLoading = (value) => {
 };
 // #endregion Configs
 
+const advancedDialog = ref(null);
 const isDialogOpen = ref(false);
 const setIsDialogOpen = (value) => {
     isDialogOpen.value = value;
@@ -87,7 +90,7 @@ const expenseForm = useForm({
     amount: props.expense?.amount && !isNaN(parseFloat(props.expense.amount)) ? parseFloat(props.expense.amount) : null,
     is_settlement: false,
     payer_details: [],
-    receiver_details: []
+    receiver_details: [],
 });
 const generateExpenseDetail = (user, amount = null, shouldSelectAll = false, expenseDetailId, isSelected) => {
     if (!user) return;
@@ -97,7 +100,7 @@ const generateExpenseDetail = (user, amount = null, shouldSelectAll = false, exp
         id: expenseDetailId ?? null,
         amount: amount && !isNaN(parseFloat(amount)) ? Math.abs(parseFloat(amount)) : null,
         isSelected: shouldSelectAll || isSelected,
-        user
+        user,
     });
 };
 const mapExpenseDetailToFormData = (expenseDetail) => {
@@ -105,7 +108,7 @@ const mapExpenseDetailToFormData = (expenseDetail) => {
         id: expenseDetail.id,
         user_id: expenseDetail.user_id,
         amount: expenseDetail.amount,
-        is_settlement: false
+        is_settlement: false,
     };
 };
 const currenciesFromSource = computed(() => {
@@ -129,14 +132,14 @@ const updateExpenseDetailsFormArray = () => {
             existingPayerDetail?.amount ?? null,
             false,
             existingPayerDetail?.id,
-            props.isEdit ? !!existingPayerDetail : props.auth.user.id === m.user?.id
+            props.isEdit ? !!existingPayerDetail : props.auth.user.id === m.user?.id,
         );
         const receiverDetail = generateExpenseDetail(
             m.user,
             existingReceiverDetail?.amount ?? null,
             !props.isEdit,
             existingReceiverDetail?.id,
-            !!existingReceiverDetail
+            !!existingReceiverDetail,
         );
 
         if (payerDetail) {
@@ -225,7 +228,7 @@ const setShouldDistributePayersEqually = (value) => {
 const isReceiverEquallyDistributed = computed(() => {
     return props.isEdit
         ? new Map(Array.from(props.expense?.expense_details.filter((d) => d.receiver_id).map((d) => [d.amount])))
-        .size === 1
+              .size === 1
         : true;
 });
 const shouldDistributeReceiversEqually = ref(isReceiverEquallyDistributed.value);
@@ -291,7 +294,7 @@ const onSaveExpenseClicked = () => {
             currency_key: selectedCurrency.value.key,
             group_id: currentGroup.value.id,
             payer_details: selectedPayerForms.value.map((v) => mapExpenseDetailToFormData(v)),
-            receiver_details: selectedReceiverForms.value.map((v) => mapExpenseDetailToFormData(v))
+            receiver_details: selectedReceiverForms.value.map((v) => mapExpenseDetailToFormData(v)),
         }))
         .post(route(props.isEdit ? "expenses.update" : "expenses.save"), {
             onSuccess: (s) => {
@@ -303,7 +306,7 @@ const onSaveExpenseClicked = () => {
             },
             onFinish: () => {
                 setIsLoading(false);
-            }
+            },
         });
 };
 // #endregion Expense Form
@@ -338,12 +341,12 @@ const filteredCurrencies = computed(() =>
     currencyQuery.value === ""
         ? currenciesFromSource.value
         : currenciesFromSource.value.filter((c) => {
-            const searchQuery = currencyQuery.value.toLowerCase().replace(/\s+/g, "");
-            const value = c.value.toLowerCase().replace(/\s+/g, "");
-            const key = c.key.toLowerCase().replace(/\s+/g, "");
-            const symbol = c.symbol.toLowerCase().replace(/\s+/g, "");
-            return value.includes(searchQuery) || key.includes(searchQuery) || symbol.includes(searchQuery);
-        })
+              const searchQuery = currencyQuery.value.toLowerCase().replace(/\s+/g, "");
+              const value = c.value.toLowerCase().replace(/\s+/g, "");
+              const key = c.key.toLowerCase().replace(/\s+/g, "");
+              const symbol = c.symbol.toLowerCase().replace(/\s+/g, "");
+              return value.includes(searchQuery) || key.includes(searchQuery) || symbol.includes(searchQuery);
+          }),
 );
 // #endregion Currency
 
@@ -448,13 +451,25 @@ watch(expenseForm, () => {
                     </template>
                 </DatePicker>
                 <span v-if="expenseForm.errors.date" class="text-xs text-error dark:text-red-400">{{
-                        expenseForm.errors.date
-                    }}</span>
+                    expenseForm.errors.date
+                }}</span>
             </div>
         </div>
 
         <div class="flex flex-col gap-2">
-            <span class="font-semibold">Expense Details</span>
+            <div class="flex flex-row items-center gap-2">
+                <span class="font-semibold">Expense Details</span>
+
+                <button
+                    class="btn btn-outline btn-xs min-w-0 flex-shrink text-gray-900 dark:text-gray-200 dark:hover:bg-gray-400 dark:hover:text-gray-800"
+                    type="button"
+                    @click="$refs.advancedExpenseForm.showModal"
+                >
+                    <div class="flex flex-row items-center gap-1">
+                        <ArrowsUpDownIcon class="h-4 w-4" /><span>Advanced</span>
+                    </div>
+                </button>
+            </div>
             <div class="flex flex-row gap-2">
                 <button
                     class="btn btn-square btn-outline dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -474,8 +489,8 @@ watch(expenseForm, () => {
                         @change="expenseForm.clearErrors('description')"
                     />
                     <span v-if="expenseForm.errors.description" class="text-xs text-error dark:text-red-400">{{
-                            expenseForm.errors.description
-                        }}</span>
+                        expenseForm.errors.description
+                    }}</span>
                 </div>
             </div>
 
@@ -498,8 +513,8 @@ watch(expenseForm, () => {
                         @change="expenseForm.clearErrors('amount')"
                     />
                     <span v-if="expenseForm.errors.amount" class="text-xs text-error dark:text-red-400">{{
-                            expenseForm.errors.amount
-                        }}</span>
+                        expenseForm.errors.amount
+                    }}</span>
                 </div>
             </div>
         </div>
@@ -622,9 +637,8 @@ watch(expenseForm, () => {
                                         <div class="flex items-start justify-between">
                                             <DialogTitle
                                                 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
-                                            >{{ dialogTitle }}
-                                            </DialogTitle
-                                            >
+                                                >{{ dialogTitle }}
+                                            </DialogTitle>
                                             <div class="ml-3 flex h-7 items-center">
                                                 <button
                                                     class="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
@@ -656,8 +670,8 @@ watch(expenseForm, () => {
                                                         <div class="flex flex-row items-center gap-2">
                                                             <CategoryIcon :category="c.key" size="h-5 w-5" />
                                                             <span :class="selectedCategory === c.key && 'font-bold'">{{
-                                                                    c.value
-                                                                }}</span>
+                                                                c.value
+                                                            }}</span>
                                                         </div>
                                                         <CheckCircleIcon
                                                             v-if="selectedCategory === c.key"
@@ -710,4 +724,6 @@ watch(expenseForm, () => {
             </div>
         </Dialog>
     </TransitionRoot>
+
+    <AdvancedExpenseForm :expenseForm :selectedCategory :selectedCurrency ref="advancedExpenseForm"></AdvancedExpenseForm>
 </template>
