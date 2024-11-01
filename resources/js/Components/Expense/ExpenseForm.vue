@@ -6,16 +6,22 @@ import {
     kDefaultExpenseGroupKey,
     setAllCurrencies,
     showToastIfNeeded,
-    to2DecimalPlacesIfValid,
+    to2DecimalPlacesIfValid
 } from "@/Common.js";
-import { ArrowsUpDownIcon, ArrowsPointingOutIcon } from "@heroicons/vue/24/outline";
+import {
+    ArrowLeftIcon,
+    ArrowsUpDownIcon,
+    CalendarIcon,
+    ListBulletIcon,
+    MagnifyingGlassIcon,
+    XMarkIcon
+} from "@heroicons/vue/24/outline";
 import CategoryIcon from "@/Components/CategoryIcon.vue";
 import ExpenseFormTable from "@/Components/Expense/ExpenseFormTable.vue";
 import GroupList from "@/Components/GroupList.vue";
 import PlaceholderImage from "@/Components/Image/PlaceholderImage.vue";
 import ServerImage from "@/Components/Image/ServerImage.vue";
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
-import { ArrowLeftIcon, CalendarIcon, ListBulletIcon, MagnifyingGlassIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 import { CheckCircleIcon } from "@heroicons/vue/24/solid";
 import { router, useForm } from "@inertiajs/vue3";
 import { DatePicker } from "v-calendar";
@@ -32,7 +38,7 @@ const props = defineProps({
     categories: Array,
     currencies: Array,
     auth: Object,
-    expense: Object,
+    expense: Object
 });
 
 onMounted(() => {
@@ -44,7 +50,7 @@ onMounted(() => {
 });
 
 const popover = ref({
-    visibility: "focus",
+    visibility: "focus"
 });
 
 const isLoading = ref(false);
@@ -53,7 +59,6 @@ const setIsLoading = (value) => {
 };
 // #endregion Configs
 
-const advancedDialog = ref(null);
 const isDialogOpen = ref(false);
 const setIsDialogOpen = (value) => {
     isDialogOpen.value = value;
@@ -90,7 +95,7 @@ const expenseForm = useForm({
     amount: props.expense?.amount && !isNaN(parseFloat(props.expense.amount)) ? parseFloat(props.expense.amount) : null,
     is_settlement: false,
     payer_details: [],
-    receiver_details: [],
+    receiver_details: []
 });
 const generateExpenseDetail = (user, amount = null, shouldSelectAll = false, expenseDetailId, isSelected) => {
     if (!user) return;
@@ -100,7 +105,7 @@ const generateExpenseDetail = (user, amount = null, shouldSelectAll = false, exp
         id: expenseDetailId ?? null,
         amount: amount && !isNaN(parseFloat(amount)) ? Math.abs(parseFloat(amount)) : null,
         isSelected: shouldSelectAll || isSelected,
-        user,
+        user
     });
 };
 const mapExpenseDetailToFormData = (expenseDetail) => {
@@ -108,7 +113,7 @@ const mapExpenseDetailToFormData = (expenseDetail) => {
         id: expenseDetail.id,
         user_id: expenseDetail.user_id,
         amount: expenseDetail.amount,
-        is_settlement: false,
+        is_settlement: false
     };
 };
 const currenciesFromSource = computed(() => {
@@ -132,14 +137,14 @@ const updateExpenseDetailsFormArray = () => {
             existingPayerDetail?.amount ?? null,
             false,
             existingPayerDetail?.id,
-            props.isEdit ? !!existingPayerDetail : props.auth.user.id === m.user?.id,
+            props.isEdit ? !!existingPayerDetail : props.auth.user.id === m.user?.id
         );
         const receiverDetail = generateExpenseDetail(
             m.user,
             existingReceiverDetail?.amount ?? null,
             !props.isEdit,
             existingReceiverDetail?.id,
-            !!existingReceiverDetail,
+            !!existingReceiverDetail
         );
 
         if (payerDetail) {
@@ -228,7 +233,7 @@ const setShouldDistributePayersEqually = (value) => {
 const isReceiverEquallyDistributed = computed(() => {
     return props.isEdit
         ? new Map(Array.from(props.expense?.expense_details.filter((d) => d.receiver_id).map((d) => [d.amount])))
-              .size === 1
+        .size === 1
         : true;
 });
 const shouldDistributeReceiversEqually = ref(isReceiverEquallyDistributed.value);
@@ -294,7 +299,7 @@ const onSaveExpenseClicked = () => {
             currency_key: selectedCurrency.value.key,
             group_id: currentGroup.value.id,
             payer_details: selectedPayerForms.value.map((v) => mapExpenseDetailToFormData(v)),
-            receiver_details: selectedReceiverForms.value.map((v) => mapExpenseDetailToFormData(v)),
+            receiver_details: selectedReceiverForms.value.map((v) => mapExpenseDetailToFormData(v))
         }))
         .post(route(props.isEdit ? "expenses.update" : "expenses.save"), {
             onSuccess: (s) => {
@@ -306,7 +311,7 @@ const onSaveExpenseClicked = () => {
             },
             onFinish: () => {
                 setIsLoading(false);
-            },
+            }
         });
 };
 // #endregion Expense Form
@@ -341,12 +346,12 @@ const filteredCurrencies = computed(() =>
     currencyQuery.value === ""
         ? currenciesFromSource.value
         : currenciesFromSource.value.filter((c) => {
-              const searchQuery = currencyQuery.value.toLowerCase().replace(/\s+/g, "");
-              const value = c.value.toLowerCase().replace(/\s+/g, "");
-              const key = c.key.toLowerCase().replace(/\s+/g, "");
-              const symbol = c.symbol.toLowerCase().replace(/\s+/g, "");
-              return value.includes(searchQuery) || key.includes(searchQuery) || symbol.includes(searchQuery);
-          }),
+            const searchQuery = currencyQuery.value.toLowerCase().replace(/\s+/g, "");
+            const value = c.value.toLowerCase().replace(/\s+/g, "");
+            const key = c.key.toLowerCase().replace(/\s+/g, "");
+            const symbol = c.symbol.toLowerCase().replace(/\s+/g, "");
+            return value.includes(searchQuery) || key.includes(searchQuery) || symbol.includes(searchQuery);
+        })
 );
 // #endregion Currency
 
@@ -451,8 +456,8 @@ watch(expenseForm, () => {
                     </template>
                 </DatePicker>
                 <span v-if="expenseForm.errors.date" class="text-xs text-error dark:text-red-400">{{
-                    expenseForm.errors.date
-                }}</span>
+                        expenseForm.errors.date
+                    }}</span>
             </div>
         </div>
 
@@ -461,12 +466,14 @@ watch(expenseForm, () => {
                 <span class="font-semibold">Expense Details</span>
 
                 <button
+                    v-if="currentGroup"
                     class="btn btn-outline btn-xs min-w-0 flex-shrink text-gray-900 dark:text-gray-200 dark:hover:bg-gray-400 dark:hover:text-gray-800"
                     type="button"
                     @click="$refs.advancedExpenseForm.showModal"
                 >
                     <div class="flex flex-row items-center gap-1">
-                        <ArrowsUpDownIcon class="h-4 w-4" /><span>Advanced</span>
+                        <ArrowsUpDownIcon class="h-4 w-4" />
+                        <span>Advanced</span>
                     </div>
                 </button>
             </div>
@@ -489,8 +496,8 @@ watch(expenseForm, () => {
                         @change="expenseForm.clearErrors('description')"
                     />
                     <span v-if="expenseForm.errors.description" class="text-xs text-error dark:text-red-400">{{
-                        expenseForm.errors.description
-                    }}</span>
+                            expenseForm.errors.description
+                        }}</span>
                 </div>
             </div>
 
@@ -513,8 +520,8 @@ watch(expenseForm, () => {
                         @change="expenseForm.clearErrors('amount')"
                     />
                     <span v-if="expenseForm.errors.amount" class="text-xs text-error dark:text-red-400">{{
-                        expenseForm.errors.amount
-                    }}</span>
+                            expenseForm.errors.amount
+                        }}</span>
                 </div>
             </div>
         </div>
@@ -552,59 +559,50 @@ watch(expenseForm, () => {
                     </button>
                 </div>
             </div>
-            <TransitionRoot :show="isPaidBySelectionShown" as="template">
-                <TransitionChild
-                    as="template"
-                    enter="ease-in-out duration-350"
-                    enter-from="opacity-0"
-                    enter-to="opacity-100"
-                    leave="ease-in-out duration-350"
-                    leave-from="opacity-100"
-                    leave-to="opacity-0"
-                >
-                    <ExpenseFormTable
-                        :expenseForm
-                        :formArray="payerFormArray"
-                        :isPayer="true"
-                        :remainingAmount="remainingPayerAmount"
-                        :selectedCurrency
-                        :shouldDistributeEqually="shouldDistributePayersEqually"
-                        @toggle-all-users="toggleAllUsers(true, allPayersSelected)"
-                        @set-should-distribute-equally="setShouldDistributePayersEqually"
-                        @user-selected="(form) => onSelectUser(true, form)"
-                        @set-payer-as-self="setPayerAsSelfAndDistributeExpense"
-                    />
-                </TransitionChild>
-            </TransitionRoot>
 
-            <TransitionRoot :show="isSelectSplitModeShown" as="template">
-                <TransitionChild
-                    as="template"
-                    enter="ease-in-out duration-350"
-                    enter-from="opacity-0"
-                    enter-to="opacity-100"
-                    leave="ease-in-out duration-350"
-                    leave-from="opacity-100"
-                    leave-to="opacity-0"
-                >
-                    <ExpenseFormTable
-                        :expenseForm
-                        :formArray="receiverFormArray"
-                        :isPayer="false"
-                        :remainingAmount="remainingReceiverAmount"
-                        :selectedCurrency
-                        :shouldDistributeEqually="shouldDistributeReceiversEqually"
-                        @toggle-all-users="toggleAllUsers(false, allReceiversSelected)"
-                        @set-should-distribute-equally="setShouldDistributeReceiversEqually"
-                        @user-selected="(form) => onSelectUser(false, form)"
-                    />
-                </TransitionChild>
-            </TransitionRoot>
+            <transition
+                enter-active-class="transition duration-200 ease-out"
+                enter-from-class="opacity-0"
+                enter-to-class="opacity-100"
+                leave-active-class="transition duration-150 ease-in"
+                leave-from-class="opacity-100"
+                leave-to-class="opacity-0"
+                mode="out-in"
+            >
+                <ExpenseFormTable
+                    v-if="isPaidBySelectionShown"
+                    key="paidBySelection"
+                    :expenseForm
+                    :formArray="payerFormArray"
+                    :isPayer="true"
+                    :remainingAmount="remainingPayerAmount"
+                    :selectedCurrency
+                    :shouldDistributeEqually="shouldDistributePayersEqually"
+                    @toggle-all-users="toggleAllUsers(true, allPayersSelected)"
+                    @set-should-distribute-equally="setShouldDistributePayersEqually"
+                    @user-selected="(form) => onSelectUser(true, form)"
+                    @set-payer-as-self="setPayerAsSelfAndDistributeExpense"
+                />
+
+                <ExpenseFormTable
+                    v-else-if="isSelectSplitModeShown"
+                    key="selectSplitMode"
+                    :expenseForm
+                    :formArray="receiverFormArray"
+                    :isPayer="false"
+                    :remainingAmount="remainingReceiverAmount"
+                    :selectedCurrency
+                    :shouldDistributeEqually="shouldDistributeReceiversEqually"
+                    @toggle-all-users="toggleAllUsers(false, allReceiversSelected)"
+                    @set-should-distribute-equally="setShouldDistributeReceiversEqually"
+                    @user-selected="(form) => onSelectUser(false, form)"
+                />
+            </transition>
         </div>
     </div>
 
     <TransitionRoot :show="isDialogOpen" as="template">
-        <Dialog as="div" class="relative z-10" @close="setIsDialogOpen(false)">
+        <Dialog as="div" class="relative z-[999]" @close="setIsDialogOpen(false)">
             <TransitionChild
                 as="template"
                 enter="ease-in-out duration-500"
@@ -637,7 +635,7 @@ watch(expenseForm, () => {
                                         <div class="flex items-start justify-between">
                                             <DialogTitle
                                                 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
-                                                >{{ dialogTitle }}
+                                            >{{ dialogTitle }}
                                             </DialogTitle>
                                             <div class="ml-3 flex h-7 items-center">
                                                 <button
@@ -670,8 +668,8 @@ watch(expenseForm, () => {
                                                         <div class="flex flex-row items-center gap-2">
                                                             <CategoryIcon :category="c.key" size="h-5 w-5" />
                                                             <span :class="selectedCategory === c.key && 'font-bold'">{{
-                                                                c.value
-                                                            }}</span>
+                                                                    c.value
+                                                                }}</span>
                                                         </div>
                                                         <CheckCircleIcon
                                                             v-if="selectedCategory === c.key"
@@ -725,5 +723,11 @@ watch(expenseForm, () => {
         </Dialog>
     </TransitionRoot>
 
-    <AdvancedExpenseForm :expenseForm :selectedCategory :selectedCurrency ref="advancedExpenseForm"></AdvancedExpenseForm>
+    <AdvancedExpenseForm ref="advancedExpenseForm" :currentGroup :expenseForm :payerFormArray :remainingPayerAmount
+                         :selectedCategory :selectedCurrency :shouldDistributePayersEqually
+                         @payerSelected="(form) => onSelectUser(true, form)"
+                         @requestToShowDialog="(mode) => setDialogMode(mode)"
+                         @setPayerAsSelfAndDistributeExpense="setPayerAsSelfAndDistributeExpense"
+                         @setShouldDistributePayersEqually="(value) => setShouldDistributePayersEqually(value)"
+                         @toggleAllPayers="toggleAllUsers(true, allPayersSelected)"></AdvancedExpenseForm>
 </template>

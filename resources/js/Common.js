@@ -14,7 +14,7 @@ import {
     ShoppingCartIcon,
     TruckIcon,
     UserGroupIcon,
-    WrenchIcon,
+    WrenchIcon
 } from "@heroicons/vue/24/outline";
 import { router } from "@inertiajs/vue3";
 
@@ -36,7 +36,7 @@ export const setRememberRecentGroup = (groupId, groupName) => {
 export const getRememberRecentGroup = () => {
     return {
         id: localStorage.getItem(kRememberRecentGroupKey),
-        name: localStorage.getItem(kRememberRecentGroupNameKey),
+        name: localStorage.getItem(kRememberRecentGroupNameKey)
     };
 };
 
@@ -67,8 +67,8 @@ export const showToastIfNeeded = (toast, flash) => {
                 toast.success(flash.message, {
                     action: {
                         label: "View",
-                        onClick: () => router.get(route(flash.route), { id: flash.id }),
-                    },
+                        onClick: () => router.get(route(flash.route), { id: flash.id })
+                    }
                 });
                 return;
             }
@@ -133,4 +133,8 @@ export const getIconForCategory = (category) => {
     }
 
     return ListBulletIcon;
+};
+
+export const generateUUID = (a) => {
+    return a ? (a ^ Math.random() * 16 >> a / 4).toString(16) : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, generateUUID);
 };
