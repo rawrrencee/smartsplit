@@ -231,7 +231,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
         <div
             class="fixed inset-0 z-10 flex w-screen items-center justify-center bg-gray-600 bg-opacity-50"
         >
-            <div class="flex h-full w-full flex-row items-center justify-center gap-8 pb-14 pt-8 sm:gap-12">
+            <div class="flex h-full w-full flex-row items-center justify-center gap-8 pb-14 sm:gap-12" :class="dialogMode === 'cardView' ? 'pt-8' : 'pt-12'">
                 <transition
                     enter-active-class="transition duration-200 ease-out"
                     enter-from-class="translate-y-1 opacity-0"
@@ -724,7 +724,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
 
                     <!-- Cards zoomed out view -->
                     <div v-else
-                         class="h-full w-full overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] py-4 px-4">
+                         class="h-full w-full overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] my-6 px-4">
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <button
                                 class="btn max-w-full rounded-lg h-36 text-gray-900 dark:bg-gray-900 dark:border-0 dark:text-gray-200 dark:hover:bg-gray-400 dark:hover:text-gray-800"
