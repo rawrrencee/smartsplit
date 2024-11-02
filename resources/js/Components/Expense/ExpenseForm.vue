@@ -26,7 +26,7 @@ import { CheckCircleIcon } from "@heroicons/vue/24/solid";
 import { router, useForm } from "@inertiajs/vue3";
 import { DatePicker } from "v-calendar";
 import "v-calendar/style.css";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
 import { toast } from "vue-sonner";
 import NavigationBarButton from "../NavigationBarButton.vue";
 import AdvancedExpenseForm from "@/Components/Expense/AdvancedExpenseForm.vue";
@@ -57,6 +57,7 @@ const isLoading = ref(false);
 const setIsLoading = (value) => {
     isLoading.value = value;
 };
+const advancedFormRef = useTemplateRef('advancedExpenseForm')
 // #endregion Configs
 
 const isDialogOpen = ref(false);
@@ -187,6 +188,7 @@ const toggleAllUsers = (isPayer, allSelected) => {
     (isPayer ? payerFormArray.value : receiverFormArray.value).forEach((f) => {
         f.amount = null;
         f.isSelected = !allSelected;
+        advancedFormRef.value?.removeReceiverAmountsByUserId(f.user?.id)
     });
 
     if (isPayer && shouldDistributePayersEqually.value) {
@@ -229,7 +231,6 @@ const setShouldDistributePayersEqually = (value) => {
         onDistributeExpenseToSelectedUsersEquallyClicked(payerFormArray.value);
     }
 };
-// const shouldDistributeReceiversEqually = ref(props.isEdit ? ) : true);
 const isReceiverEquallyDistributed = computed(() => {
     return props.isEdit
         ? new Map(Array.from(props.expense?.expense_details.filter((d) => d.receiver_id).map((d) => [d.amount])))
@@ -256,9 +257,23 @@ const onDistributeExpenseToSelectedUsersEquallyClicked = (forms) => {
         p.amount = amountPerUser;
     });
 };
+const onUpdateWithAdvancedCalculations = (amounts) => {
+    receiverFormArray.value.forEach((f) => {
+        const amount = amounts.find((a) => a.user_id === f.user?.id);
+        f.amount = amount ? amount.amountAfterSurcharge : 0;
+    });
+
+    if (remainingReceiverAmount.value < 0) {
+        alert('Values were updated but not fully balanced. You may want to check the summary.');
+    } else {
+        expenseConfigurationState.value = "splitMode"
+        advancedFormRef.value.hideModal()
+    }
+};
 const onSelectUser = (isPayer, form) => {
     form.isSelected = !form.isSelected;
     form.amount = null;
+    advancedFormRef.value?.removeReceiverAmountsByUserId(form.user?.id)
     if (isPayer && shouldDistributePayersEqually.value) {
         onDistributeExpenseToSelectedUsersEquallyClicked(payerFormArray.value);
     }
@@ -462,11 +477,11 @@ watch(expenseForm, () => {
         </div>
 
         <div class="flex flex-col gap-2">
-            <div class="flex flex-row items-center gap-2">
+            <div class="flex flex-row flex-wrap items-center gap-2">
                 <span class="font-semibold">Expense Details</span>
 
                 <button
-                    v-if="currentGroup"
+                    v-if="currentGroup && !isEdit"
                     class="btn btn-outline btn-xs min-w-0 flex-shrink text-gray-900 dark:text-gray-200 dark:hover:bg-gray-400 dark:hover:text-gray-800"
                     type="button"
                     @click="$refs.advancedExpenseForm.showModal"
@@ -723,11 +738,15 @@ watch(expenseForm, () => {
         </Dialog>
     </TransitionRoot>
 
-    <AdvancedExpenseForm ref="advancedExpenseForm" :currentGroup :expenseForm :payerFormArray :remainingPayerAmount
-                         :selectedCategory :selectedCurrency :shouldDistributePayersEqually
+    <AdvancedExpenseForm ref="advancedExpenseForm" :currentGroup :expenseForm :payerFormArray :receiverFormArray
+                         :remainingPayerAmount
+                         :selectedCategory :selectedCurrency :selectedReceiverForms :shouldDistributePayersEqually
                          @payerSelected="(form) => onSelectUser(true, form)"
+                         @receiverSelected="(form) => onSelectUser(false, form)"
                          @requestToShowDialog="(mode) => setDialogMode(mode)"
                          @setPayerAsSelfAndDistributeExpense="setPayerAsSelfAndDistributeExpense"
                          @setShouldDistributePayersEqually="(value) => setShouldDistributePayersEqually(value)"
-                         @toggleAllPayers="toggleAllUsers(true, allPayersSelected)"></AdvancedExpenseForm>
+                         @setShouldDistributeReceiversEqually="(value) => setShouldDistributeReceiversEqually(value)"
+                         @toggleAllPayers="toggleAllUsers(true, allPayersSelected)"
+                         @updateWithAdvancedCalculations="(amounts) => onUpdateWithAdvancedCalculations(amounts)"></AdvancedExpenseForm>
 </template>

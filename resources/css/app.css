@@ -5,3 +5,12 @@
 [x-cloak] {
     display: none;
 }
+
+:root {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+:root::-webkit-scrollbar {
+    display: none;
+}
