@@ -258,17 +258,18 @@ const onDistributeExpenseToSelectedUsersEquallyClicked = (forms) => {
     });
 };
 const onUpdateWithAdvancedCalculations = (amounts) => {
+    console.log(amounts)
     receiverFormArray.value.forEach((f) => {
-        const amount = amounts.find((a) => a.user_id === f.user?.id);
+        const amount = amounts.find((a) => a.user?.id === f.user?.id);
         f.amount = amount ? amount.amountAfterSurcharge : 0;
     });
 
     if (remainingReceiverAmount.value < 0) {
         alert('Values were updated but not fully balanced. You may want to check the summary.');
     } else {
-        expenseConfigurationState.value = "splitMode"
         advancedFormRef.value.hideModal()
     }
+    expenseConfigurationState.value = "splitMode"
 };
 const onSelectUser = (isPayer, form) => {
     form.isSelected = !form.isSelected;
@@ -740,7 +741,7 @@ watch(expenseForm, () => {
 
     <AdvancedExpenseForm ref="advancedExpenseForm" :currentGroup :expenseForm :payerFormArray :receiverFormArray
                          :remainingPayerAmount
-                         :selectedCategory :selectedCurrency :selectedReceiverForms :shouldDistributePayersEqually
+                         :selectedCategory :selectedCurrency :selectedPayerForms :selectedReceiverForms :shouldDistributePayersEqually
                          @payerSelected="(form) => onSelectUser(true, form)"
                          @receiverSelected="(form) => onSelectUser(false, form)"
                          @requestToShowDialog="(mode) => setDialogMode(mode)"

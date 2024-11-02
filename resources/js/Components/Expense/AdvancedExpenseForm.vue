@@ -23,16 +23,8 @@ import { useForm } from "@inertiajs/vue3";
 import ProfilePhotoImage from "@/Components/Image/ProfilePhotoImage.vue";
 import { generateUUID, to2DecimalPlacesIfValid } from "@/Common.js";
 import { DotLottieVue } from "@lottiefiles/dotlottie-vue";
-import {
-    Dialog,
-    DialogPanel,
-    DialogTitle,
-    Disclosure,
-    DisclosureButton,
-    DisclosurePanel,
-    TransitionChild,
-    TransitionRoot
-} from "@headlessui/vue";
+import { Dialog, Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
+import DialogAnimated from "@/Components/DialogAnimated.vue";
 
 const whaleLottieUrl = new URL("../../../assets/lottie/whale.lottie", import.meta.url).href;
 const props = defineProps({
@@ -41,6 +33,7 @@ const props = defineProps({
     selectedCategory: String,
     selectedCurrency: Object,
     selectedReceiverForms: Array,
+    selectedPayerForms: Array,
     payerFormArray: Array,
     receiverFormArray: Array,
     remainingPayerAmount: Number,
@@ -194,7 +187,7 @@ const totalAmountsByUser = computed(() => {
             const denominator = fractionItem.denominator > 0 ? fractionItem.denominator : 1;
             const amount = (numerator / denominator) * props.expenseForm.amount;
             return {
-                user_id: gm.user_id,
+                user: gm.user,
                 amount: amount,
                 amountAfterSurcharge: amount
             };
@@ -212,11 +205,14 @@ const totalAmountsByUser = computed(() => {
 
         if (userBaseAmount === 0 && amountAfterSurcharge === 0) return undefined;
         return {
-            user_id: gm.user_id,
+            user: gm.user,
             amount: userBaseAmount,
             amountAfterSurcharge
         };
     }).filter((t) => !!t);
+});
+const remainingReceiverAmount = computed(() => {
+    return props.expenseForm?.amount - totalAmountsByUser.value.reduce((acc, curr) => acc + curr.amountAfterSurcharge, 0);
 });
 
 defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
@@ -667,7 +663,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                     </div>
 
                                     <div
-                                        v-if="totalAmountsByUser.find((t) => t.user_id === gm.user_id)"
+                                        v-if="totalAmountsByUser.find((t) => t.user?.id === gm.user_id)"
                                         class="grow-0 sticky bottom-0 grid grid-cols-1 bg-gray-200/60 backdrop-blur dark:bg-gray-900 text-gray-900 dark:text-gray-200 rounded-b-xl">
                                         <Disclosure v-slot="{ open }">
                                             <DisclosureButton
@@ -699,7 +695,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                                             class="col-span-3 md:col-span-1">{{ selectedCurrency.symbol ?? "$"
                                                             }}</span>
                                                         <span
-                                                            class="col-span-5 md:col-span-2 text-right">{{ to2DecimalPlacesIfValid(totalAmountsByUser.find((t) => t.user_id === gm.user_id)?.amount) ?? "0.00"
+                                                            class="col-span-5 md:col-span-2 text-right">{{ to2DecimalPlacesIfValid(totalAmountsByUser.find((t) => t.user?.id === gm.user_id)?.amount) ?? "0.00"
                                                             }}</span>
                                                     </div>
 
@@ -714,7 +710,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                                             class="col-span-3 md:col-span-1">{{ selectedCurrency.symbol ?? "$"
                                                             }}</span>
                                                         <span
-                                                            class="col-span-5 md:col-span-2 text-right">{{ to2DecimalPlacesIfValid(totalAmountsByUser.find((t) => t.user_id === gm.user_id)?.amountAfterSurcharge) ?? "0.00"
+                                                            class="col-span-5 md:col-span-2 text-right">{{ to2DecimalPlacesIfValid(totalAmountsByUser.find((t) => t.user?.id === gm.user_id)?.amountAfterSurcharge) ?? "0.00"
                                                             }}</span>
                                                     </div>
                                                 </DisclosurePanel>
@@ -794,7 +790,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                                 class="flex-grow justify-end flex flex-col mb-4 relative bottom-0">
                                                 <div class="flex flex-row justify-between max-w-full">
                                                     <span>{{ selectedCurrency?.symbol ?? "$" }}</span>
-                                                    <span>{{ to2DecimalPlacesIfValid(totalAmountsByUser.find((t) => t.user_id === gm.user_id)?.amountAfterSurcharge) ?? "0.00"
+                                                    <span>{{ to2DecimalPlacesIfValid(totalAmountsByUser.find((t) => t.user?.id === gm.user_id)?.amountAfterSurcharge) ?? "0.00"
                                                         }}</span>
                                                 </div>
                                             </div>
@@ -844,61 +840,161 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
         </div>
     </dialog>
 
-    <TransitionRoot :show="isDialogOpen" as="template">
-        <Dialog as="div" class="relative z-[999]" @close="setIsDialogOpen(false)">
-            <TransitionChild
-                as="template"
-                enter="ease-in-out duration-500"
-                enter-from="opacity-0"
-                enter-to="opacity-100"
-                leave="ease-in-out duration-500"
-                leave-from="opacity-100"
-                leave-to="opacity-0"
-            >
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-            </TransitionChild>
+    <DialogAnimated
+        :is-dialog-open="isDialogOpen"
+        dialog-title="Summary"
+        size="xl"
+        @dialog-closed="setIsDialogOpen(false)"
+    >
+        <template v-slot:body>
+            <div
+                class="flex h-full w-full flex-col gap-6 overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-6 pb-8">
+                <!-- Payers -->
+                <div v-if="selectedPayerForms.length" class="flex flex-col gap-2">
+                    <span>Payers</span>
+                    <div
+                        class="w-full overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                        <table class="table">
+                            <thead class="dark:text-gray-200">
+                            <tr class="border-none">
+                                <th class="w-50 pl-0 pt-0">Name</th>
+                                <th class="pr-0 pt-0 text-right">
+                                    {{ selectedCurrency?.symbol ?? "$" }}
+                                </th>
+                            </tr>
+                            </thead>
 
-            <div class="fixed inset-0 overflow-hidden">
-                <div class="absolute inset-0 overflow-hidden">
-                    <div class="pointer-events-none fixed inset-y-0 flex max-w-full pt-48">
-                        <TransitionChild
-                            as="template"
-                            enter="transform transition ease-in-out duration-500"
-                            enter-from="translate-y-full"
-                            enter-to="translate-y-0"
-                            leave="transform transition ease-in-out duration-500"
-                            leave-from="translate-y-0"
-                            leave-to="translate-y-full"
-                        >
-                            <DialogPanel class="pointer-events-auto w-screen">
-                                <div
-                                    class="flex h-full flex-col rounded-t-2xl bg-gray-50 shadow-xl dark:bg-gray-900 dark:text-gray-200"
-                                >
-                                    <div class="px-6 pb-3 pt-6">
-                                        <div class="flex items-start justify-between">
-                                            <DialogTitle
-                                                class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-200"
-                                            >Summary
-                                            </DialogTitle>
-                                            <div class="ml-3 flex h-7 items-center">
-                                                <button
-                                                    class="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-                                                    type="button"
-                                                    @click="setIsDialogOpen(false)"
-                                                >
-                                                    <span class="absolute -inset-2.5" />
-                                                    <span class="sr-only">Close panel</span>
-                                                    <XMarkIcon aria-hidden="true" class="h-6 w-6" />
-                                                </button>
-                                            </div>
+                            <tbody>
+                            <template v-for="s in selectedPayerForms">
+                                <tr class="border-none">
+                                    <td class="w-50 pl-0">
+                                        <div class="flex flex-row items-center gap-2">
+                                            <ProfilePhotoImage
+                                                :image-url="s.user?.profile_photo_url"
+                                                :size="6"
+                                            />
+                                            <span
+                                                class="text-xs font-medium text-gray-700 dark:text-gray-200">{{ s.user?.name
+                                                }}</span>
                                         </div>
-                                    </div>
-                                </div>
-                            </DialogPanel>
-                        </TransitionChild>
+                                    </td>
+                                    <td class="pr-0 text-right text-xs text-gray-700 dark:text-gray-200">
+                                        {{ to2DecimalPlacesIfValid(s.amount) }}
+                                    </td>
+                                </tr>
+                            </template>
+                            </tbody>
+
+                            <tfoot>
+                            <tr class="dark:text-gray-200">
+                                <th class="pl-0">Remaining</th>
+                                <th :class="Math.round(remainingPayerAmount) !== 0 && 'text-error dark:text-red-400'"
+                                    class="pr-0 text-right">
+                                    {{ to2DecimalPlacesIfValid(remainingPayerAmount) }}
+                                </th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Receivers -->
+                <div v-if="totalAmountsByUser.length" class="flex flex-col gap-2">
+                    <span>Split between</span>
+                    <div
+                        class="w-full overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                        <table class="table">
+                            <thead class="dark:text-gray-200">
+                            <tr class="border-none">
+                                <th class="w-50 pl-0 pt-0">Name</th>
+                                <th class="pr-0 pt-0 text-right">
+                                    {{ selectedCurrency?.symbol ?? "$" }}
+                                </th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            <template v-for="s in totalAmountsByUser">
+                                <tr class="border-none">
+                                    <td class="w-50 pl-0">
+                                        <div class="flex flex-row items-center gap-2">
+                                            <ProfilePhotoImage
+                                                :image-url="s.user?.profile_photo_url"
+                                                :size="6"
+                                            />
+                                            <span
+                                                class="text-xs font-medium text-gray-700 dark:text-gray-200">{{ s.user?.name
+                                                }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="pr-0 text-right text-xs text-gray-700 dark:text-gray-200">
+                                        {{ to2DecimalPlacesIfValid(s.amountAfterSurcharge) }}
+                                    </td>
+                                </tr>
+                            </template>
+                            </tbody>
+
+                            <tfoot>
+                            <tr class="dark:text-gray-200">
+                                <th class="pl-0">Remaining</th>
+                                <th :class="Math.round(remainingReceiverAmount) !== 0 && 'text-error dark:text-red-400'"
+                                    class="pr-0 text-right">
+                                    {{ to2DecimalPlacesIfValid(remainingReceiverAmount) }}
+                                </th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Surcharges -->
+                <div class="flex flex-col gap-2">
+                    <div v-if="groupedSurcharges.hasValues" class="flex flex-col gap-2">
+                        <span>Surcharges</span>
+                        <div
+                            class="w-full overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                            <div class="grid grid-cols-12 gap-2 text-xs py-2">
+                                <template v-if="groupedSurcharges.nonCumulativePercentages.length">
+                                                        <span
+                                                            class="col-span-12 font-semibold truncate">Non-cumulative percentages</span>
+                                    <span
+                                        v-if="groupedSurcharges.nonCumulativePercentages.length > 1"
+                                        class="col-span-12">{{ groupedSurcharges.nonCumulativePercentages.join("% + ") + "%"
+                                        }}</span>
+                                    <span class="col-span-1 col-start-9 text-right">=</span>
+                                    <span
+                                        class="col-span-3 text-right">{{ to2DecimalPlacesIfValid(groupedSurcharges.nonCumulativePercentage)
+                                        }} %</span>
+                                </template>
+
+                                <template v-if="groupedSurcharges.cumulativePercentages.length">
+                                    <span class="col-span-12 font-semibold truncate">Cumulative percentages</span>
+                                    <span v-if="groupedSurcharges.cumulativePercentages.length > 1"
+                                          class="col-span-12 text-wrap">{{ groupedSurcharges.cumulativePercentages.join("% x ") + "%"
+                                        }}</span>
+                                    <span class="col-span-1 col-start-9 text-right">=</span>
+                                    <span
+                                        class="col-span-3 text-right">{{ to2DecimalPlacesIfValid(groupedSurcharges.cumulativePercentage)
+                                        }} %</span>
+                                </template>
+
+                                <template v-if="groupedSurcharges.fixedAmounts.length">
+                                                        <span
+                                                            class="col-span-12 font-semibold truncate">Fixed Amounts</span>
+                                    <span v-if="groupedSurcharges.fixedAmounts.length > 1"
+                                          class="col-span-12 text-wrap">{{ groupedSurcharges.fixedAmounts.join(" + ")
+                                        }}</span>
+                                    <span class="col-span-1 col-start-9 text-right">=</span>
+                                    <span
+                                        class="col-span-3 text-right">{{ selectedCurrency?.symbol ?? "$"
+                                        }} {{ groupedSurcharges.fixedAmount }}</span>
+                                </template>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>
-        </Dialog>
-    </TransitionRoot>
+        </template>
+    </DialogAnimated>
 </template>

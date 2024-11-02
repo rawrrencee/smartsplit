@@ -530,7 +530,7 @@ const dialogTitleFromMode = computed(() => {
                         </div>
                     </TransitionChild>
                 </TransitionRoot>
-                <div class="scrollbar-none flex h-full flex-col overflow-y-scroll [&::-webkit-scrollbar]:hidden">
+                <div class="flex h-full flex-col overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     <div class="flex flex-col gap-3 pb-4">
                         <template v-for="member in activeGroupMembers">
                             <div
@@ -693,7 +693,7 @@ const dialogTitleFromMode = computed(() => {
                         class="flex flex-col gap-2"
                     >
                         <div
-                            class="scrollbar-none flex min-h-0 w-full shrink-0 flex-row gap-3 overflow-x-scroll [&::-webkit-scrollbar]:hidden"
+                            class="flex min-h-0 w-full shrink-0 flex-row gap-3 overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                         >
                             <div
                                 v-for="currency in Object.keys(spending.group_spending_by_currency)"
@@ -711,7 +711,7 @@ const dialogTitleFromMode = computed(() => {
                 <div class="flex flex-col gap-4">
                     <span class="font-medium">Spending by member</span>
 
-                    <div class="scrollbar-none w-full overflow-x-scroll [&::-webkit-scrollbar]:hidden">
+                    <div class="w-full overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         <table
                             v-if="
                                 spending?.group_spending_by_currency &&
@@ -779,7 +779,7 @@ const dialogTitleFromMode = computed(() => {
                 <div class="flex flex-col gap-4">
                     <span class="font-medium">Settled amounts by member</span>
 
-                    <div class="scrollbar-none w-full overflow-x-scroll [&::-webkit-scrollbar]:hidden">
+                    <div class="w-full overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         <table
                             v-if="
                                 spending?.group_spending_by_currency &&
