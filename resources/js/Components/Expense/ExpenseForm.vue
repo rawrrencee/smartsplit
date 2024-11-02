@@ -253,8 +253,7 @@ const onDistributeExpenseToSelectedUsersEquallyClicked = (forms) => {
     }
     const amountsDistributed = distributeEqually(expenseForm.amount, selectedForms.length);
     selectedForms.forEach((p, i) => {
-        const amountPerUser = amountsDistributed?.[i] ?? 0;
-        p.amount = amountPerUser;
+        p.amount = amountsDistributed?.[i] ?? 0;
     });
 };
 const onUpdateWithAdvancedCalculations = (amounts) => {
