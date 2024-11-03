@@ -853,7 +853,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                 class="flex h-full w-full flex-col gap-6 overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-6 pb-8">
                 <!-- Payers -->
                 <div v-if="selectedPayerForms.length" class="flex flex-col gap-2">
-                    <span>Payers</span>
+                    <span class="font-semibold">Payers</span>
                     <div
                         class="w-full overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         <table class="table">
@@ -902,7 +902,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
 
                 <!-- Receivers -->
                 <div v-if="totalAmountsByUser.length" class="flex flex-col gap-2">
-                    <span>Split between</span>
+                    <span class="font-semibold">Split between</span>
                     <div
                         class="w-full overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         <table class="table">
@@ -952,7 +952,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                 <!-- Surcharges -->
                 <div class="flex flex-col gap-2">
                     <div v-if="groupedSurcharges.hasValues" class="flex flex-col gap-2">
-                        <span>Surcharges</span>
+                        <span class="font-semibold">Surcharges</span>
                         <div
                             class="w-full overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                             <div class="grid grid-cols-12 gap-2 text-xs py-2">
