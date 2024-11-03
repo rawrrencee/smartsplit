@@ -378,8 +378,8 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
 
                                 <div class="shrink-0 flex-grow flex flex-col gap-6 w-full pt-4">
                                     <template v-for="(s, i) in surchargesArray" :key="s.id">
-                                        <div class="grid grid-cols-12 gap-2 items-center px-4 text-gray-400 dark:text-gray-200">
-                                            <span class="col-span-12 text-xs">Surcharge {{ i + 1
+                                        <div class="grid grid-cols-12 gap-2 items-center px-4 text-gray-900 dark:text-gray-200">
+                                            <span class="col-span-12 text-gray-400 dark:text-gray-200 text-xs">Surcharge {{ i + 1
                                                 }}</span>
                                             <span v-if="s.type === 'amount'"
                                                   class="col-span-2 font-semibold">{{ selectedCurrency.symbol ?? "$"
@@ -426,7 +426,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                                         @change="s.isPercentageCumulative = !s.isPercentageCumulative"
                                                     />
                                                     <span
-                                                        class="text-xs dark:text-gray-200">Cumulative Percentage</span>
+                                                        class="text-xs text-gray-900 dark:text-gray-200">Cumulative Percentage</span>
                                                 </label>
                                             </div>
                                         </div>
@@ -498,7 +498,6 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                 </div>
                             </div>
                         </div>
-
 
                         <!-- Group Member Cards -->
                         <template v-for="gm in activeGroupMembers">
