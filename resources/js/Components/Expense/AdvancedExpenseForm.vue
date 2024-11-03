@@ -376,46 +376,52 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                     </button>
                                 </div>
 
-                                <div class="shrink-0 flex-grow flex flex-col gap-6 w-full pt-4">
+                                <div class="shrink-0 flex-grow flex flex-col gap-6 w-full pt-4 pb-8">
                                     <template v-for="(s, i) in surchargesArray" :key="s.id">
-                                        <div class="grid grid-cols-12 gap-2 items-center px-4 text-gray-900 dark:text-gray-200">
-                                            <span class="col-span-12 text-gray-400 dark:text-gray-200 text-xs">Surcharge {{ i + 1
+                                        <div
+                                            class="flex flex-col flex-wrap gap-2 items-center px-4 text-gray-900 dark:text-gray-200">
+                                            <span
+                                                class="flex-grow w-full text-gray-400 dark:text-gray-200 text-xs md:text-center">Surcharge {{ i + 1
                                                 }}</span>
+                                            <div class="w-full flex-grow flex flex-row gap-2 items-center justify-center">
                                             <span v-if="s.type === 'amount'"
-                                                  class="col-span-2 font-semibold">{{ selectedCurrency.symbol ?? "$"
+                                                  class="flex-shrink font-semibold">{{ selectedCurrency.symbol ?? "$"
                                                 }}</span>
-                                            <input
-                                                v-if="s.type === 'percentage'"
-                                                :id="`surchargePercentage_${s.id}`"
-                                                v-model="s.percentage"
-                                                :max="100"
-                                                :min="0"
-                                                :minlength="1"
-                                                class="col-span-7 w-full text-right sm:col-span-4 input input-sm input-bordered [appearance:textfield] dark:border-0 dark:bg-gray-700 dark:text-gray-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                                placeholder="0"
-                                                type="number"
-                                                @change="(val) => {
+                                                <div class="max-w-sm w-full text-xs">
+                                                    <input
+                                                        v-if="s.type === 'percentage'"
+                                                        :id="`surchargePercentage_${s.id}`"
+                                                        v-model="s.percentage"
+                                                        :max="100"
+                                                        :min="0"
+                                                        :minlength="1"
+                                                        class="w-full text-right input input-sm input-bordered [appearance:textfield] dark:border-0 dark:bg-gray-700 dark:text-gray-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                                        placeholder="0"
+                                                        type="number"
+                                                        @change="(val) => {
                                                 if (val.target.value > 100) val.target.value = 100;
                                                 if (val.target.value < 0) val.target.value = 0;
                                                 s.percentage = val.target.value;
                                                 }"
-                                            />
-                                            <input
-                                                v-else
-                                                :id="`surchargeAmount_${s.id}`"
-                                                v-model="s.amount"
-                                                class="col-span-7 w-full text-right sm:col-span-4 input input-sm input-bordered [appearance:textfield] dark:border-0 dark:bg-gray-700 dark:text-gray-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                                placeholder="0"
-                                                type="number"
-                                            />
-                                            <span v-if="s.type === 'percentage'"
-                                                  class="col-span-2 font-semibold">%</span>
-                                            <button
-                                                class="col-span-3 sm:col-span-1 min-w-0 btn btn-outline btn-sm dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
-                                                @click="removeSurcharge(s.id)">
-                                                <MinusIcon class="h-4 w-4" />
-                                            </button>
-                                            <div v-if="s.type === 'percentage'" class="flex flex-row col-span-12">
+                                                    />
+                                                    <input
+                                                        v-else
+                                                        :id="`surchargeAmount_${s.id}`"
+                                                        v-model="s.amount"
+                                                        class="w-full text-right input input-sm input-bordered [appearance:textfield] dark:border-0 dark:bg-gray-700 dark:text-gray-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                                        placeholder="0"
+                                                        type="number"
+                                                    />
+                                                </div>
+                                                <span v-if="s.type === 'percentage'"
+                                                      class="shrink-0 font-semibold">%</span>
+                                                <button
+                                                    class="shrink-0 sm:col-span-1 min-w-0 btn btn-outline btn-sm dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                                                    @click="removeSurcharge(s.id)">
+                                                    <MinusIcon class="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                            <div v-if="s.type === 'percentage'" class="self-start md:self-center">
                                                 <label
                                                     class="label flex cursor-pointer flex-row items-center gap-2 p-0">
                                                     <input
@@ -455,7 +461,8 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                             leave-to-class="transform scale-95 opacity-0"
                                         >
                                             <DisclosurePanel>
-                                                <div class="grid grid-cols-12 gap-2 text-xs px-4 py-2 dark:bg-gray-800/80">
+                                                <div
+                                                    class="grid grid-cols-12 gap-2 text-xs px-4 py-2 dark:bg-gray-800/80">
                                                     <template v-if="groupedSurcharges.nonCumulativePercentages.length">
                                                         <span
                                                             class="col-span-12 font-semibold truncate">Non-cumulative percentages</span>
@@ -640,7 +647,8 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                                                 <MinusIcon class="h-4 w-4" />
                                                             </button>
                                                         </div>
-                                                        <div v-if="r.type === 'fixedAmount'" class="self-start md:self-center">
+                                                        <div v-if="r.type === 'fixedAmount'"
+                                                             class="self-start md:self-center">
                                                             <label
                                                                 class="label flex cursor-pointer flex-row items-center gap-2 p-0">
                                                                 <input
