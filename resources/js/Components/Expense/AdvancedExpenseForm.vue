@@ -677,7 +677,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                         <Disclosure v-slot="{ open }">
                                             <DisclosureButton
                                                 :class="open ? 'rounded-b-none' : 'rounded-b-xl'"
-                                                class="btn btn-sm text-xs rounded-t-none py-2 px-4 flex flex-row items-center justify-between gap-1 transition-transform duration-200 ease-in-out transform active:scale-95">
+                                                class="btn btn-sm border-none dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 text-xs rounded-t-none py-2 px-4 flex flex-row items-center justify-between gap-1 transition-transform duration-200 ease-in-out transform active:scale-95">
                                                 <span>View Calculations</span>
                                                 <ChevronRightIcon
                                                     :class="open && 'rotate-90 transform transition-transform'"
