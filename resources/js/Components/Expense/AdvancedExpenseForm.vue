@@ -771,7 +771,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                             :class="selectedReceiverForms?.find((r) => r.user?.id === gm.user_id) ? '' : 'opacity-30'"
                                             :src="gm.user?.profile_photo_url"
                                             alt="Background"
-                                            class="absolute blur-sm opacity-70 contrast-50 brightness-[40%] inset-0 w-full object-cover z-0" />
+                                            class="absolute  blur-sm opacity-70 contrast-50 brightness-[40%] inset-0 w-full h-36 object-cover z-0" />
 
                                         <div class="p-4 flex flex-col flex-grow h-full w-full gap-5 z-10">
                                             <div
@@ -782,7 +782,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                             <div class="flex flex-col gap-2 items-start">
                                                 <ProfilePhotoImage :image-url="gm.user?.profile_photo_url" :size="4" />
                                                 <span
-                                                    class="text-start font-semibold">{{ gm.user?.name
+                                                    class="w-full truncate text-start font-semibold">{{ gm.user?.name
                                                     }}</span>
                                             </div>
 
