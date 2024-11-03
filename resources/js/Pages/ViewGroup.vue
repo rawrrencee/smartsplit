@@ -749,7 +749,7 @@ const dialogTitleFromMode = computed(() => {
                                         <td class="pr-0 text-right text-xs text-gray-700 dark:text-gray-200">
                                             {{
                                                 to2DecimalPlacesIfValid(
-                                                    parseFloat(s.spending_by_currency[currency])
+                                                    parseFloat(s.spending_by_currency[currency] ?? 0)
                                                 )
                                             }}
                                         </td>
