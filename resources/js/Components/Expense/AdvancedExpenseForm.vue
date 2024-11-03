@@ -207,7 +207,7 @@ const totalAmountsByUser = computed(() => {
         return {
             user: gm.user,
             amount: userBaseAmount,
-            amountAfterSurcharge: Math.round(amountAfterSurcharge * 100) / 100,
+            amountAfterSurcharge: Math.round(amountAfterSurcharge * 100) / 100
         };
     }).filter((t) => !!t);
 });
@@ -354,7 +354,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                         class="badge badge-neutral bg-blue-900 badge-lg flex flex-row items-center gap-2 dark:font-bold dark:text-gray-200">
                                         Surcharges
                                     </div>
-                                    <ReceiptPercentIcon class="mt-4 h-12 w-12"></ReceiptPercentIcon>
+                                    <ReceiptPercentIcon class="mt-4 h-12 w-12 dark:text-gray-200"></ReceiptPercentIcon>
                                 </div>
 
                                 <div class="flex flex-row gap-2 mt-4 mx-4 justify-center">
@@ -378,8 +378,9 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
 
                                 <div class="shrink-0 flex-grow flex flex-col gap-6 w-full pt-4">
                                     <template v-for="(s, i) in surchargesArray" :key="s.id">
-                                        <div class="grid grid-cols-12 gap-2 items-center px-4">
-                                            <span class="col-span-12 text-xs text-gray-400">Surcharge {{ i + 1 }}</span>
+                                        <div class="grid grid-cols-12 gap-2 items-center px-4 text-gray-400 dark:text-gray-200">
+                                            <span class="col-span-12 text-xs">Surcharge {{ i + 1
+                                                }}</span>
                                             <span v-if="s.type === 'amount'"
                                                   class="col-span-2 font-semibold">{{ selectedCurrency.symbol ?? "$"
                                                 }}</span>
@@ -424,7 +425,8 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                                         type="checkbox"
                                                         @change="s.isPercentageCumulative = !s.isPercentageCumulative"
                                                     />
-                                                    <span class="text-xs">Cumulative Percentage</span>
+                                                    <span
+                                                        class="text-xs dark:text-gray-200">Cumulative Percentage</span>
                                                 </label>
                                             </div>
                                         </div>
@@ -437,7 +439,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                     <Disclosure v-slot="{ open }">
                                         <DisclosureButton
                                             :class="open ? 'rounded-b-none' : 'rounded-b-xl'"
-                                            class="btn btn-sm text-xs rounded-t-none py-2 px-4 flex flex-row items-center justify-between gap-1 transition-transform duration-200 ease-in-out transform active:scale-95">
+                                            class="btn btn-sm border-none dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 text-xs rounded-t-none py-2 px-4 flex flex-row items-center justify-between gap-1 transition-transform duration-200 ease-in-out transform active:scale-95">
                                             <span>View Breakdown</span>
                                             <ChevronRightIcon
                                                 :class="open && 'rotate-90 transform transition-transform'"
@@ -453,7 +455,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                             leave-to-class="transform scale-95 opacity-0"
                                         >
                                             <DisclosurePanel>
-                                                <div class="grid grid-cols-12 gap-2 text-xs px-4 py-2">
+                                                <div class="grid grid-cols-12 gap-2 text-xs px-4 py-2 dark:bg-gray-800/80">
                                                     <template v-if="groupedSurcharges.nonCumulativePercentages.length">
                                                         <span
                                                             class="col-span-12 font-semibold truncate">Non-cumulative percentages</span>
@@ -550,7 +552,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
 
                                             <button
                                                 :disabled="receiverAmountsArray?.some((r) => r.type === 'fixedAmount' && r.user.id === gm.user_id) || receiverAmountsArray?.some((r) => r.type === 'fraction' && r.user.id === gm.user_id)"
-                                                class="flex-shrink min-w-0 btn btn-outline btn-xs dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700"
+                                                class="flex-shrink min-w-0 btn btn-outline btn-xs dark:border-0 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 disabled:dark:bg-gray-700 disabled:dark:text-gray-900"
                                                 @click="addReceiverAmount(gm.user, 'fraction')">
                                                 <div class="w-full flex flex-row items-center gap-1">
                                                     <CalculatorIcon class="h-4 w-4" />
@@ -561,11 +563,11 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
 
                                         <span
                                             v-if="receiverAmountsArray?.some((r) => r.type === 'fraction' && r.user.id === gm.user_id)"
-                                            class="text-xs text-gray-400 text-center">You can't add fixed amounts if a fractional amount is added.</span>
+                                            class="text-xs text-gray-400 text-center">NOTE: You can't add fixed amounts if a fractional amount is added.</span>
 
                                         <span
                                             v-if="receiverAmountsArray?.some((r) => r.type === 'fixedAmount' && r.user.id === gm.user_id)"
-                                            class="text-xs text-gray-400 text-center">You can't add fractional amounts if a fixed amount is added.</span>
+                                            class="text-xs text-gray-400 text-center">NOTE: You can't add fractional amounts if a fixed amount is added.</span>
                                     </div>
 
                                     <div class="shrink-0 flex-grow flex flex-col gap-2 mb-6">
@@ -580,20 +582,20 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                         </div>
                                         <template v-else>
                                             <div
-                                                class="flex flex-col flex-grow mt-2 items-center gap-2 text-gray-900 dark:text-gray-200">
+                                                class="flex flex-col flex-grow mt-2 items-center gap-4 text-gray-900 dark:text-gray-200">
                                                 <template
                                                     v-for="(r, i) in receiverAmountsArray.filter((r) => r.user.id === gm.user_id)"
                                                     :key="r.id">
                                                     <div class="w-full flex flex-col px-4 items-center gap-y-1">
                                                         <span
-                                                            class="text-xs w-full text-gray-400">{{ r.type === "fixedAmount" ? `Expense ${i + 1}` : `Fraction`
+                                                            class="text-xs md:text-center w-full text-gray-400 dark:text-gray-200">{{ r.type === "fixedAmount" ? `Expense ${i + 1}` : `Fraction`
                                                             }}
                                                         </span>
                                                         <div :class="r.type === 'fixedAmount' ? 'justify-center' : ''"
                                                              class="w-full flex-grow flex flex-row gap-2 items-center">
                                                         <span
                                                             v-if="r.type === 'fixedAmount'"
-                                                            class="shrink-0 truncate text-right font-semibold">{{ selectedCurrency?.symbol ?? "$"
+                                                            class="shrink-0 truncate text-right font-semibold dark:text-gray-200">{{ selectedCurrency?.symbol ?? "$"
                                                             }}</span>
                                                             <div v-if="r.type === 'fixedAmount'"
                                                                  class="max-w-sm w-full text-xs dark:bg-gray-800">
@@ -639,7 +641,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                                                 <MinusIcon class="h-4 w-4" />
                                                             </button>
                                                         </div>
-                                                        <div v-if="r.type === 'fixedAmount'" class="self-start">
+                                                        <div v-if="r.type === 'fixedAmount'" class="self-start md:self-center">
                                                             <label
                                                                 class="label flex cursor-pointer flex-row items-center gap-2 p-0">
                                                                 <input
@@ -724,7 +726,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
 
                     <!-- Cards zoomed out view -->
                     <div v-else
-                         class="h-full w-full overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] my-6 px-4">
+                         class="h-full w-full max-w-4xl overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-8 px-4">
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <button
                                 class="btn max-w-full rounded-lg h-36 text-gray-900 dark:bg-gray-900 dark:border-0 dark:text-gray-200 dark:hover:bg-gray-400 dark:hover:text-gray-800"
@@ -758,7 +760,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                         <input
                                             :id="`isReceiverSelected_${gm.user_id}`"
                                             :checked="receiverFormArray.find((r) => r.user?.id === gm.user_id && r.isSelected)?.isSelected"
-                                            class="absolute checkbox checkbox-sm top-3 right-3 dark:bg-gray-600 z-30"
+                                            class="absolute checkbox checkbox-md top-3 right-3 dark:bg-gray-600 z-30"
                                             type="checkbox"
                                             @click.self.stop
                                             @change.self.stop="(cb) => {
@@ -782,12 +784,12 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                             <div class="flex flex-col gap-2 items-start">
                                                 <ProfilePhotoImage :image-url="gm.user?.profile_photo_url" :size="4" />
                                                 <span
-                                                    class="w-full truncate text-start font-semibold">{{ gm.user?.name
+                                                    class="w-full truncate text-xs text-start font-semibold">{{ gm.user?.name
                                                     }}</span>
                                             </div>
 
                                             <div
-                                                class="flex-grow justify-end flex flex-col mb-4 relative bottom-0">
+                                                class="flex-grow justify-end flex flex-col relative bottom-0">
                                                 <div class="flex flex-row justify-between max-w-full">
                                                     <span>{{ selectedCurrency?.symbol ?? "$" }}</span>
                                                     <span>{{ to2DecimalPlacesIfValid(totalAmountsByUser.find((t) => t.user?.id === gm.user_id)?.amountAfterSurcharge) ?? "0.00"
