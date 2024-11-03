@@ -188,7 +188,10 @@ const toggleAllUsers = (isPayer, allSelected) => {
     (isPayer ? payerFormArray.value : receiverFormArray.value).forEach((f) => {
         f.amount = null;
         f.isSelected = !allSelected;
-        advancedFormRef.value?.removeReceiverAmountsByUserId(f.user?.id)
+
+        if (!isPayer) {
+            advancedFormRef.value?.removeReceiverAmountsByUserId(f.user?.id)
+        }
     });
 
     if (isPayer && shouldDistributePayersEqually.value) {
@@ -257,13 +260,20 @@ const onDistributeExpenseToSelectedUsersEquallyClicked = (forms) => {
     });
 };
 const onUpdateWithAdvancedCalculations = (amounts) => {
-    console.log(amounts)
     receiverFormArray.value.forEach((f) => {
         const amount = amounts.find((a) => a.user?.id === f.user?.id);
-        f.amount = amount ? amount.amountAfterSurcharge : 0;
+        f.amount = amount?.amountAfterSurcharge > 0 ? amount.amountAfterSurcharge : 0;
     });
 
-    if (remainingReceiverAmount.value < 0) {
+    if (remainingReceiverAmount.value > 0 && remainingReceiverAmount.value < 0.10) {
+        const roundingAdjustments = distributeEqually(remainingReceiverAmount.value, receiverFormArray.value.length)
+        console.log(roundingAdjustments)
+        receiverFormArray.value.forEach((f, i) => {
+            f.amount += roundingAdjustments?.[i] ?? 0;
+        });
+    }
+
+    if (remainingReceiverAmount.value < 0 || remainingReceiverAmount.value > 0) {
         alert('Values were updated but not fully balanced. You may want to check the summary.');
     } else {
         advancedFormRef.value.hideModal()
@@ -273,7 +283,9 @@ const onUpdateWithAdvancedCalculations = (amounts) => {
 const onSelectUser = (isPayer, form) => {
     form.isSelected = !form.isSelected;
     form.amount = null;
-    advancedFormRef.value?.removeReceiverAmountsByUserId(form.user?.id)
+    if (!isPayer) {
+        advancedFormRef.value?.removeReceiverAmountsByUserId(form.user?.id)
+    }
     if (isPayer && shouldDistributePayersEqually.value) {
         onDistributeExpenseToSelectedUsersEquallyClicked(payerFormArray.value);
     }
@@ -291,7 +303,7 @@ const remainingReceiverAmount = computed(() => {
     const totalAmount = receiverFormArray.value
         .filter((f) => f.isSelected)
         .reduce((total, payer) => total + payer.amount, 0);
-    return expenseForm?.amount - totalAmount;
+    return Math.round((expenseForm?.amount - totalAmount) * 100) / 100;
 });
 const isAmountBalanced = computed(() => {
     const expenseAmount = to2DecimalPlacesIfValid(expenseForm.amount);
@@ -300,9 +312,17 @@ const isAmountBalanced = computed(() => {
 
     return !!expenseAmount && expenseAmount === payerAmounts && expenseAmount === receiverAmounts;
 });
+const isSomeSelectedReceiverZero = computed(() => {
+    return selectedReceiverForms.value.some((r) => r.amount === 0)
+});
 const onSaveExpenseClicked = () => {
     if (!isAmountBalanced.value) {
         toast.error("The expense amount is zero or has not been fully distributed.");
+        return;
+    }
+
+    if (isSomeSelectedReceiverZero.value) {
+        toast.error("Deselect the user who is splitting with zero amount before saving.");
         return;
     }
 

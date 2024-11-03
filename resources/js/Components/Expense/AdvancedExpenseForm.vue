@@ -207,7 +207,7 @@ const totalAmountsByUser = computed(() => {
         return {
             user: gm.user,
             amount: userBaseAmount,
-            amountAfterSurcharge
+            amountAfterSurcharge: Math.round(amountAfterSurcharge * 100) / 100,
         };
     }).filter((t) => !!t);
 });
@@ -231,7 +231,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
         <div
             class="fixed inset-0 z-10 flex w-screen items-center justify-center bg-gray-600 bg-opacity-50"
         >
-            <div class="flex h-full w-full flex-row items-center justify-center gap-8 pb-14 sm:gap-12" :class="dialogMode === 'cardView' ? 'pt-8' : 'pt-12'">
+            <div class="flex h-full w-full flex-row items-center justify-center gap-8 pb-14 pt-12 sm:gap-12">
                 <transition
                     enter-active-class="transition duration-200 ease-out"
                     enter-from-class="translate-y-1 opacity-0"
@@ -243,7 +243,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                 >
                     <!-- Single card view -->
                     <div v-if="dialogMode === 'cardView'"
-                         class="carousel carousel-center h-full w-full space-x-4 p-4">
+                         class="carousel carousel-center h-full w-full space-x-4 px-4 pb-4">
 
                         <!-- Main Card -->
                         <div id="expenseDetails_mainCard"
@@ -888,7 +888,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                             <tfoot>
                             <tr class="dark:text-gray-200">
                                 <th class="pl-0">Remaining</th>
-                                <th :class="Math.round(remainingPayerAmount) !== 0 && 'text-error dark:text-red-400'"
+                                <th :class="remainingPayerAmount !== 0 && 'text-error dark:text-red-400'"
                                     class="pr-0 text-right">
                                     {{ to2DecimalPlacesIfValid(remainingPayerAmount) }}
                                 </th>
@@ -937,7 +937,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                             <tfoot>
                             <tr class="dark:text-gray-200">
                                 <th class="pl-0">Remaining</th>
-                                <th :class="Math.round(remainingReceiverAmount) !== 0 && 'text-error dark:text-red-400'"
+                                <th :class="remainingReceiverAmount !== 0 && 'text-error dark:text-red-400'"
                                     class="pr-0 text-right">
                                     {{ to2DecimalPlacesIfValid(remainingReceiverAmount) }}
                                 </th>
