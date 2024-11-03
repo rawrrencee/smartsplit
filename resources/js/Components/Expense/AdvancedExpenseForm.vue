@@ -570,7 +570,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
                                             class="text-xs text-gray-400 text-center">NOTE: You can't add fractional amounts if a fixed amount is added.</span>
                                     </div>
 
-                                    <div class="shrink-0 flex-grow flex flex-col gap-2 mb-6">
+                                    <div class="shrink-0 flex-grow flex flex-col gap-2 pb-8">
                                         <div v-if="!receiverAmountsArray?.some((r) => r.user.id === gm.user_id)"
                                              class="h-full flex flex-row place-items-center justify-center mb-8 sm:mb-0">
                                             <div class="text-center opacity-80">
