@@ -30,7 +30,7 @@ defineEmits(["dialogClosed"]);
 
 <template>
     <TransitionRoot as="template" :show="isDialogOpen">
-        <Dialog as="div" class="relative z-[998]" @close="$emit('dialogClosed')">
+        <Dialog as="div" class="relative z-30" @close="$emit('dialogClosed')">
             <TransitionChild
                 as="template"
                 enter="ease-in-out duration-500"

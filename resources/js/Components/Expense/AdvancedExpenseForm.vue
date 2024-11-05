@@ -219,7 +219,7 @@ defineExpose({ showModal, hideModal, removeReceiverAmountsByUserId });
 </script>
 
 <template>
-    <dialog ref="advancedExpenseFormDialog" class="modal backdrop-blur-sm">
+    <dialog ref="advancedExpenseFormDialog" class="modal backdrop-blur-sm z-20">
         <div class="fixed inset-0 z-20 h-10 bg-transparent">
             <form method="dialog">
                 <button class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">

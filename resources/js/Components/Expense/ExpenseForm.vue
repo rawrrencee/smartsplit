@@ -637,7 +637,7 @@ watch(expenseForm, () => {
     </div>
 
     <TransitionRoot :show="isDialogOpen" as="template">
-        <Dialog as="div" class="relative z-[999]" @close="setIsDialogOpen(false)">
+        <Dialog as="div" class="relative z-30" @close="setIsDialogOpen(false)">
             <TransitionChild
                 as="template"
                 enter="ease-in-out duration-500"
