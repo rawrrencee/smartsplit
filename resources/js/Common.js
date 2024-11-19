@@ -78,16 +78,25 @@ export const showToastIfNeeded = (toast, flash) => {
 };
 
 export const distributeEqually = (amount, people) => {
-    const m = amount * 100;
-    const n = m % people;
-    const v = Math.floor(m / people) / 100;
-    const w = Math.floor(m / people + 1) / 100;
-    let out = new Array(people);
+    const totalCents = Math.round(amount * 100); // Convert amount to cents and round to avoid floating-point issues
+    const baseShare = Math.floor(totalCents / people); // Base share in cents
+    const remainder = totalCents % people; // Remaining cents to distribute
 
-    for (let i = 0; i < people; ++i) {
-        out[i] = i < n ? w : v;
-    }
-    return out;
+    // Create an array where everyone gets the base share
+    const distribution = Array(people).fill(baseShare);
+
+    // Randomly select `remainder` people to get an extra cent
+    const extraIndices = Array.from({ length: people }, (_, i) => i)
+        .sort(() => Math.random() - 0.5) // Shuffle the indices
+        .slice(0, remainder); // Select `remainder` random indices
+
+    // Add the extra cent to the selected indices
+    extraIndices.forEach(index => {
+        distribution[index]++;
+    });
+
+    // Convert back to dollars
+    return distribution.map(share => share / 100);
 };
 
 export const to2DecimalPlacesIfValid = (value, withSeparator = true) => {

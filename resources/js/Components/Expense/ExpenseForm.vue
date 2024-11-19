@@ -267,7 +267,6 @@ const onUpdateWithAdvancedCalculations = (amounts) => {
 
     if (remainingReceiverAmount.value > 0 && remainingReceiverAmount.value < 0.10) {
         const roundingAdjustments = distributeEqually(remainingReceiverAmount.value, receiverFormArray.value.length)
-        console.log(roundingAdjustments)
         receiverFormArray.value.forEach((f, i) => {
             f.amount += roundingAdjustments?.[i] ?? 0;
         });
