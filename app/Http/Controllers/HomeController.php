@@ -32,7 +32,7 @@ class HomeController extends Controller
         $groups = Group::whereHas('groupMembers', function ($query) use ($userId) {
             $query->where('user_id', $userId);
             $query->where('status', GroupMemberStatusEnum::ACCEPTED->value);
-        })->select('id', 'group_title', 'img_path')->take($limit)->get()->reverse();
+        })->select('id', 'group_title', 'img_path')->orderBy('created_at', 'desc')->take($limit)->get();
 
         foreach ($groups as $group) {
             $expenses = $this->GroupController->mapExpenseDetailsByDate(
