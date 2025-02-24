@@ -530,7 +530,7 @@ const dialogTitleFromMode = computed(() => {
                         </div>
                     </TransitionChild>
                 </TransitionRoot>
-                <div class="scrollbar-none flex h-full flex-col overflow-y-scroll [&::-webkit-scrollbar]:hidden">
+                <div class="flex h-full flex-col overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     <div class="flex flex-col gap-3 pb-4">
                         <template v-for="member in activeGroupMembers">
                             <div
@@ -634,7 +634,7 @@ const dialogTitleFromMode = computed(() => {
         <template v-if="dialogMode === 'viewBalances'" v-slot:body>
             <div
                 v-if="hasGroupBalanceDeltas"
-                class="scrollbar-none flex h-full flex-col gap-6 overflow-y-scroll px-6 pb-8 [&::-webkit-scrollbar]:hidden"
+                class="overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex h-full flex-col gap-6  px-6 pb-8"
             >
                 <template v-for="userId in Object.keys(groupBalance?.deltas ?? {})">
                     <div v-if="groupBalance?.deltas?.[userId]?.length > 0" class="flex flex-col gap-1">
@@ -681,7 +681,7 @@ const dialogTitleFromMode = computed(() => {
                 v-if="
                     spending?.group_spending_by_currency && Object.keys(spending.group_spending_by_currency).length > 0
                 "
-                class="scrollbar-none flex h-full w-full flex-col gap-6 overflow-y-scroll px-6 pb-8 [&::-webkit-scrollbar]:hidden"
+                class="flex h-full w-full flex-col gap-6 overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-6 pb-8"
             >
                 <div class="flex flex-col gap-4">
                     <span class="font-medium">Total spend</span>
@@ -693,7 +693,7 @@ const dialogTitleFromMode = computed(() => {
                         class="flex flex-col gap-2"
                     >
                         <div
-                            class="scrollbar-none flex min-h-0 w-full shrink-0 flex-row gap-3 overflow-x-scroll [&::-webkit-scrollbar]:hidden"
+                            class="flex min-h-0 w-full shrink-0 flex-row gap-3 overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                         >
                             <div
                                 v-for="currency in Object.keys(spending.group_spending_by_currency)"
@@ -711,7 +711,7 @@ const dialogTitleFromMode = computed(() => {
                 <div class="flex flex-col gap-4">
                     <span class="font-medium">Spending by member</span>
 
-                    <div class="scrollbar-none w-full overflow-x-scroll [&::-webkit-scrollbar]:hidden">
+                    <div class="w-full overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         <table
                             v-if="
                                 spending?.group_spending_by_currency &&
@@ -749,7 +749,7 @@ const dialogTitleFromMode = computed(() => {
                                         <td class="pr-0 text-right text-xs text-gray-700 dark:text-gray-200">
                                             {{
                                                 to2DecimalPlacesIfValid(
-                                                    parseFloat(s.spending_by_currency[currency])
+                                                    parseFloat(s.spending_by_currency[currency] ?? 0)
                                                 )
                                             }}
                                         </td>
@@ -779,7 +779,7 @@ const dialogTitleFromMode = computed(() => {
                 <div class="flex flex-col gap-4">
                     <span class="font-medium">Settled amounts by member</span>
 
-                    <div class="scrollbar-none w-full overflow-x-scroll [&::-webkit-scrollbar]:hidden">
+                    <div class="w-full overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         <table
                             v-if="
                                 spending?.group_spending_by_currency &&
@@ -837,7 +837,7 @@ const dialogTitleFromMode = computed(() => {
         </template>
 
         <template v-if="dialogMode === 'filterExpensesByMember'" v-slot:body>
-            <div class="scrollbar-none flex h-full flex-col gap-2 overflow-y-scroll pb-4 [&::-webkit-scrollbar]:hidden">
+            <div class="flex h-full flex-col gap-2 pb-4 overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <template v-for="m in groupMembers">
                     <button
                         class="flex flex-row items-center justify-between gap-2 px-6 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"

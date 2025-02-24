@@ -11,6 +11,7 @@ const { expenseForm, formArray, selectedCurrency } = defineProps({
     shouldDistributeEqually: Boolean,
     isPayer: Boolean,
     remainingAmount: Number,
+    shownIn: String
 });
 const emit = defineEmits(["toggleAllUsers", "setShouldDistributeEqually", "userSelected", "setPayerAsSelf"]);
 const setShouldDistributeEqually = (value) => {
@@ -25,7 +26,7 @@ const onSelectUser = (form) => {
 </script>
 
 <template>
-    <div class="flex flex-col rounded-xl bg-gray-50 transition-opacity dark:bg-gray-900 dark:text-gray-50">
+    <div :class="shownIn === 'modal' ? 'rounded-b-xl' : 'rounded-xl'" class="flex flex-col bg-gray-50 transition-opacity dark:bg-gray-900 dark:text-gray-50">
         <div class="flex flex-col gap-2 border-b-[1px] p-4 dark:border-gray-700">
             <div class="flex flex-row items-center justify-between gap-2">
                 <label class="label flex cursor-pointer flex-row items-center gap-2 p-0">

@@ -57,7 +57,7 @@ watch(
 <template>
     <div class="flex h-full flex-col justify-between">
         <div
-            class="scrollbar-none flex flex-1 flex-col overflow-y-scroll bg-gray-50 dark:bg-gray-900 [&::-webkit-scrollbar]:hidden"
+            class="flex flex-1 flex-col bg-gray-50 dark:bg-gray-900 overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
             ref="commentsScrollableDiv"
         >
             <div v-if="comments.length > 0">
