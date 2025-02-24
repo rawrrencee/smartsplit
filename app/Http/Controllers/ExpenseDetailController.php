@@ -132,12 +132,12 @@ class ExpenseDetailController extends Controller
 
     private function generateAmountOwed($userId, $amount, $symbol, $currencyKey)
     {
-        return (object) array(
+        return (object) [
             'user_id' => $userId,
             'amount' => $amount,
             'symbol' => $symbol,
             'key' => $currencyKey
-        );
+        ];
     }
 
     public function getOverallExpenseDeltaForUserInGroup($userId, $groupId = null)
@@ -175,11 +175,11 @@ class ExpenseDetailController extends Controller
 
             $delta = $positiveAmount->add($negativeAmount);
             if (!$delta->isZero() && $mergedAmounts->where('currency_key', $currencyKey)->isEmpty()) {
-                $mergedAmounts->push((object) array(
+                $mergedAmounts->push((object) [
                     'currency_key'  => $currencyKey,
                     'amount'        => $moneyFormatter->format($delta),
                     'symbol'        => $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $currencyKey, 'key', 'symbol')
-                ));
+                ]);
             }
         }
 
@@ -224,16 +224,16 @@ class ExpenseDetailController extends Controller
                 ->pluck('total_amount', 'currency_key')
                 ->toArray();
 
-            $groupMemberSpending[] = (object) array(
+            $groupMemberSpending[] = (object) [
                 'user_id' => $userId,
                 'spending_by_currency' => $userExpenseDetails,
                 'settle_up_by_currency' => $userSettleUpDetails
-            );
+            ];
         }
 
-        return (object) array(
+        return (object) [
             'group_spending_by_currency' => $groupSpendingByCurrency,
             'group_member_spending' => $groupMemberSpending,
-        );
+        ];
     }
 }
