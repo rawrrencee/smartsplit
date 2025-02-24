@@ -2,22 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\ExpenseDetail;
 use App\Models\Group;
 use App\Models\GroupMember;
-use Illuminate\Support\Arr;
-use Money\Currencies;
 use Money\Currencies\ISOCurrencies;
 use Money\Currency;
 use Money\Formatter\DecimalMoneyFormatter;
 use Money\Money;
 
-use function Laravel\Prompts\error;
-
 class ExpenseDetailController extends Controller
 {
-    protected $CommonController, $HardcodedDataController;
+    protected $CommonController;
+
+    protected $HardcodedDataController;
 
     public function __construct(CommonController $CommonController, HardcodedDataController $HardcodedDataController)
     {
@@ -40,7 +37,7 @@ class ExpenseDetailController extends Controller
 
             $clone = [];
             foreach ($overallDeltaForMember as $d) {
-                $clone[] = clone ($d);
+                $clone[] = clone $d;
             }
 
             $groupDelta[$member->user_id] = $clone;
@@ -48,7 +45,7 @@ class ExpenseDetailController extends Controller
         }
 
         $membersOwedAmounts = [];
-        $moneyFormatter = new DecimalMoneyFormatter(new ISOCurrencies());
+        $moneyFormatter = new DecimalMoneyFormatter(new ISOCurrencies);
         foreach ($groupMembers as $member) {
             $delta = $groupDelta[$member->user_id];
 
@@ -65,16 +62,20 @@ class ExpenseDetailController extends Controller
                     $otherMemberCurrencyDeltas = collect($groupDelta[$otherMember->user_id]);
                     $otherMemberCurrencyDelta = $otherMemberCurrencyDeltas->firstWhere('currency_key', $currencyDelta->currency_key);
 
-                    if (!isset($otherMemberCurrencyDelta)) continue;
+                    if (! isset($otherMemberCurrencyDelta)) {
+                        continue;
+                    }
 
-                    if (!$currencyDelta->amount instanceof Money) {
+                    if (! $currencyDelta->amount instanceof Money) {
                         $currencyDelta->amount = new Money(number_format($currencyDelta->amount * 100, 0, '', ''), new Currency('USD'));
                     }
-                    if (!$otherMemberCurrencyDelta->amount instanceof Money) {
+                    if (! $otherMemberCurrencyDelta->amount instanceof Money) {
                         $otherMemberCurrencyDelta->amount = new Money(number_format($otherMemberCurrencyDelta->amount * 100, 0, '', ''), new Currency('USD'));
                     }
 
-                    if ($currencyDelta->amount->isZero()) continue;
+                    if ($currencyDelta->amount->isZero()) {
+                        continue;
+                    }
                     if ($currencyDelta->amount->isNegative() && $otherMemberCurrencyDelta->amount->isPositive()) {
                         $amountToRepay = Money::min($currencyDelta->amount->absolute(), $otherMemberCurrencyDelta->amount);
                         $currencyDelta->amount = $currencyDelta->amount->add($amountToRepay);
@@ -118,7 +119,7 @@ class ExpenseDetailController extends Controller
         // Assert calculation is correct
         foreach ($groupDelta as $delta) {
             foreach ($delta as $userId => $currencyDelta) {
-                if (!$currencyDelta->amount->isZero()) {
+                if (! $currencyDelta->amount->isZero()) {
                     throw new \Exception("Remaining delta of {$currencyDelta->amount->getAmount()} {$currencyDelta->currency_key} for user {$userId}");
                 }
             }
@@ -136,7 +137,7 @@ class ExpenseDetailController extends Controller
             'user_id' => $userId,
             'amount' => $amount,
             'symbol' => $symbol,
-            'key' => $currencyKey
+            'key' => $currencyKey,
         ];
     }
 
@@ -167,18 +168,17 @@ class ExpenseDetailController extends Controller
         $mergedAmounts = collect([]);
 
         // Merge positive and negative amounts for each currency
-        $moneyFormatter = new DecimalMoneyFormatter(new ISOCurrencies());
+        $moneyFormatter = new DecimalMoneyFormatter(new ISOCurrencies);
         foreach (array_merge(array_keys($positiveAmounts), array_keys($negativeAmounts)) as $currencyKey) {
             $positiveAmount = isset($positiveAmounts[$currencyKey]) ? new Money(number_format($positiveAmounts[$currencyKey] * 100, 0, '', ''), new Currency('USD')) : new Money(0, new Currency('USD'));
             $negativeAmount = isset($negativeAmounts[$currencyKey]) ? new Money(number_format($negativeAmounts[$currencyKey] * 100, 0, '', ''), new Currency('USD')) : new Money(0, new Currency('USD'));
 
-
             $delta = $positiveAmount->add($negativeAmount);
-            if (!$delta->isZero() && $mergedAmounts->where('currency_key', $currencyKey)->isEmpty()) {
+            if (! $delta->isZero() && $mergedAmounts->where('currency_key', $currencyKey)->isEmpty()) {
                 $mergedAmounts->push((object) [
-                    'currency_key'  => $currencyKey,
-                    'amount'        => $moneyFormatter->format($delta),
-                    'symbol'        => $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $currencyKey, 'key', 'symbol')
+                    'currency_key' => $currencyKey,
+                    'amount' => $moneyFormatter->format($delta),
+                    'symbol' => $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $currencyKey, 'key', 'symbol'),
                 ]);
             }
         }
@@ -227,7 +227,7 @@ class ExpenseDetailController extends Controller
             $groupMemberSpending[] = (object) [
                 'user_id' => $userId,
                 'spending_by_currency' => $userExpenseDetails,
-                'settle_up_by_currency' => $userSettleUpDetails
+                'settle_up_by_currency' => $userSettleUpDetails,
             ];
         }
 

@@ -24,7 +24,7 @@ class Expense extends Model
         'receiver_name',
         'is_settlement',
         'created_by',
-        'updated_by'
+        'updated_by',
     ];
 
     // Set up cascading delete

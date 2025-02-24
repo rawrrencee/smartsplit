@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class ExpenseComment extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'expense_id',
         'user_id',
         'content',
-        'is_edited'
+        'is_edited',
     ];
 
     public function expense()

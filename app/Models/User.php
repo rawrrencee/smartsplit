@@ -23,8 +23,8 @@ class User extends Authenticatable
     }
     use Notifiable;
     use SetsProfilePhotoFromUrl;
-    use TwoFactorAuthenticatable;
     use SoftDeletes;
+    use TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.

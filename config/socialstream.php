@@ -25,5 +25,5 @@ return [
         'registration-failed' => '/register',
         'provider-linked' => '/user/profile',
         'provider-link-failed' => '/user/profile',
-    ]
+    ],
 ];

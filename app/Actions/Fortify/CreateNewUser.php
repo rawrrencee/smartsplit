@@ -24,6 +24,7 @@ class CreateNewUser implements CreatesNewUsers
             $user = User::withTrashed()->where('email', $input['email'])->first();
             if (isset($user) && $user->trashed()) {
                 $user->restore();
+
                 return $user;
             }
         }
