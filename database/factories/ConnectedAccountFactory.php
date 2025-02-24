@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\ConnectedAccount;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 use JoelButcher\Socialstream\Providers;

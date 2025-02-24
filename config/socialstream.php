@@ -1,7 +1,6 @@
 <?php
 
 use App\Providers\AppServiceProvider;
-use App\Providers\RouteServiceProvider;
 use JoelButcher\Socialstream\Features;
 use JoelButcher\Socialstream\Providers;
 

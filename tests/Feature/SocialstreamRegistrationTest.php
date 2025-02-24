@@ -3,7 +3,6 @@
 namespace tests;
 
 use App\Providers\AppServiceProvider;
-use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use JoelButcher\Socialstream\Providers;
 use Laravel\Fortify\Features as FortifyFeatures;
