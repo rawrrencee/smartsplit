@@ -3,18 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Enums\GroupMemberStatusEnum;
-use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Models\ExpenseDetail;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
+use Inertia\Inertia;
 
 class ExpenseController extends Controller
 {
-    protected $CommonController, $HardcodedDataController, $GroupController, $UserController, $ExpenseDetailController;
+    protected $CommonController;
+
+    protected $HardcodedDataController;
+
+    protected $GroupController;
+
+    protected $UserController;
+
+    protected $ExpenseDetailController;
 
     public function __construct(CommonController $CommonController, HardcodedDataController $HardcodedDataController, GroupController $GroupController, UserController $UserController, ExpenseDetailController $ExpenseDetailController)
     {
@@ -30,7 +37,7 @@ class ExpenseController extends Controller
         return Inertia::render('AddNewExpense', [
             'currencies' => filter_var($request['withCurrencies'], FILTER_VALIDATE_BOOLEAN) ? $this->HardcodedDataController->getCurrencies() : [],
             'categories' => $this->HardcodedDataController->getCategories(),
-            'groups' => $this->GroupController->getGroupsByMemberUserIdOrEmail($request->user()->id, null, GroupMemberStatusEnum::ACCEPTED, false, true)
+            'groups' => $this->GroupController->getGroupsByMemberUserIdOrEmail($request->user()->id, null, GroupMemberStatusEnum::ACCEPTED, false, true),
         ]);
     }
 
@@ -88,15 +95,15 @@ class ExpenseController extends Controller
             }, 'updatedBy' => function ($query) {
                 $query->select('id', 'name');
                 $query->withTrashed();
-            }
+            },
         ])->first();
 
-        if (!isset($expense)) {
+        if (! isset($expense)) {
             return redirect()->route('404');
         }
 
         $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($expense->group_id, auth()->user()->id, false);
-        if (!$isGroupMember) {
+        if (! $isGroupMember) {
             return redirect()->route('404');
         }
 
@@ -109,7 +116,7 @@ class ExpenseController extends Controller
         }
 
         return Inertia::render('ViewExpense', [
-            'expense' => $expense
+            'expense' => $expense,
         ]);
     }
 
@@ -129,15 +136,15 @@ class ExpenseController extends Controller
                 $query->select('id', 'name');
             }, 'updatedBy' => function ($query) {
                 $query->select('id', 'name');
-            }
+            },
         ])->first();
 
-        if (!isset($expense)) {
+        if (! isset($expense)) {
             return redirect()->route('404');
         }
 
         $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($expense->group_id, auth()->user()->id, false);
-        if (!$isGroupMember) {
+        if (! $isGroupMember) {
             return redirect()->route('404');
         }
 
@@ -168,22 +175,22 @@ class ExpenseController extends Controller
 
         try {
             $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($request['group_id'], auth()->user()->id, false);
-            if (!$isGroupMember) {
-                throw new Exception("You are not a member of this group.");
+            if (! $isGroupMember) {
+                throw new Exception('You are not a member of this group.');
             }
 
             DB::beginTransaction();
             $isSettlement = $request['is_settlement'];
 
             // Set number of payers and payer_name
-            $request['num_payers'] =  count($request['payer_details']);
+            $request['num_payers'] = count($request['payer_details']);
             if ($request['num_payers'] == 1) {
                 $user = $this->UserController->getUserByUserId($request['payer_details'][0]['user_id']);
                 if (isset($user)) {
                     $request['payer_name'] = $user->name;
                 }
             } else {
-                $request['payer_name'] = "people";
+                $request['payer_name'] = 'people';
             }
 
             // Set receiver name
@@ -199,7 +206,7 @@ class ExpenseController extends Controller
                 }
 
                 $currencySymbol = $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $request['currency_key'], 'key', 'symbol');
-                $request['description'] = $payer->name . ' paid ' . $receiver->name . ' ' . $currencySymbol . $this->CommonController->to2DecimalPlacesIfValid($request['amount']) . '.';
+                $request['description'] = $payer->name.' paid '.$receiver->name.' '.$currencySymbol.$this->CommonController->to2DecimalPlacesIfValid($request['amount']).'.';
             }
 
             // Update date format
@@ -242,7 +249,7 @@ class ExpenseController extends Controller
 
             DB::commit();
 
-            $message = $isSettlement ? "Settle up amount added successfully." : "Expense created successfully.";
+            $message = $isSettlement ? 'Settle up amount added successfully.' : 'Expense created successfully.';
 
             return redirect()->back()
                 ->with('show', true)
@@ -258,7 +265,7 @@ class ExpenseController extends Controller
                 ->with('show', true)
                 ->with('type', 'default')
                 ->with('status', 'error')
-                ->with('message', 'Failed to create record: ' . $this->CommonController->formatException($e));
+                ->with('message', 'Failed to create record: '.$this->CommonController->formatException($e));
         }
     }
 
@@ -268,46 +275,46 @@ class ExpenseController extends Controller
 
         try {
             $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($request['group_id'], auth()->user()->id, false);
-            if (!$isGroupMember) {
-                throw new Exception("You are not a member of this group.");
+            if (! $isGroupMember) {
+                throw new Exception('You are not a member of this group.');
             }
 
             DB::beginTransaction();
             $isSettlement = $request['is_settlement'];
 
             // Set number of payers and payer_name
-            $request['num_payers'] =  count($request['payer_details']);
+            $request['num_payers'] = count($request['payer_details']);
             if ($request['num_payers'] == 1) {
                 $user = $this->UserController->getUserByUserId($request['payer_details'][0]['user_id']);
                 if (isset($user)) {
                     $request['payer_name'] = $user->name;
                 }
             } else {
-                $request['payer_name'] = "people";
+                $request['payer_name'] = 'people';
             }
 
             // Set receiver name
             if ($isSettlement) {
-                if (!isset($request['payer_details'][0]) || !isset($request['payer_details'][0]['user_id']) || !isset($request['payer_details'][0]['receiver_id'])) {
-                    throw new Exception("Invalid payer or receiver details.");
+                if (! isset($request['payer_details'][0]) || ! isset($request['payer_details'][0]['user_id']) || ! isset($request['payer_details'][0]['receiver_id'])) {
+                    throw new Exception('Invalid payer or receiver details.');
                 }
 
                 $payer = $this->UserController->getUserByUserId($request['payer_details'][0]['user_id']);
                 if (isset($payer)) {
                     $request['payer_name'] = $payer->name;
                 } else {
-                    throw new Exception("Payer of settlement was not found.");
+                    throw new Exception('Payer of settlement was not found.');
                 }
 
                 $receiver = $this->UserController->getUserByUserId($request['payer_details'][0]['receiver_id']);
                 if (isset($receiver)) {
                     $request['receiver_name'] = $receiver->name;
                 } else {
-                    throw new Exception("Recipient of settlement was not found.");
+                    throw new Exception('Recipient of settlement was not found.');
                 }
 
                 $currencySymbol = $this->CommonController->findValueByKey($this->HardcodedDataController->getCurrencies(), $request['currency_key'], 'key', 'symbol');
-                $request['description'] = $payer->name . ' paid ' . $receiver->name . ' ' . $currencySymbol . $this->CommonController->to2DecimalPlacesIfValid($request['amount']) . '.';
+                $request['description'] = $payer->name.' paid '.$receiver->name.' '.$currencySymbol.$this->CommonController->to2DecimalPlacesIfValid($request['amount']).'.';
             }
 
             // Update date format
@@ -315,12 +322,12 @@ class ExpenseController extends Controller
             $request['updated_by'] = auth()->user()->id;
 
             $expense = Expense::where('id', $request['id'])->first();
-            if (!isset($expense)) {
-                throw new Exception("Expense to update was not found.");
+            if (! isset($expense)) {
+                throw new Exception('Expense to update was not found.');
             }
             $expense->update($request->only(['group_id', 'date', 'category', 'description', 'currency_key', 'amount', 'num_payers', 'payer_name', 'receiver_name', 'is_settlement', 'created_by', 'updated_by']));
 
-            if (!$isSettlement) {
+            if (! $isSettlement) {
                 $existingExpenseDetails = ExpenseDetail::where('expense_id', $expense->id)->get();
                 $requestPayers = collect($request['payer_details']);
                 $requestReceivers = collect($request['receiver_details']);
@@ -336,7 +343,7 @@ class ExpenseController extends Controller
                     // Update existing expense details if found
                     if (isset($payerToUpdate)) {
                         $ed->update(['amount' => $payerToUpdate['amount'], 'currency_key' => $expense->currency_key]);
-                    } else if (isset($receiverToUpdate)) {
+                    } elseif (isset($receiverToUpdate)) {
                         $ed->update(['amount' => -$receiverToUpdate['amount'], 'currency_key' => $expense->currency_key]);
                     } else {
                         // Delete existing expense detail if not found
@@ -378,7 +385,7 @@ class ExpenseController extends Controller
                 $existingExpenseDetails = ExpenseDetail::where('expense_id', $expense->id)->get();
 
                 if ($existingExpenseDetails->isEmpty() || count($existingExpenseDetails) > 1) {
-                    throw new Exception("Invalid expense details for settlement.");
+                    throw new Exception('Invalid expense details for settlement.');
                 }
 
                 foreach ($existingExpenseDetails as $ed) {
@@ -394,7 +401,7 @@ class ExpenseController extends Controller
 
             DB::commit();
 
-            $message = $isSettlement ? "Settle up amount updated successfully." : "Expense updated successfully.";
+            $message = $isSettlement ? 'Settle up amount updated successfully.' : 'Expense updated successfully.';
 
             return redirect()->route('expenses.view', ['id' => $expense->id])
                 ->with('show', true)
@@ -408,7 +415,7 @@ class ExpenseController extends Controller
                 ->with('show', true)
                 ->with('type', 'default')
                 ->with('status', 'error')
-                ->with('message', 'Failed to update record: ' . $this->CommonController->formatException($e));
+                ->with('message', 'Failed to update record: '.$this->CommonController->formatException($e));
         }
     }
 
@@ -423,8 +430,8 @@ class ExpenseController extends Controller
 
             $groupId = Expense::where('id', $request['id'])->first()->group_id;
             $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($groupId, auth()->user()->id, false);
-            if (!$isGroupMember) {
-                throw new Exception("You are not a member of this group.");
+            if (! $isGroupMember) {
+                throw new Exception('You are not a member of this group.');
             }
 
             Expense::destroy($request['id']);
@@ -457,7 +464,7 @@ class ExpenseController extends Controller
             'payer_details.*.amount' => 'required|numeric|min:0.01',
         ];
 
-        if (!$isSettlement) {
+        if (! $isSettlement) {
             $rules['receiver_details'] = 'required|array';
             $rules['receiver_details.*.user_id'] = 'required|exists:users,id';
             $rules['receiver_details.*.amount'] = 'required|numeric|min:0.01';
@@ -484,7 +491,7 @@ class ExpenseController extends Controller
             'payer_details.*.amount' => 'required|numeric|min:0.01',
         ];
 
-        if (!$isSettlement) {
+        if (! $isSettlement) {
             $rules['receiver_details'] = 'required|array';
             $rules['receiver_details.*.user_id'] = 'required|exists:users,id';
             $rules['receiver_details.*.amount'] = 'required|numeric|min:0.01';

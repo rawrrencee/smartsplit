@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\ConnectedAccount;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 use JoelButcher\Socialstream\Providers;
@@ -12,8 +11,6 @@ use JoelButcher\Socialstream\Providers;
  */
 class ConnectedAccountFactory extends Factory
 {
-    protected $model = ConnectedAccount::class;
-
     public function definition(): array
     {
         return [

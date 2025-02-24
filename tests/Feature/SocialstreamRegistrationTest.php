@@ -2,7 +2,7 @@
 
 namespace tests;
 
-use App\Providers\RouteServiceProvider;
+use App\Providers\AppServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use JoelButcher\Socialstream\Providers;
 use Laravel\Fortify\Features as FortifyFeatures;
@@ -37,7 +37,7 @@ class SocialstreamRegistrationTest extends TestCase
     /**
      * @dataProvider socialiteProvidersDataProvider
      */
-    public function test_users_can_register_using_socialite_providers(string $socialiteProvider)
+    public function test_users_can_register_using_socialite_providers(string $socialiteProvider): void
     {
         if (! FortifyFeatures::enabled(FortifyFeatures::registration())) {
             $this->markTestSkipped('Registration support is not enabled.');
@@ -47,7 +47,7 @@ class SocialstreamRegistrationTest extends TestCase
             $this->markTestSkipped("Registration support with the $socialiteProvider provider is not enabled.");
         }
 
-        $user = (new User())
+        $user = (new User)
             ->map([
                 'id' => 'abcdefgh',
                 'nickname' => 'Jane',
@@ -70,7 +70,7 @@ class SocialstreamRegistrationTest extends TestCase
         $response = $this->get("/oauth/$socialiteProvider/callback");
 
         $this->assertAuthenticated();
-        $response->assertRedirect(RouteServiceProvider::HOME);
+        $response->assertRedirect(AppServiceProvider::HOME);
     }
 
     /**
