@@ -1,5 +1,6 @@
 <?php
 
+use App\Providers\AppServiceProvider;
 use App\Providers\RouteServiceProvider;
 use JoelButcher\Socialstream\Features;
 use JoelButcher\Socialstream\Providers;
@@ -17,10 +18,10 @@ return [
         Features::providerAvatars(),
         Features::refreshOAuthTokens(),
     ],
-    'home' => RouteServiceProvider::HOME,
+    'home' => AppServiceProvider::HOME,
     'redirects' => [
-        'login' => RouteServiceProvider::HOME,
-        'register' => RouteServiceProvider::HOME,
+        'login' => AppServiceProvider::HOME,
+        'register' => AppServiceProvider::HOME,
         'login-failed' => '/login',
         'registration-failed' => '/register',
         'provider-linked' => '/user/profile',

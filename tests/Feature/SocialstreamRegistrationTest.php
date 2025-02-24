@@ -2,6 +2,7 @@
 
 namespace tests;
 
+use App\Providers\AppServiceProvider;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use JoelButcher\Socialstream\Providers;
@@ -70,7 +71,7 @@ class SocialstreamRegistrationTest extends TestCase
         $response = $this->get("/oauth/$socialiteProvider/callback");
 
         $this->assertAuthenticated();
-        $response->assertRedirect(RouteServiceProvider::HOME);
+        $response->assertRedirect(AppServiceProvider::HOME);
     }
 
     /**
