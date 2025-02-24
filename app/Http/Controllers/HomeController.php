@@ -40,10 +40,10 @@ class HomeController extends Controller
                 $userId
             );
             if (count($expenses) > 0) {
-                $result[] = (object) array(
+                $result[] = (object) [
                     'group' => $group,
                     'expenses' => $expenses
-                );
+                ];
             }
         }
 
