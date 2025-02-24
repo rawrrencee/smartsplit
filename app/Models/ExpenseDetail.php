@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -22,22 +24,22 @@ class ExpenseDetail extends Model
         'is_settlement',
     ];
 
-    public function group()
+    public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
     }
 
-    public function expense()
+    public function expense(): BelongsTo
     {
         return $this->belongsTo(Expense::class);
     }
 
-    public function payer()
+    public function payer(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'payer_id');
     }
 
-    public function receiver()
+    public function receiver(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'receiver_id');
     }

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -38,27 +40,27 @@ class Expense extends Model
         });
     }
 
-    public function expenseDetails()
+    public function expenseDetails(): HasMany
     {
         return $this->hasMany(ExpenseDetail::class);
     }
 
-    public function expenseComments()
+    public function expenseComments(): HasMany
     {
         return $this->hasMany(ExpenseComment::class);
     }
 
-    public function group()
+    public function group(): HasOne
     {
         return $this->hasOne(Group::class, 'id', 'group_id');
     }
 
-    public function createdBy()
+    public function createdBy(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'created_by');
     }
 
-    public function updatedBy()
+    public function updatedBy(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'updated_by');
     }
