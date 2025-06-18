@@ -466,7 +466,7 @@ class GroupController extends Controller
     public function updatePendingGroupRequestStatus(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:group_members,id',
+            'id' => 'required|exists:group_members,group_id',
             'status' => ['required', new EnumValue(GroupMemberStatusEnum::cases())],
         ]);
         $groupMember = GroupMember::whereGroupId($request['id'])->where(function ($query) {
