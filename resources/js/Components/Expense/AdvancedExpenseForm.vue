@@ -172,7 +172,7 @@ const totalSurchargeAmount = computed(() => {
     return surchargeAmount > 0 && props.selectedReceiverForms?.length ? surchargeAmount / props.selectedReceiverForms.length : 0;
 });
 const totalAmountsByUser = computed(() => {
-    return activeGroupMembers.value.map((gm) => {
+    const results = activeGroupMembers.value.map((gm) => {
         let surchargeableAmount = 0;
         let nonSurchargeableAmount = 0;
         let userBaseAmount = 0;
@@ -188,8 +188,8 @@ const totalAmountsByUser = computed(() => {
             const amount = (numerator / denominator) * props.expenseForm.amount;
             return {
                 user: gm.user,
-                amount: amount,
-                amountAfterSurcharge: amount
+                amount: Math.round(amount * 100) / 100,
+                amountAfterSurcharge: Math.round(amount * 100) / 100
             };
         }
 
@@ -206,10 +206,26 @@ const totalAmountsByUser = computed(() => {
         if (userBaseAmount === 0 && amountAfterSurcharge === 0) return undefined;
         return {
             user: gm.user,
-            amount: userBaseAmount,
+            amount: Math.round(userBaseAmount * 100) / 100,
             amountAfterSurcharge: Math.round(amountAfterSurcharge * 100) / 100
         };
     }).filter((t) => !!t);
+
+    // Ensure total equals original amount by adjusting the last user's amount
+    if (results.length > 0) {
+        const totalCalculated = results.reduce((acc, curr) => acc + curr.amountAfterSurcharge, 0);
+        const roundedTotal = Math.round(totalCalculated * 100) / 100;
+        const targetAmount = Math.round(props.expenseForm.amount * 100) / 100;
+        const difference = Math.round((targetAmount - roundedTotal) * 100) / 100;
+        
+        if (Math.abs(difference) > 0) {
+            // Adjust a random user's amount to make the total exact
+            const randomIndex = Math.floor(Math.random() * results.length);
+            results[randomIndex].amountAfterSurcharge = Math.round((results[randomIndex].amountAfterSurcharge + difference) * 100) / 100;
+        }
+    }
+
+    return results;
 });
 const remainingReceiverAmount = computed(() => {
     return props.expenseForm?.amount - totalAmountsByUser.value.reduce((acc, curr) => acc + curr.amountAfterSurcharge, 0);

@@ -78,25 +78,36 @@ export const showToastIfNeeded = (toast, flash) => {
 };
 
 export const distributeEqually = (amount, people) => {
-    const totalCents = Math.round(amount * 100); // Convert amount to cents and round to avoid floating-point issues
-    const baseShare = Math.floor(totalCents / people); // Base share in cents
-    const remainder = totalCents % people; // Remaining cents to distribute
-
-    // Create an array where everyone gets the base share
+    // Round the input amount to 2 decimal places
+    const roundedAmount = Math.round(amount * 100) / 100;
+    
+    // Calculate base share per person
+    const baseShare = Math.floor((roundedAmount * 100) / people) / 100;
+    
+    // Create initial distribution with base shares
     const distribution = Array(people).fill(baseShare);
+    
+    // Calculate the total distributed so far
+    const totalDistributed = baseShare * people;
+    
+    // Calculate the remaining amount due to rounding
+    const remaining = Math.round((roundedAmount - totalDistributed) * 100) / 100;
+    
+    // Distribute the remaining amount as evenly as possible
+    if (remaining > 0) {
+        const remainingCents = Math.round(remaining * 100);
+        
+        // Randomly select people to get extra cents
+        const extraIndices = Array.from({ length: people }, (_, i) => i)
+            .sort(() => Math.random() - 0.5)
+            .slice(0, remainingCents);
+        
+        extraIndices.forEach(index => {
+            distribution[index] = Math.round((distribution[index] + 0.01) * 100) / 100;
+        });
+    }
 
-    // Randomly select `remainder` people to get an extra cent
-    const extraIndices = Array.from({ length: people }, (_, i) => i)
-        .sort(() => Math.random() - 0.5) // Shuffle the indices
-        .slice(0, remainder); // Select `remainder` random indices
-
-    // Add the extra cent to the selected indices
-    extraIndices.forEach(index => {
-        distribution[index]++;
-    });
-
-    // Convert back to dollars
-    return distribution.map(share => share / 100);
+    return distribution;
 };
 
 export const to2DecimalPlacesIfValid = (value, withSeparator = true) => {
