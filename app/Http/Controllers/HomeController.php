@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Enums\GroupMemberStatusEnum;
-use App\Http\Controllers\Controller;
 use App\Models\Group;
 use Inertia\Inertia;
 
 class HomeController extends Controller
 {
-    protected $CommonController, $HardcodedDataController, $ExpenseDetailController, $GroupController;
+    protected $CommonController;
+
+    protected $HardcodedDataController;
+
+    protected $ExpenseDetailController;
+
+    protected $GroupController;
 
     public function __construct(CommonController $CommonController, HardcodedDataController $HardcodedDataController, ExpenseDetailController $ExpenseDetailController, GroupController $GroupController)
     {
@@ -42,7 +47,7 @@ class HomeController extends Controller
             if (count($expenses) > 0) {
                 $result[] = (object) [
                     'group' => $group,
-                    'expenses' => $expenses
+                    'expenses' => $expenses,
                 ];
             }
         }

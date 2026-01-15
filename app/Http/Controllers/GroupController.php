@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enums\GroupMemberStatusEnum;
-use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Models\ExpenseDetail;
 use App\Models\Group;
@@ -11,12 +10,18 @@ use App\Models\GroupMember;
 use App\Rules\EnumValue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 
 class GroupController extends Controller
 {
-    protected $CommonController, $UserController, $HardcodedDataController, $ExpenseDetailController;
+    protected $CommonController;
+
+    protected $UserController;
+
+    protected $HardcodedDataController;
+
+    protected $ExpenseDetailController;
 
     public function __construct(CommonController $CommonController, UserController $UserController, HardcodedDataController $HardcodedDataController, ExpenseDetailController $ExpenseDetailController)
     {
@@ -31,7 +36,7 @@ class GroupController extends Controller
         return Group::whereOwnerId($userId)->get();
     }
 
-    public function getGroupsByMemberUserIdOrEmail($userId, $email = null, GroupMemberStatusEnum $status = null, $withTrashed = false, $withUser = false)
+    public function getGroupsByMemberUserIdOrEmail($userId, $email = null, ?GroupMemberStatusEnum $status = null, $withTrashed = false, $withUser = false)
     {
         $mainQuery = Group::whereHas('groupMembers', function ($query) use ($userId, $email, $status, $withTrashed) {
             $query->where(function ($query) use ($userId, $email) {
@@ -195,7 +200,7 @@ class GroupController extends Controller
                 'receiver_name' => $expense->receiver_name,
                 'is_settlement' => $expense->is_settlement,
                 'net_amount' => $netAmount,
-                'num_comments' => $numComments
+                'num_comments' => $numComments,
             ];
         }
 
@@ -209,11 +214,11 @@ class GroupController extends Controller
         foreach ($groups as $group) {
             $overallDeltaForGroupMember = $this->ExpenseDetailController->getOverallExpenseDeltaForUserInGroup($request->user()->id, $group->id);
             $group['delta'] = $overallDeltaForGroupMember;
-        };
+        }
 
         return Inertia::render('Groups', [
             'groups' => $groups,
-            'pendingGroups' => $this->getGroupsByMemberUserIdOrEmail($request->user()->id, $request->user()->email, GroupMemberStatusEnum::PENDING)
+            'pendingGroups' => $this->getGroupsByMemberUserIdOrEmail($request->user()->id, $request->user()->email, GroupMemberStatusEnum::PENDING),
         ]);
     }
 
@@ -221,7 +226,7 @@ class GroupController extends Controller
     {
         $id = intval($request['id']);
         $isGroupMember = $this->isGroupMemberWithUserIdExisting($id, auth()->user()->id, false);
-        if ($id === 0 || !$isGroupMember) {
+        if ($id === 0 || ! $isGroupMember) {
             return redirect()->route('404');
         }
 
@@ -229,7 +234,7 @@ class GroupController extends Controller
             ->where('id', '=', $id)
             ->first();
 
-        if (!isset($group)) {
+        if (! isset($group)) {
             return redirect()->route('404');
         }
 
@@ -256,14 +261,14 @@ class GroupController extends Controller
             'groupBalance' => $groupBalance,
             'expenses' => $this->mapExpenseDetailsByDate($expenses, auth()->user()->id),
             'spending' => $spending,
-            'paginatedResults' => $expenses
+            'paginatedResults' => $expenses,
         ]);
 
-        if (!isset($groupBalance)) {
+        if (! isset($groupBalance)) {
             $pageResponse->with('show', true)
                 ->with('type', 'default')
                 ->with('status', 'error')
-                ->with('message', 'Group balance was not retrieved successfully, but you can still view the expenses. ' . $this->CommonController->formatException($e));
+                ->with('message', 'Group balance was not retrieved successfully, but you can still view the expenses. '.$this->CommonController->formatException($e));
         }
 
         return $pageResponse;
@@ -278,7 +283,7 @@ class GroupController extends Controller
 
         $request['owner_id'] = auth()->user()->id;
 
-        if (!empty($request['group_photo'])) {
+        if (! empty($request['group_photo'])) {
             $path = $request->file('group_photo')->store('group-photos', 'private');
             $request['img_path'] = $path;
         }
@@ -302,7 +307,7 @@ class GroupController extends Controller
             DB::rollBack();
 
             return Inertia::render('Groups', [
-                'errorMessage' => 'Failed to create record: ' . $this->CommonController->formatException($e),
+                'errorMessage' => 'Failed to create record: '.$this->CommonController->formatException($e),
             ]);
         }
     }
@@ -311,11 +316,11 @@ class GroupController extends Controller
     {
         $request->validate([
             'group_id' => 'required|exists:groups,id',
-            'email' => 'required|email|max:255'
+            'email' => 'required|email|max:255',
         ]);
 
         $isGroupMember = $this->isGroupMemberWithUserIdExisting($request['group_id'], auth()->user()->id, false);
-        if (!$isGroupMember) {
+        if (! $isGroupMember) {
             return redirect()->route('404');
         }
 
@@ -404,7 +409,7 @@ class GroupController extends Controller
         }
 
         $isGroupMember = $this->isGroupMemberWithUserIdExisting($id, auth()->user()->id, false);
-        if (!$isGroupMember) {
+        if (! $isGroupMember) {
             return redirect()->route('404');
         }
 
@@ -412,7 +417,7 @@ class GroupController extends Controller
             ->where('id', '=', $id)
             ->first();
 
-        if (!isset($group)) {
+        if (! isset($group)) {
             return redirect()->route('home');
         }
 
@@ -430,13 +435,13 @@ class GroupController extends Controller
         ]);
 
         $isGroupMember = $this->isGroupMemberWithUserIdExisting($request['id'], auth()->user()->id, false);
-        if (!$isGroupMember) {
+        if (! $isGroupMember) {
             return redirect()->route('404');
         }
 
         $group = Group::whereId($request['id'])->first();
 
-        if (!empty($request['group_photo'])) {
+        if (! empty($request['group_photo'])) {
             $path = $request->file('group_photo')->store('group-photos', 'private');
             $request['img_path'] = $path;
         }
@@ -459,7 +464,7 @@ class GroupController extends Controller
                 ->with('show', true)
                 ->with('type', 'default')
                 ->with('status', 'error')
-                ->with('message', 'Failed to update record: ' . $this->CommonController->formatException($e));
+                ->with('message', 'Failed to update record: '.$this->CommonController->formatException($e));
         }
     }
 
@@ -477,7 +482,7 @@ class GroupController extends Controller
         if (isset($groupMember)) {
             try {
                 DB::beginTransaction();
-                if (!isset($groupMember->user_id)) {
+                if (! isset($groupMember->user_id)) {
                     $groupMember->update(['user_id' => auth()->user()->id]);
                 }
                 $groupMember->update(['status' => $request['status']]);
@@ -562,7 +567,7 @@ class GroupController extends Controller
 
         $id = intval($request['id']);
         $isGroupMember = $this->isGroupMemberWithUserIdExisting($id, auth()->user()->id, false);
-        if ($id === 0 || !$isGroupMember) {
+        if ($id === 0 || ! $isGroupMember) {
             return redirect()->route('404');
         }
 
@@ -588,7 +593,7 @@ class GroupController extends Controller
             'Expense Name',
             'Is Settlement',
             'Currency',
-            'Total Amount'
+            'Total Amount',
         ];
 
         $row1Header = array_fill(0, count($row2Header), '');
@@ -598,7 +603,7 @@ class GroupController extends Controller
                 if ($i === 0) {
                     $row1Header[] = $cycle == 0 ? 'Payer' : 'Receiver';
                 } else {
-                    $row1Header[] = "";
+                    $row1Header[] = '';
                 }
             }
         }
@@ -644,7 +649,7 @@ class GroupController extends Controller
                 $expense->description,
                 $expense->is_settlement ? 'YES' : 'NO',
                 $expense->currency_key,
-                $expense->amount
+                $expense->amount,
             ];
 
             $rowWithPayerData = array_merge($row, $payerDataColumns);
@@ -672,7 +677,7 @@ class GroupController extends Controller
 
     private function buildGroupMemberWithUser(int $groupId, int $userId, GroupMemberStatusEnum $status): GroupMember
     {
-        $groupMember = new GroupMember();
+        $groupMember = new GroupMember;
         $groupMember->group_id = $groupId;
         $groupMember->user_id = $userId;
         $groupMember->status = $status->value;
@@ -689,7 +694,7 @@ class GroupController extends Controller
     {
         if (isset($group)) {
             $isDeleted = $this->CommonController->deletePhoto($img_path);
-            if ($isDeleted || !$isDeleted && !empty($group->img_path)) {
+            if ($isDeleted || ! $isDeleted && ! empty($group->img_path)) {
                 try {
                     DB::beginTransaction();
                     $group->update(['img_path' => null]);

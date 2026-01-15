@@ -16,7 +16,7 @@ class EnumValue implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!in_array($value, array_column($this->enumCases, 'value'))) {
+        if (! in_array($value, array_column($this->enumCases, 'value'))) {
             $fail('The value provided was not found in the list of accepted parameters.');
         }
     }

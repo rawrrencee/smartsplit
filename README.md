@@ -85,8 +85,8 @@
 >       DB_USERNAME=sail
 >       DB_PASSWORD=password
 >
->       BROADCAST_DRIVER=log
->       CACHE_DRIVER=file
+>       BROADCAST_CONNECTION=log
+>       CACHE_STORE=file
 >       FILESYSTEM_DISK=local
 >       QUEUE_CONNECTION=sync
 >       SESSION_DRIVER=database

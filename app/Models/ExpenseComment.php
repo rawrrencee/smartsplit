@@ -4,23 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ExpenseComment extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'expense_id',
         'user_id',
         'content',
-        'is_edited'
+        'is_edited',
     ];
 
-    public function expense()
+    public function expense(): BelongsTo
     {
         return $this->belongsTo(Expense::class);
     }
 
-    public function user()
+    public function user(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'user_id');
     }

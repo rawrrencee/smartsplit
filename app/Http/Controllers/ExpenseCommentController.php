@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Models\ExpenseComment;
 use Exception;
@@ -11,7 +10,11 @@ use Illuminate\Support\Facades\DB;
 
 class ExpenseCommentController extends Controller
 {
-    protected $CommonController, $HardcodedDataController, $GroupController;
+    protected $CommonController;
+
+    protected $HardcodedDataController;
+
+    protected $GroupController;
 
     public function __construct(CommonController $CommonController, HardcodedDataController $HardcodedDataController, GroupController $GroupController)
     {
@@ -32,13 +35,13 @@ class ExpenseCommentController extends Controller
             $request['is_edited'] = false;
             $expense = Expense::where('id', $request['expense_id'])->first();
 
-            if (!isset($expense)) {
+            if (! isset($expense)) {
                 throw new Exception('Expense not found');
             }
 
             $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($expense->group_id, auth()->user()->id, false);
-            if (!$isGroupMember) {
-                throw new Exception("You are not a member of this group.");
+            if (! $isGroupMember) {
+                throw new Exception('You are not a member of this group.');
             }
 
             DB::beginTransaction();
@@ -57,7 +60,7 @@ class ExpenseCommentController extends Controller
                 ->with('show', true)
                 ->with('type', 'default')
                 ->with('status', 'error')
-                ->with('message', 'Failed to create record: ' . $this->CommonController->formatException($e));
+                ->with('message', 'Failed to create record: '.$this->CommonController->formatException($e));
         }
     }
 
@@ -72,19 +75,19 @@ class ExpenseCommentController extends Controller
             DB::beginTransaction();
 
             $expenseComment = ExpenseComment::where('id', $request['id'])->with(['expense'])->first();
-            if (!isset($expenseComment)) {
-                throw new Exception("Expense not found.");
+            if (! isset($expenseComment)) {
+                throw new Exception('Expense not found.');
             }
 
             $expense = $expenseComment->expense;
             $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($expense->group_id, auth()->user()->id, false);
-            if (!$isGroupMember) {
-                throw new Exception("You are not a member of this group.");
+            if (! $isGroupMember) {
+                throw new Exception('You are not a member of this group.');
             }
 
             $isCommenter = $expenseComment->user_id == auth()->user()->id;
-            if (!$isCommenter) {
-                throw new Exception("You cannot edit this comment as you are not the author.");
+            if (! $isCommenter) {
+                throw new Exception('You cannot edit this comment as you are not the author.');
             }
 
             $expenseComment->update(['content' => $request['content']]);
@@ -113,19 +116,19 @@ class ExpenseCommentController extends Controller
             DB::beginTransaction();
 
             $expenseComment = ExpenseComment::where('id', $request['id'])->with(['expense'])->first();
-            if (!isset($expenseComment)) {
-                throw new Exception("Expense not found.");
+            if (! isset($expenseComment)) {
+                throw new Exception('Expense not found.');
             }
 
             $expense = $expenseComment->expense;
             $isGroupMember = $this->GroupController->isGroupMemberWithUserIdExisting($expense->group_id, auth()->user()->id, false);
-            if (!$isGroupMember) {
-                throw new Exception("You are not a member of this group.");
+            if (! $isGroupMember) {
+                throw new Exception('You are not a member of this group.');
             }
 
             $isCommenter = $expenseComment->user_id == auth()->user()->id;
-            if (!$isCommenter) {
-                throw new Exception("You cannot delete this comment as you are not the author.");
+            if (! $isCommenter) {
+                throw new Exception('You cannot delete this comment as you are not the author.');
             }
 
             ExpenseComment::destroy($request['id']);

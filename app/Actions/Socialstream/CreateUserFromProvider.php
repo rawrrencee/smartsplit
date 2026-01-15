@@ -16,6 +16,7 @@ class CreateUserFromProvider implements CreatesUserFromProvider
      * The creates connected accounts instance.
      */
     public CreatesConnectedAccounts $createsConnectedAccounts;
+
     public GroupController $groupController;
 
     /**
@@ -37,6 +38,7 @@ class CreateUserFromProvider implements CreatesUserFromProvider
             $user = User::withTrashed()->where('email', $providerUser->getEmail())->first();
             if (isset($user) && $user->trashed()) {
                 $user->restore();
+
                 return $user;
             }
         }
@@ -55,7 +57,7 @@ class CreateUserFromProvider implements CreatesUserFromProvider
                 // Link the user to any existing group memberships by email
                 $groupMembers = $this->groupController->getGroupMembersByEmail($user->email);
                 foreach ($groupMembers as $m) {
-                    if (!isset($m->user_id)) {
+                    if (! isset($m->user_id)) {
                         $m->update(['user_id' => $user->id]);
                     }
                 }
